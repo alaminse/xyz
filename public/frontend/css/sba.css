@@ -1,0 +1,212 @@
+:root {
+    --bs-primary: #F1A909;
+    --bs-secondary: #fccf6e;
+    --bs-font-family: 'Serif';
+}
+
+.test-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.question-card {
+    background: white;
+    border-radius: .8rem;
+    padding: .5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.custom-list-item {
+    border: 2px solid #e0e0e0;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.custom-list-item:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+    transform: translateX(5px);
+}
+
+.custom-list-item label {
+    cursor: pointer;
+    display: block;
+    padding: 5px;
+}
+
+.explanation-card,
+.note-card {
+    background: #f8f9fa;
+    border-left: 4px solid #667eea;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.status-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.question-status-item {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    margin-bottom: 8px;
+    border-radius: 8px;
+}
+
+.score-display {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.score-display h3 {
+    color: white;
+    font-weight: bold;
+    font-size: 2rem;
+}
+
+.bg-white {
+    background-color: #ffffff;
+}
+
+.bg-primary {
+    background-color: var(--bs-primary) !important;
+}
+
+.text-primary {
+    color: var(--bs-primary) !important;
+}
+
+.bg-danger {
+    background-color: #f8d7da !important;
+    color: #721c24;
+}
+
+.bg-success {
+    background-color: #d4edda !important;
+    color: #155724;
+}
+
+.accordion-item {
+    border: none;
+    margin-right: 1rem;
+    background-color: transparent;
+}
+
+.accordion-button {
+    background: #040E22;
+    text-decoration: none;
+    color: #FFFF;
+    box-shadow: none;
+    border: none;
+    margin: 4px 0;
+    padding: .5rem 1rem;
+}
+
+.accordion-button:not(.collapsed) {
+    border-bottom: 4px solid var(--bs-primary);
+    color: var(--bs-primary);
+    font-weight: bold;
+    background-color: #040E22;
+    ;
+}
+
+.accordion-button:focus {
+    z-index: 3;
+    border-color: none;
+    outline: 0;
+    box-shadow: none;
+}
+
+.accordion-button:not(.collapsed)::after {
+    /* background-image: url("{{ asset('frontend/assets/2.png') }}");   */
+    background-image: url('/frontend/assets/2.png');
+    transform: rotate(-180deg);
+}
+
+.accordion-button::after {
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-left: auto;
+    content: "";
+    background-image: url('/frontend/assets/1.png');
+    /* background-image: url("{{ asset('frontend/assets/1.png') }}"); */
+    background-repeat: no-repeat;
+    background-size: 1.25rem;
+    /* transition: transform .2s ease-in-out; */
+
+}
+
+#accordionExample {
+    max-height: 100vh;
+    overflow-y: scroll;
+}
+
+.accordion-body {
+    padding: .5rem !important;
+}
+
+.accordion-body a:hover {
+    color: #F1A909;
+}
+
+.accordion-body a {
+    text-decoration: none;
+    color: #FFFF;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.topic-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.recent-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.accordion-button {
+    background: rgba(255, 255, 255, 0.1);
+    color: white !important;
+    font-weight: 600;
+    border: none;
+}
+
+.accordion-button:not(.collapsed) {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: none;
+}
+
+.list-group-item {
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(5px);
+}
+
+.progress {
+    border: 1px solid #667eea;
+    height: 25px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.progress-bar {
+    font-weight: bold;
+    line-height: 25px;
+}

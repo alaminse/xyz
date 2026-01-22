@@ -1,0 +1,201 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #1D2228;
+}
+
+.side-navbar {
+    width: 250px;
+    height: 100%;
+    position: fixed;
+    margin-left: -300px;
+    background-color: #040E22;
+    transition: 0.5s;
+}
+.navbar {
+    padding-left: 3rem;
+    padding-right: 1.2rem;
+}
+.top-height img {
+    max-height: 55px;
+    /* width: 100%; */
+}
+
+.top-height {
+    height: 70px;
+}
+
+.nav-link a {
+    color: #fff !important;
+    text-decoration: none;
+}
+
+.nav-link .active,
+.nav-link a:focus,
+.nav-link a:hover {
+    color: #F1A909 !important;
+}
+
+.header-title {
+    margin: 1rem;
+}
+
+.my-container {
+    transition: 0.4s;
+}
+
+.active-nav {
+    margin-left: 0;
+}
+
+.active-cont {
+    margin-left: 250px;
+}
+
+#menu-btn i {
+    font-size: 40px;
+}
+
+#menu-btn {
+    color: #fff;
+}
+
+.search {
+    width: 100%;
+    position: relative;
+    display: flex;
+}
+
+.searchTerm {
+    width: 100%;
+    border: 3px solid #00B4CC;
+    border-right: none;
+    padding: 5px;
+    height: 20px;
+    border-radius: 5px 0 0 5px;
+    outline: none;
+    color: #9DBFAF;
+}
+
+.searchTerm:focus {
+    color: #00B4CC;
+}
+
+.searchButton {
+    width: 40px;
+    height: 36px;
+    border: 1px solid #00B4CC;
+    background: #00B4CC;
+    text-align: center;
+    color: #fff;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+/*Resize the wrap to see the search bar change!*/
+.wrap {
+    width: 30%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.card-header {
+    margin-bottom: 1rem;
+    padding: 0;
+    background-color: transparent;
+}
+
+.recent-card {
+    border: 1px solid #F1A909;
+}
+.btn-group-sm>.btn, .btn-sm
+{
+    --bs-btn-padding-y: .4rem;
+    --bs-btn-padding-x: 1rem;
+}
+.button-yellow:hover, .button-white:hover {
+    border: 1px solid #F1A909;
+}
+.button-yellow {
+    background-color: #F1A909;
+    color: #FFFF;
+    height: 36px;
+}
+
+.button-white {
+    background-color: #FFFF;
+    color: #F1A909;
+}
+
+.note-description {
+    overflow: scroll;
+    word-wrap: break-word;
+    max-width: 100%;
+}
+
+/*.note, .explanation {*/
+/*    overflow-y: auto;*/
+/*    overflow-x: scroll;*/
+/*    word-wrap: break-word;*/
+/*    overflow-wrap: break-word;*/
+/*    max-width: 100%;*/
+/*    height: auto;*/
+/*    max-height: 300px;*/
+/*}*/
+
+
+.note, .explanation {
+    overflow-y: auto;
+    overflow-x: scroll;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    height: auto;
+    max-height: 300px;
+
+    /* Customize scroll bar */
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: #888 #f5f5f5; /* For Firefox */
+}
+
+/* General Scrollbar Styling for Webkit Browsers */
+*::-webkit-scrollbar {
+    width: 10px; /* Width of the vertical scrollbar */
+    height: 10px; /* Height of the horizontal scrollbar */
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #888; /* Color of the scrollbar thumb */
+    border-radius: 5px; /* Rounded corners for the scrollbar thumb */
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Darker thumb color on hover */
+}
+
+*::-webkit-scrollbar-track {
+    background: #f5f5f5; /* Color of the scrollbar track */
+    border-radius: 5px; /* Rounded corners for the scrollbar track */
+}
+
+/* Specific Rules for Firefox */
+* {
+    scrollbar-width: thin; /* Makes the scrollbar thin */
+    scrollbar-color: #888 #f5f5f5; /* Thumb and track colors */
+}
+
+
+@media (max-width: 567px) {
+    .is_active {
+        display: none;
+    }
+    .navbar {
+        padding-left: 0;
+    }
+}

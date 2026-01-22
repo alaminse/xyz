@@ -1,0 +1,8 @@
+[24-Nov-2024 09:39:24 UTC] PHP Warning:  require(/home/demonjmo/medimaniac.com/vendor/composer/../symfony/deprecation-contracts/function.php): Failed to open stream: No such file or directory in /home/demonjmo/medimaniac.com/vendor/composer/autoload_real.php on line 41
+[24-Nov-2024 09:39:24 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/demonjmo/medimaniac.com/vendor/composer/../symfony/deprecation-contracts/function.php' (include_path='.:/opt/alt/php81/usr/share/pear:/opt/alt/php81/usr/share/php:/usr/share/pear:/usr/share/php') in /home/demonjmo/medimaniac.com/vendor/composer/autoload_real.php:41
+Stack trace:
+#0 /home/demonjmo/medimaniac.com/vendor/composer/autoload_real.php(45): {closure}()
+#1 /home/demonjmo/medimaniac.com/vendor/autoload.php(25): ComposerAutoloaderInit36cdd01e09929e7642394f6d4bb7559a::getLoader()
+#2 /home/demonjmo/medimaniac.com/public/index.php(34): require('/home/demonjmo/...')
+#3 {main}
+  thrown in /home/demonjmo/medimaniac.com/vendor/composer/autoload_real.php on line 41

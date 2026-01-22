@@ -1,0 +1,130 @@
+ @keyframes kenburns {
+    0% {
+      transform: scale(1);
+      transition: transform 20000ms linear 0s;
+    }
+  
+    100% {
+      transform: scale(1.4);
+      transition: transform 20000ms linear 0s;
+    }
+  }
+  
+  #main-carousel .carousel {
+    max-width: 100%;
+  }
+  
+  /* Carousel Wrapper */
+  .kb-carousel {
+    overflow: hidden;
+    max-height: 80vh; 
+  }
+  
+  /* Carousel Items */
+  .kb-carousel .carousel-item {
+    height: auto;
+    transition: transform .6s ease-in-out 0s, opacity ease-in-out .6s;
+  }
+  
+  .kb-carousel .carousel-item.active {
+    transition: transform .6s ease-in-out 0s, opacity ease-in-out .6s;
+  }
+  
+  .kb-carousel > .carousel-inner > .carousel-item > img,
+  .kb-carousel > .carousel-inner > .carousel-item > a > img {
+    width: 100%; /* Make images responsive */
+    height: auto;
+    opacity: 0.8;
+    animation: kenburns 20000ms linear 0s infinite alternate;
+    overflow: hidden;
+  }
+  
+  /* Controls */
+  .kb-control-prev,
+  .kb-control-next {
+    border-radius: 50%;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin: auto 0;
+    opacity: 0;
+    color: #fff;
+    background:  #F1A909;;
+  }
+  
+  .kb-carousel:hover .kb-control-prev,
+  .kb-carousel:hover .kb-control-next {
+    opacity: 1;
+  }
+  
+  .kb-control-prev {
+    left: 1%;
+  }
+  
+  .kb-control-next {
+    right: 1%;
+  }
+  
+  .kb-control-prev:hover,
+  .kb-control-prev:focus,
+  .kb-control-next:hover,
+  .kb-control-next:focus {
+    color: #fff;
+    background: rgba(0 0 0 / 1);
+  }
+  
+  /* Support for dark mode */
+  [data-bs-theme = "dark"] .carousel .carousel-control-next-icon,
+  [data-bs-theme = "dark"] .carousel .carousel-control-prev-icon {
+    filter: none;
+  }
+  
+  .carousel-caption {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    padding: 20px;
+    width: 80%;
+    align-items: center;
+  }
+
+  .carousel-caption p
+  {
+    padding: 2rem 5rem;
+  }
+
+  .carousel-caption h2
+  {
+    font-family: 'Nunito Sans';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 4rem;
+    line-height: 61px;
+    color: #D9D9D9;
+    padding: 0 5%;
+    text-align: center;
+  }
+
+  #main-carousel .carousel .carousel-inner .carousel-item .carousel-caption .button .btn-warning
+  {
+    width: 150px;
+    border-color: #F1A909 !important;
+    border-radius: 0 !important;
+  }
+  
+  #main-carousel .carousel .carousel-inner .carousel-item .carousel-caption .button .btn-outline-success
+  {
+    width: 150px;
+    color: #FFFFFF;
+    border-color: #FFFFFF !important;
+    border-radius: 0 !important;
+  }
+
+  @media (max-width: 1150px) {
+    .carousel-caption h2
+    {
+      font-size: 2rem;
+    }
+  }
+  

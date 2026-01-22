@@ -1,0 +1,333 @@
+/* =====================================================
+   SUMMARY CARDS
+===================================================== */
+.summary-container {
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 20px 0;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.summary-card {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 8px 20px;
+    display: table;
+    width: 100%;
+    background: #fff;
+}
+
+.summary-card .label {
+    font-size: 14px;
+    color: #6c757d;
+    font-weight: 600;
+    display: table-cell;
+}
+
+.summary-card .value {
+    font-size: 22px;
+    font-weight: bold;
+    color: #4A90E2;
+    display: table-cell;
+    text-align: right;
+}
+
+/* =====================================================
+   RESULT BADGE
+===================================================== */
+.result-badge {
+    padding: 8px 18px;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.result-badge.pass {
+    background: #28a745;
+    color: #fff;
+}
+
+.result-badge.fail {
+    background: #dc3545;
+    color: #fff;
+}
+
+/* =====================================================
+   QUESTIONS & OPTIONS
+===================================================== */
+.question-block {
+    background: #fff;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.question-header {
+    background: #f8f9fa;
+    padding: 12px 15px;
+    border-left: 4px solid #4A90E2;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.question-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+/* =====================================================
+   BOOTSTRAP COLOR UTILITIES (SUBTLE BACKGROUNDS)
+===================================================== */
+.bg-success-subtle {
+    background-color: #d1e7dd !important;
+}
+
+.bg-danger-subtle {
+    background-color: #f8d7da !important;
+}
+
+.bg-warning-subtle {
+    background-color: #fff3cd !important;
+}
+
+/* =====================================================
+   SBA OPTIONS (Single Best Answer)
+===================================================== */
+.sba-options-container .option-box {
+    border: 2px solid #dee2e6;
+    border-radius: 10px;
+    padding: 15px;
+    background: #ffffff;
+    transition: all 0.3s ease;
+}
+
+.sba-options-container .option-box.correct {
+    border-color: #28a745;
+    background-color: #d4edda;
+}
+
+.sba-options-container .option-box.incorrect {
+    border-color: #dc3545;
+    background-color: #f8d7da;
+}
+
+.sba-options-container .option-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.option-label {
+    display: inline-block;
+    min-width: 25px;
+    color: #495057;
+    font-size: 16px;
+    margin-right: 8px;
+}
+
+.option-text {
+    color: #212529;
+    font-size: 14px;
+}
+
+.indicator {
+    color: inherit;
+}
+
+/* =====================================================
+   MCQ OPTIONS (Multiple Choice Question)
+===================================================== */
+.mcq-options-container .card {
+    transition: all 0.3s ease;
+}
+
+.mcq-options-container .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* =====================================================
+   EXPLANATION SECTION
+===================================================== */
+.explanation-section {
+    background: #f8f9fa;
+    border-left: 4px solid #4A90E2;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+    color: #2c3e50;
+    line-height: 1.7;
+}
+
+.explanation-section * {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Headings */
+.explanation-section h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.explanation-section h4,
+.explanation-section h5 {
+    margin: 14px 0 6px;
+}
+
+/* Text */
+.explanation-section p {
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+/* Highlight */
+.explanation-section strong,
+.explanation-section b {
+    font-weight: 600;
+}
+
+/* Lists */
+.explanation-section ul,
+.explanation-section ol {
+    padding-left: 20px;
+    margin: 10px 0;
+}
+
+.explanation-section li {
+    margin-bottom: 6px;
+}
+
+/* Links */
+.explanation-section a {
+    text-decoration: underline;
+    word-break: break-word;
+}
+
+.explanation-section a:hover {
+    color: #2c6ed5;
+}
+
+/* Images */
+.explanation-section img {
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+    margin: 12px 0;
+    display: block;
+}
+
+/* Tables */
+.explanation-section .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    margin: 12px 0;
+}
+
+.explanation-section table,
+.note-card table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.explanation-section th,
+.explanation-section td {
+    padding: 8px;
+    border: 1px solid #dee2e6;
+    font-size: 13px;
+}
+
+.explanation-section th {
+    background: #eef2f7;
+    font-weight: 600;
+}
+
+/* Code */
+.explanation-section code {
+    background: #eef2f7;
+    color: #d63384;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+/* Pre */
+.explanation-section pre {
+    background: #f1f3f5;
+    padding: 12px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 13px;
+}
+
+/* Blockquote */
+.explanation-section blockquote {
+    border-left: 4px solid #F1A909;
+    padding-left: 12px;
+    margin: 12px 0;
+    font-style: italic;
+}
+
+/* Video */
+.explanation-section video,
+.explanation-section iframe {
+    width: 100%;
+    border-radius: 6px;
+    margin: 12px 0;
+}
+
+/* =====================================================
+   RESPONSIVE STYLES
+===================================================== */
+@media (max-width: 768px) {
+    .explanation-section {
+        padding: 14px;
+    }
+
+    .explanation-section p,
+    .explanation-section li {
+        font-size: 13px;
+    }
+
+    .explanation-section h3 {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .sba-options-container .option-box {
+        padding: 12px;
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+
+    .option-status {
+        margin-top: 8px;
+    }
+
+    .option-label {
+        font-size: 14px;
+    }
+
+    .option-text {
+        font-size: 13px;
+    }
+
+    .mcq-options-container .card-body {
+        padding: 12px !important;
+    }
+}
+
+/* =====================================================
+   PRINT STYLES
+===================================================== */
+@media print {
+    .question-block {
+        page-break-inside: avoid;
+    }
+}
