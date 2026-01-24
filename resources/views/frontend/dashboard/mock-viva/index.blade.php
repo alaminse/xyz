@@ -6,7 +6,15 @@
         .button-yellow:hover,
         .button-white:hover {
             color: white;
+     
+        .list-group {
+            background-color: transparent !important;
         }
+
+        .list-group .list-group-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+</style>
     </style>
 @endsection
 @section('content')
