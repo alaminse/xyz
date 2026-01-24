@@ -340,8 +340,8 @@ class AssessmentController extends Controller
                 }
 
                 // প্রতিটি option এর জন্য marks calculate
-                $marksPerOption = $question->mark_per_question / $totalAvailableOptions; // প্রতিটি option এর value
-                $minusMarkPerOption = $question->minus_mark / $totalAvailableOptions; // প্রতিটি ভুল এর জন্য minus
+                $marksPerOption = $question->mark_per_question; // প্রতিটি option এর value
+                $minusMarkPerOption = $question->minus_mark; // প্রতিটি ভুল এর জন্য minus
 
                 $questionMarks = ($totalCorrect * $marksPerOption) - ($totalWrong * $minusMarkPerOption);
                 $achieved_marks += $questionMarks;
