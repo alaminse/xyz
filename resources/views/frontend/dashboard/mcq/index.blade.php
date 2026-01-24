@@ -3,7 +3,7 @@
 @section('css')
     <link rel="stylesheet" href="{{ asset('frontend/css/sba.css') }}">
 <style>
-            .list-group {
+        .list-group {
             background-color: transparent !important;
         }
 

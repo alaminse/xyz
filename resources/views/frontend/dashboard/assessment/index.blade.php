@@ -2,6 +2,15 @@
 @section('title', 'Assessments')
 @section('css')
     <link rel="stylesheet" href="{{ asset('frontend/css/sba.css') }}">
+    <style>
+        .list-group {
+            background-color: transparent !important;
+        }
+
+        .list-group .list-group-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+</style>
 @endsection
 @section('content')
     <div class="row">

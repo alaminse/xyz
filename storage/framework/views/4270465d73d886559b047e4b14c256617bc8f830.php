@@ -1,6 +1,15 @@
 <?php $__env->startSection('title', 'Assessments'); ?>
 <?php $__env->startSection('css'); ?>
     <link rel="stylesheet" href="<?php echo e(asset('frontend/css/sba.css')); ?>">
+    <style>
+        .list-group {
+            background-color: transparent !important;
+        }
+
+        .list-group .list-group-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+</style>
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('content'); ?>
     <div class="row">
