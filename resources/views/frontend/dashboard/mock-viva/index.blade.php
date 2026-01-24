@@ -6,7 +6,7 @@
         .button-yellow:hover,
         .button-white:hover {
             color: white;
-     
+        }
         .list-group {
             background-color: transparent !important;
         }
