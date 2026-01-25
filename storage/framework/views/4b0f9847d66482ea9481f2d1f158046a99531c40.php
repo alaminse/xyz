@@ -279,35 +279,65 @@
             /* ======================
                 ADD / UPDATE QUESTION
             ====================== */
-            $('#questionForm').on('submit', function(e) {
+            $('#questionForm').on('submit', function (e) {
                 e.preventDefault();
 
                 let questionId = $('#question_id').val();
-                let url = questionId ?
-                    `/admin/flashs/questions/${questionId}` :
-                    `/admin/flashs/${flashId}/questions`;
 
-                let method = questionId ? 'PUT' : 'POST';
+                let url = questionId
+                    ? `/admin/flashs/questions/${questionId}`     // UPDATE
+                    : `/admin/flashs/${flashId}/questions`;       // STORE
 
                 $.ajax({
                     url: url,
-                    type: 'POST',
+                    type: 'POST', // ✅ matches BOTH routes
                     data: {
                         _token: '<?php echo e(csrf_token()); ?>',
-                        _method: method,
                         question: $('#question').val(),
                         answer: $('#answer').summernote('code')
                     },
-                    success: function(res) {
+                    success: function (res) {
+                        console.log(res);
+
                         if (res.success) {
                             location.reload();
                         }
                     },
-                    error: function() {
+                    error: function (xhr) {
+                        console.log(xhr.responseText);
                         alert('Something went wrong');
                     }
                 });
             });
+            // $('#questionForm').on('submit', function(e) {
+            //     e.preventDefault();
+
+            //     let questionId = $('#question_id').val();
+            //     let url = questionId ?
+            //         `/admin/flashs/questions/${questionId}` :
+            //         `/admin/flashs/${flashId}/questions`;
+
+            //     let method = questionId ? 'PUT' : 'POST';
+
+            //     // $.ajax({
+            //     //     url: url,
+            //     //     type: 'POST',
+            //     //     data: {
+            //     //         _token: '<?php echo e(csrf_token()); ?>',
+            //     //         _method: method,
+            //     //         question: $('#question').val(),
+            //     //         answer: $('#answer').summernote('code')
+            //     //     },
+            //     //     success: function(res) {
+            //     //         if (res.success) {
+            //     //             location.reload();
+            //     //         }
+            //     //     },
+            //     //     error: function() {
+            //     //         alert('Something went wrong');
+            //     //     }
+            //     // });
+            // });
 
             /* ======================
                 EDIT QUESTION

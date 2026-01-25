@@ -183,24 +183,25 @@ class McqController extends Controller
 
     public function updateProgress(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'quiz_id'           => 'required|exists:user_mcq_progress,id',
+            'mcq_id'            => 'required|exists:mcqs,id',
+            'question_id'       => 'required|exists:mcq_questions,id',
+            'answers'           => 'required|array',
+            'answers.option1'   => 'nullable|in:0,1',
+            'answers.option2'   => 'nullable|in:0,1',
+            'answers.option3'   => 'nullable|in:0,1',
+            'answers.option4'   => 'nullable|in:0,1',
+            'answers.option5'   => 'nullable|in:0,1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()->first()], 422);
+        }
+
+        $validated = $validator->validated();
+
         try {
-            $validator = Validator::make($request->all(), [
-                'quiz_id'           => 'required|exists:user_mcq_progress,id',
-                'mcq_id'            => 'required|exists:mcqs,id',
-                'question_id'       => 'required|exists:mcq_questions,id',
-                'answers'           => 'required|array',
-                'answers.option1'   => 'nullable|in:0,1',
-                'answers.option2'   => 'nullable|in:0,1',
-                'answers.option3'   => 'nullable|in:0,1',
-                'answers.option4'   => 'nullable|in:0,1',
-                'answers.option5'   => 'nullable|in:0,1',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json(['error' => $validator->errors()->first()], 422);
-            }
-
-            $validated = $validator->validated();
 
             // Quiz খোঁজা এবং ownership verify করা
             $quiz = UserMcqProgress::where('id', $validated['quiz_id'])
@@ -243,9 +244,9 @@ class McqController extends Controller
             }
 
             // Progress data বের করা
-            $remainingMcq = json_decode($quiz->remaining_mcq, true) ?? [];
-            $answeredMcq = json_decode($quiz->answered_mcq, true) ?? [];
-            $allAnswers = json_decode($quiz->answers, true) ?? [];
+            $remainingMcq   = json_decode($quiz->remaining_mcq, true) ?? [];
+            $answeredMcq    = json_decode($quiz->answered_mcq, true) ?? [];
+            $allAnswers     = json_decode($quiz->answers, true) ?? [];
 
             // Answer key তৈরি করা
             $answerKey = $validated['question_id'];
@@ -296,7 +297,7 @@ class McqController extends Controller
             // Data save করা
             $quiz->remaining_mcq = json_encode($remainingMcq);
             $quiz->answered_mcq = json_encode($answeredMcq);
-            $quiz->answers = json_encode($allAnswers);
+            $quiz->answers      = json_encode($allAnswers);
             $quiz->save();
 
             return response()->json([

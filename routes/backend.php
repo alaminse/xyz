@@ -176,6 +176,7 @@ Route::middleware('auth')
                 Route::post('/{flash}/questions', 'storeQuestion')->name('questions.store');
                 Route::get('/questions/{question}', 'getQuestion')->name('questions.get');
                 Route::post('/questions/{question}', 'updateQuestion')->name('questions.update');
+                
                 Route::delete('/questions/{question}', 'destroyQuestion')->name('questions.destroy');
                 Route::post('/{flash}/check-duplicate', 'checkDuplicate')->name('questions.check');
             });

@@ -6,8 +6,7 @@
 @section('content')
     <div class="card mb-2 topic-card">
         <div class="card-body p-2">
-            <div
-                class="d-flex flex-lg-row justify-content-between align-items-start align-items-lg-center gap-2">
+            <div class="d-flex flex-lg-row justify-content-between align-items-start align-items-lg-center gap-2">
                 <div class="flex-grow-1">
                     <div class="d-flex justify-content-between align-items-center">
                     <button type="button" class="btn btn-light btn-sm" id="previous-button">
@@ -76,7 +75,7 @@
 
                                 <div class="explanation-card" style="display:none;">
                                     <h6><i class="bi bi-lightbulb text-warning me-2"></i>Explanation</h6>
-                                    <p class="mb-3"></p>
+                                    <div class="mb-3 explanation-here"></div>
 
                                     @if ($question->note)
                                         <div class="note-section mt-3">
@@ -209,7 +208,7 @@
 
                             // Show explanation
                             let explanationCard = form.find('.explanation-card');
-                            explanationCard.find('p').html(response.question.explain ||
+                            explanationCard.find('.explanation-here').html(response.question.explain ||
                                 'No explanation available.');
                             explanationCard.show();
 

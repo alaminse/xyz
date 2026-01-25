@@ -41,7 +41,7 @@ class McqController extends Controller
             'answer4'   => 'required|boolean',
             'option5'   => 'required|string|max:500',
             'answer5'   => 'required|boolean',
-            'explain'   => 'required|string|max:5000',
+            'explain'   => 'required|string|max:50000',
         ];
     }
 

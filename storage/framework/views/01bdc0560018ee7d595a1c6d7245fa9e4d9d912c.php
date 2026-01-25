@@ -2,7 +2,7 @@
 <?php $__env->startSection('css'); ?>
     <link rel="stylesheet" href="<?php echo e(asset('frontend/css/sba.css')); ?>">
 <style>
-            .list-group {
+        .list-group {
             background-color: transparent !important;
         }
 

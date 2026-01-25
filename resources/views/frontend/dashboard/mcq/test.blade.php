@@ -176,7 +176,7 @@
                     <ul class="list-group status-list" id="statusList"></ul>
 
                     <a href="{{ route('mcqs.index', $course->slug) }}" class="btn end-btn">
-                        <i class="bi bi-x-circle me-2"></i>End Test
+                        <i class="bi bi-x-circle me-2"></i>End Session
                     </a>
                 </div>
             </div>
@@ -257,17 +257,26 @@
                     let optNum = $(this).data('option');
                     let selected = form.find(`input[name="option${optNum}"]:checked`).val();
 
+                    // Only send if user selected
                     if (selected !== undefined) {
                         options[`option${optNum}`] = selected;
-                    } else {
-                        allSelected = false;
                     }
                 });
+                // form.find('.option-item').each(function() {
+                //     let optNum = $(this).data('option');
+                //     let selected = form.find(`input[name="option${optNum}"]:checked`).val();
 
-                if (!allSelected) {
-                    alert('Please answer all options before submitting!');
-                    return;
-                }
+                //     if (selected !== undefined) {
+                //         options[`option${optNum}`] = selected;
+                //     } else {
+                //         allSelected = false;
+                //     }
+                // });
+
+                // if (!allSelected) {
+                //     alert('Please answer all options before submitting!');
+                //     return;
+                // }
 
                 form.find('.submit-btn').prop('disabled', true).html(
                     '<i class="bi bi-hourglass-split me-2"></i> Submitting...');
@@ -294,30 +303,58 @@
                             form.find('.option-item').each(function() {
                                 let optNum = $(this).data('option');
                                 let correctAns = $(this).data('correct');
-                                let selected = options[`option${optNum}`];
+                                let selected = options.hasOwnProperty(`option${optNum}`)
+                                                ? options[`option${optNum}`]
+                                                : null;
+
+                                // let selected = options[`option${optNum}`];
 
                                 // Input disable করা
-                                $(this).find('input').prop('disabled', true);
+
+                                if (selected === null) {
+                                    return; // no chosen, no wrong, no correct
+                                }
 
                                 let chosenText = selected == 1 ? 'True' : 'False';
                                 let correctText = correctAns == 1 ? 'True' : 'False';
 
                                 if (parseInt(selected) === parseInt(correctAns)) {
                                     $(this).addClass('correct');
-                                    $(this).find('.correct-label').removeClass(
-                                    'd-none');
+                                    $(this).find('.correct-label').removeClass('d-none');
                                     correctCount++;
                                 } else {
                                     $(this).addClass('wrong');
                                     $(this).find('.chosen-label')
                                         .removeClass('d-none')
                                         .html(`
-                                    <span class="text-danger">
-                                        You chose: <strong>${chosenText}</strong><br>
-                                        Correct: <strong>${correctText}</strong>
-                                    </span>
-                                `);
+                                            <span class="text-danger">
+                                                You chose: <strong>${chosenText}</strong><br>
+                                                Correct: <strong>${correctText}</strong>
+                                            </span>
+                                        `);
                                 }
+
+                                // $(this).find('input').prop('disabled', true);
+
+                                // let chosenText = selected == 1 ? 'True' : 'False';
+                                // let correctText = correctAns == 1 ? 'True' : 'False';
+
+                                // if (parseInt(selected) === parseInt(correctAns)) {
+                                //     $(this).addClass('correct');
+                                //     $(this).find('.correct-label').removeClass(
+                                //     'd-none');
+                                //     correctCount++;
+                                // } else {
+                                //     $(this).addClass('wrong');
+                                //     $(this).find('.chosen-label')
+                                //         .removeClass('d-none')
+                                //         .html(`
+                                //     <span class="text-danger">
+                                //         You chose: <strong>${chosenText}</strong><br>
+                                //         Correct: <strong>${correctText}</strong>
+                                //     </span>
+                                // `);
+                                // }
                             });
 
                             correct += correctCount;
