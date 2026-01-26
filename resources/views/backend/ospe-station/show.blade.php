@@ -2,6 +2,7 @@
 @section('title', 'Ospe Station Details')
 
 @section('css')
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
 
     <style>
         .dynamic-question-item {
@@ -192,7 +193,7 @@
                                         @foreach ($questions as $qIndex => $q)
                                             <div class="qa-item">
                                                 <div class="question-text">Q{{ $qIndex + 1 }}:
-                                                    {{ $q['question'] ?? 'N/A' }}</div>
+                                                    {!! $q['question'] ?? 'N/A' !!}</div>
                                                 <div class="answer-text">Answer: {!! $q['answer'] ?? 'N/A' !!}</div>
                                             </div>
                                         @endforeach
@@ -240,6 +241,13 @@
 
                     <div class="modal-body">
 
+                        <!-- Notes Dropdown যোগ করুন -->
+                        <div class="mb-3">
+                            <label>Select Note (Optional)</label>
+                            <select name="note_id" id="note_id" class="form-control">
+                                <option value="">Select Note</option>
+                            </select>
+                        </div>
                         <!-- Image -->
                         <div class="mb-3">
                             <label>Image <span class="text-danger">*</span></label>
@@ -296,7 +304,6 @@
         </div>
     </div>
 
-
     <!-- Edit Question Group Modal -->
     <div class="modal fade" id="editQuestionGroupModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">
@@ -350,7 +357,6 @@
         </div>
     </div>
 
-
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -378,68 +384,200 @@
     </div>
 
     @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+
+        <!-- NotesHandler স্ক্রিপ্ট ইনক্লুড করুন -->
+        <script src="{{ asset('backend/js/notes-handler.js') }}"></script>
+
         <script>
             let questionCount = 1;
             let editQuestionCount = 0;
 
+            // OSPE এর existing data পান
+            const ospeCourseIds = @json($ospe->courses->pluck('id')->toArray());
+            const ospeChapterId = {{ $ospe->chapter_id ?? 'null' }};
+            const ospeLessonId = {{ $ospe->lesson_id ?? 'null' }};
+
+            $(document).ready(function() {
+                // প্রথম question এর জন্য Summernote initialize করুন
+                initializeSummernote('#questionsContainer');
+            });
+
             /* =========================
-               COLLAPSE / EXPAND QUESTION GROUPS ON PAGE
+            Summernote Initialize Function
+            ========================== */
+            function initializeSummernote(container) {
+                $(container).find('textarea[name*="[question]"], textarea[name*="[answer]"]').each(function() {
+                    if (!$(this).hasClass('summernote-initialized')) {
+                        $(this).summernote({
+                            height: 150,
+                            toolbar: [
+                                ['style', ['style']],
+                                ['font', ['bold', 'italic', 'underline', 'clear']],
+                                ['color', ['color']],
+                                ['para', ['ul', 'ol', 'paragraph']],
+                                ['table', ['table']],
+                                ['insert', ['link', 'picture']],
+                                ['view', ['fullscreen', 'codeview', 'help']]
+                            ],
+                            callbacks: {
+                                onInit: function() {
+                                    $(this).addClass('summernote-initialized');
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+
+            /* =========================
+            Summernote Destroy Function
+            ========================== */
+            function destroySummernote(container) {
+                $(container).find('.summernote-initialized').each(function() {
+                    $(this).summernote('destroy');
+                    $(this).removeClass('summernote-initialized');
+                });
+            }
+
+            /* =========================
+            ADD MODAL খোলার সময় Notes লোড করুন
+            ========================== */
+            $('#addQuestionGroupModal').on('shown.bs.modal', function() {
+                // Notes লোড করুন
+                loadNotesForModal('#note_id', null);
+
+                // Summernote initialize করুন
+                initializeSummernote('#questionsContainer');
+            });
+
+            /* =========================
+            Notes Load Function
+            ========================== */
+            function loadNotesForModal(selectId, selectedNoteId = null) {
+                const $select = $(selectId);
+
+                $select.empty().append('<option value="">Select Note</option>');
+
+                if (!ospeCourseIds || ospeCourseIds.length === 0) {
+                    console.log('No courses found');
+                    return;
+                }
+
+                const data = {
+                    course_ids: ospeCourseIds
+                };
+
+                if (ospeChapterId) {
+                    data.chapter_id = ospeChapterId;
+                }
+
+                if (ospeLessonId) {
+                    data.lesson_id = ospeLessonId;
+                }
+
+                $select.prop('disabled', true);
+
+                $.ajax({
+                    url: '/admin/mcqs/get-notes',
+                    type: 'GET',
+                    data: data,
+                    dataType: 'json',
+                    success: function(response) {
+                        $select.prop('disabled', false);
+
+                        if (response.success && response.notes) {
+                            response.notes.forEach(function(note) {
+                                const isSelected = selectedNoteId ? (note.id == selectedNoteId) : false;
+                                const option = new Option(note.title, note.id, false, isSelected);
+                                $select.append(option);
+                            });
+
+                            $select.trigger('change');
+
+                            if (response.notes.length > 0) {
+                                console.log(`${response.notes.length} notes loaded successfully`);
+                            } else {
+                                console.log('No notes found for this criteria');
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $select.prop('disabled', false);
+                        console.error('Error loading notes:', error);
+
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            alert('Error: ' + xhr.responseJSON.message);
+                        }
+                    }
+                });
+            }
+
+            /* =========================
+            COLLAPSE / EXPAND QUESTION GROUPS ON PAGE
             ========================== */
             $(document).on('click', '.question-header', function(e) {
-                // Only collapse if clicking directly on the header text, not on buttons
                 if ($(e.target).hasClass('question-header')) {
                     $(this).next('.question-group-content').slideToggle(300);
-                    $(this).toggleClass('');
+                    $(this).toggleClass('collapsed');
                 }
             });
 
             /* =========================
-               ADD QUESTION (ADD MODAL)
+            ADD QUESTION (ADD MODAL)
             ========================== */
             $('#addQuestionBtn').on('click', function() {
                 const html = `
-        <div class="dynamic-question-item">
-            <div class="d-flex justify-content-between align-items-center">
-                <span class="question-toggle">Question ${questionCount + 1}</span>
-                <button type="button" class="btn btn-sm btn-danger remove-question-btn">
-                    <i class="fa fa-trash"></i>
-                </button>
-            </div>
+            <div class="dynamic-question-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="question-toggle">Question ${questionCount + 1}</span>
+                    <button type="button" class="btn btn-sm btn-danger remove-question-btn">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
 
-            <div class="question-body">
-                <div class="mb-2">
-                    <label>Question *</label>
-                    <textarea name="questions[${questionCount}][question]" class="form-control" required></textarea>
+                <div class="question-body">
+                    <div class="mb-2">
+                        <label>Question *</label>
+                        <textarea name="questions[${questionCount}][question]" class="form-control question-textarea" required></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <label>Answer *</label>
+                        <textarea name="questions[${questionCount}][answer]" class="form-control answer-textarea" required></textarea>
+                    </div>
                 </div>
-                <div class="mb-2">
-                    <label>Answer *</label>
-                    <textarea name="questions[${questionCount}][answer]" class="form-control" required></textarea>
-                </div>
-            </div>
-        </div>`;
+            </div>`;
 
                 $('#questionsContainer').append(html);
+
+                // নতুন যোগ করা textarea তে Summernote initialize করুন
+                const $newItem = $('#questionsContainer .dynamic-question-item').last();
+                initializeSummernote($newItem);
+
                 questionCount++;
             });
 
             /* =========================
-               REMOVE QUESTION (ADD)
+            REMOVE QUESTION (ADD)
             ========================== */
             $(document).on('click', '.remove-question-btn', function() {
                 if (confirm('Remove this question?')) {
-                    $(this).closest('.dynamic-question-item').remove();
+                    const $item = $(this).closest('.dynamic-question-item');
+                    // Summernote destroy করুন
+                    destroySummernote($item);
+                    $item.remove();
                 }
             });
 
             /* =========================
-               COLLAPSE / EXPAND MODAL QUESTIONS
+            COLLAPSE / EXPAND MODAL QUESTIONS
             ========================== */
             $(document).on('click', '.question-toggle', function() {
                 $(this).closest('.dynamic-question-item').toggleClass('collapsed');
             });
 
             /* =========================
-               IMAGE PREVIEW (ADD MODAL)
+            IMAGE PREVIEW (ADD MODAL)
             ========================== */
             $('#addImageInput').on('change', function() {
                 const file = this.files[0];
@@ -458,7 +596,7 @@
             });
 
             /* =========================
-               IMAGE PREVIEW (EDIT MODAL)
+            IMAGE PREVIEW (EDIT MODAL)
             ========================== */
             $(document).on('change', '#editQuestionForm input[name="image"]', function() {
                 const file = this.files[0];
@@ -474,12 +612,13 @@
             });
 
             /* =========================
-               EDIT GROUP
+            EDIT GROUP
             ========================== */
             $(document).on('click', '.edit-group-btn', function() {
                 const id = $(this).data('id');
                 const questions = $(this).data('questions');
                 const image = $(this).data('image');
+                const noteId = $(this).data('note-id');
 
                 $('#editQuestionForm').attr(
                     'action',
@@ -495,15 +634,55 @@
                     $('#currentImagePreview').html('<p class="text-muted">No image</p>');
                 }
 
+                // আগের Summernote instances destroy করুন
+                destroySummernote('#editQuestionsContainer');
+
                 // Questions
                 $('#editQuestionsContainer').html('');
                 editQuestionCount = 0;
 
                 questions.forEach((q, i) => {
                     $('#editQuestionsContainer').append(`
+                <div class="dynamic-question-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="question-toggle">Question ${i + 1}</span>
+                        <button type="button" class="btn btn-sm btn-danger remove-edit-question-btn">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+
+                    <div class="question-body">
+                        <div class="mb-2">
+                            <label>Question *</label>
+                            <textarea name="questions[${i}][question]" class="form-control question-textarea" required>${q.question || ''}</textarea>
+                        </div>
+                        <div class="mb-2">
+                            <label>Answer *</label>
+                            <textarea name="questions[${i}][answer]" class="form-control answer-textarea" required>${q.answer || ''}</textarea>
+                        </div>
+                    </div>
+                </div>
+            `);
+                    editQuestionCount++;
+                });
+
+                // Edit modal এর Summernote initialize করুন
+                initializeSummernote('#editQuestionsContainer');
+
+                // Edit modal এ notes লোড করুন
+                loadNotesForModal('#edit_note_id', noteId);
+
+                $('#editQuestionGroupModal').modal('show');
+            });
+
+            /* =========================
+            ADD QUESTION (EDIT MODAL)
+            ========================== */
+            $('#addEditQuestionBtn').on('click', function() {
+                const html = `
             <div class="dynamic-question-item">
                 <div class="d-flex justify-content-between align-items-center">
-                    <span class="question-toggle">Question ${i + 1}</span>
+                    <span class="question-toggle">Question ${editQuestionCount + 1}</span>
                     <button type="button" class="btn btn-sm btn-danger remove-edit-question-btn">
                         <i class="fa fa-trash"></i>
                     </button>
@@ -512,89 +691,80 @@
                 <div class="question-body">
                     <div class="mb-2">
                         <label>Question *</label>
-                        <textarea name="questions[${i}][question]" class="form-control" required>${q.question}</textarea>
+                        <textarea name="questions[${editQuestionCount}][question]" class="form-control question-textarea" required></textarea>
                     </div>
                     <div class="mb-2">
                         <label>Answer *</label>
-                        <textarea name="questions[${i}][answer]" class="form-control" required>${q.answer}</textarea>
+                        <textarea name="questions[${editQuestionCount}][answer]" class="form-control answer-textarea" required></textarea>
                     </div>
                 </div>
             </div>
-        `);
-                    editQuestionCount++;
-                });
+        `;
 
-                $('#editQuestionGroupModal').modal('show');
-            });
+                $('#editQuestionsContainer').append(html);
 
-            /* =========================
-               ADD QUESTION (EDIT MODAL)
-            ========================== */
-            $('#addEditQuestionBtn').on('click', function() {
-                $('#editQuestionsContainer').append(`
-        <div class="dynamic-question-item">
-            <div class="d-flex justify-content-between align-items-center">
-                <span class="question-toggle">Question ${editQuestionCount + 1}</span>
-                <button type="button" class="btn btn-sm btn-danger remove-edit-question-btn">
-                    <i class="fa fa-trash"></i>
-                </button>
-            </div>
-
-            <div class="question-body">
-                <div class="mb-2">
-                    <label>Question *</label>
-                    <textarea name="questions[${editQuestionCount}][question]" class="form-control" required></textarea>
-                </div>
-                <div class="mb-2">
-                    <label>Answer *</label>
-                    <textarea name="questions[${editQuestionCount}][answer]" class="form-control" required></textarea>
-                </div>
-            </div>
-        </div>
-    `);
+                // নতুন যোগ করা textarea তে Summernote initialize করুন
+                const $newItem = $('#editQuestionsContainer .dynamic-question-item').last();
+                initializeSummernote($newItem);
 
                 editQuestionCount++;
             });
 
             /* =========================
-               REMOVE QUESTION (EDIT)
+            REMOVE QUESTION (EDIT)
             ========================== */
             $(document).on('click', '.remove-edit-question-btn', function() {
                 if (confirm('Remove this question?')) {
-                    $(this).closest('.dynamic-question-item').remove();
+                    const $item = $(this).closest('.dynamic-question-item');
+                    // Summernote destroy করুন
+                    destroySummernote($item);
+                    $item.remove();
                 }
             });
 
             /* =========================
-               RESET ADD MODAL
+            RESET ADD MODAL
             ========================== */
             $('#addQuestionGroupModal').on('hidden.bs.modal', function() {
+                // Summernote destroy করুন
+                destroySummernote('#questionsContainer');
+
                 this.querySelector('form').reset();
                 $('#addImagePreview').html('');
+                $('#note_id').empty().append('<option value="">Select Note</option>');
                 questionCount = 1;
 
                 $('#questionsContainer').html(`
-        <div class="dynamic-question-item">
-            <div class="d-flex justify-content-between align-items-center">
-                <span class="question-toggle">Question 1</span>
-            </div>
+            <div class="dynamic-question-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="question-toggle">Question 1</span>
+                </div>
 
-            <div class="question-body">
-                <div class="mb-2">
-                    <label>Question *</label>
-                    <textarea name="questions[0][question]" class="form-control" required></textarea>
-                </div>
-                <div class="mb-2">
-                    <label>Answer *</label>
-                    <textarea name="questions[0][answer]" class="form-control" required></textarea>
+                <div class="question-body">
+                    <div class="mb-2">
+                        <label>Question *</label>
+                        <textarea name="questions[0][question]" class="form-control question-textarea" required></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <label>Answer *</label>
+                        <textarea name="questions[0][answer]" class="form-control answer-textarea" required></textarea>
+                    </div>
                 </div>
             </div>
-        </div>
-    `);
+        `);
             });
 
             /* =========================
-               OPEN DELETE MODAL
+            RESET EDIT MODAL
+            ========================== */
+            $('#editQuestionGroupModal').on('hidden.bs.modal', function() {
+                // Summernote destroy করুন
+                destroySummernote('#editQuestionsContainer');
+                $('#edit_note_id').empty().append('<option value="">Select Note</option>');
+            });
+
+            /* =========================
+            OPEN DELETE MODAL
             ========================== */
             $(document).on('click', '.delete-group-btn', function() {
                 let id = $(this).data('id');

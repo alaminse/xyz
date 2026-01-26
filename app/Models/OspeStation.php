@@ -42,15 +42,6 @@ class OspeStation extends Model
         return $this->lesson ? $this->lesson?->name : 'N/A';
     }
 
-    public function note()
-    {
-        return $this->belongsTo(Note::class, 'note_id');
-    }
-
-    public function getNoteTitle(): string
-    {
-        return $this->note ? $this->note?->title : 'N/A';
-    }
 
     public function questions(): HasMany
     {

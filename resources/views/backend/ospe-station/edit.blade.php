@@ -2,7 +2,6 @@
 @section('title', 'OSPE Edit')
 
 @section('css')
-    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
     <link href="{{ asset('backend/vendors/select2/dist/css/select2.min.css') }}" rel="stylesheet">
 @endsection
 
@@ -67,17 +66,6 @@
                             @enderror
                         </div>
 
-                        <div class="form-group col-sm-12 mb-2">
-                            <label for="note_id" class="form-label">Related Notes (Optional)</label>
-                            <select name="note_id" id="note_id" class="form-control select2"
-                                data-old-value="{{ old('note_id', $ospe->note_id) }}">
-                                <option value="">Select Note</option>
-                            </select>
-                            @error('note_id')
-                                <small class="text-danger">{{ $message }}</small>
-                            @enderror
-                        </div>
-
                         <!-- Status -->
                         <div class="col-md-4 mb-2">
                             <label>Status</label>
@@ -112,10 +100,8 @@
 @endsection
 
 @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
     <script src="{{ asset('backend/vendors/select2/dist/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('backend/js/dependent-dropdown-handler.js') }}"></script>
-    <script src="{{ asset('backend/js/notes-handler.js') }}"></script>
     <script>
         $(document).ready(function() {
             // Initialize the combined form handler
@@ -127,40 +113,17 @@
                 lessonsUrl: '/admin/lessons/get',
                 moduleType: 'ospe',
                 allowMultipleCourses: true,
-                summernoteSelector: '.summernote',
                 summernoteHeight: 300,
-                csrfToken: '{{ csrf_token() }}',
-                summernoteUploadUrl: "{{ route('admin.summernote.upload') }}"
-            });
-
-            // Initialize Notes Handler
-            const notesHandler = new NotesHandler({
-                courseSelect: '#courseSelect',
-                chapterSelect: '#chapterSelect',
-                lessonSelect: '#lessonSelect',
-                noteSelect: '#note_id',
-                notesUrl: '/admin/mcqs/get-notes',
-                autoLoad: true
             });
 
             // Get existing MCQ data for initialization
             const existingCourseIds = @json($ospe->courses->pluck('id')->toArray());
             const existingChapterId = {{ $ospe->chapter_id }};
             const existingLessonId = {{ $ospe->lesson_id }};
-            const existingNoteId = {{ $ospe->note_id ?? 'null' }};
 
             // Initialize with existing data
             if (existingCourseIds && existingCourseIds.length > 0) {
                 formHandler.initializeWithData(existingCourseIds, existingChapterId, existingLessonId);
-
-                // Load notes after initialization with existing note selected
-                if (existingNoteId) {
-                    notesHandler.initializeWithNote(existingNoteId);
-                } else {
-                    setTimeout(function() {
-                        notesHandler.loadNotes();
-                    }, 500);
-                }
             }
         });
     </script>

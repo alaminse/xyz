@@ -1,7 +1,6 @@
 <?php $__env->startSection('title', 'OSPE Create'); ?>
 
 <?php $__env->startSection('css'); ?>
-    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
     <link href="<?php echo e(asset('backend/vendors/select2/dist/css/select2.min.css')); ?>" rel="stylesheet">
 <?php $__env->stopSection(); ?>
 
@@ -93,26 +92,6 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
                         </div>
-
-                        
-                        <div class="col-sm-12 mb-3">
-                            <label for="note_id" class="form-label">Related Notes (Optional)</label>
-                            <select name="note_id" id="note_id" class="form-control select2"
-                                    data-old-value="<?php echo e(old('note_id')); ?>">
-                                <option value="">Select Note</option>
-                            </select>
-                            <?php $__errorArgs = ['note_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                <small class="text-danger"><?php echo e($message); ?></small>
-                            <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                        </div>
-
                         <!-- Status -->
                         <div class="col-md-4 mb-2">
                             <label>Status</label>
@@ -141,10 +120,8 @@ unset($__errorArgs, $__bag); ?>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startPush('scripts'); ?>
-    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
     <script src="<?php echo e(asset('backend/vendors/select2/dist/js/select2.full.min.js')); ?>"></script>
     <script src="<?php echo e(asset('backend/js/dependent-dropdown-handler.js')); ?>"></script>
-    <script src="<?php echo e(asset('backend/js/notes-handler.js')); ?>"></script>
     <script>
         $(document).ready(function() {
             // Initialize the combined form handler
@@ -156,22 +133,7 @@ unset($__errorArgs, $__bag); ?>
                 lessonsUrl: '/admin/lessons/get',
                 moduleType: 'ospe',
                 allowMultipleCourses: true,
-                summernoteSelector: '.summernote',
-                summernoteHeight: 300,
-                csrfToken: '<?php echo e(csrf_token()); ?>',
-                summernoteUploadUrl: "<?php echo e(route('admin.summernote.upload')); ?>"
             });
-
-            // Initialize Notes Handler
-            const notesHandler = new NotesHandler({
-                courseSelect: '#courseSelect',
-                chapterSelect: '#chapterSelect',
-                lessonSelect: '#lessonSelect',
-                noteSelect: '#note_id',
-                notesUrl: '/admin/mcqs/get-notes',
-                autoLoad: true
-            });
-
             // Restore old values on validation error
             const oldCourseIds = $('#courseSelect').data('old-value');
             const oldChapterId = $('#chapterSelect').data('old-value');
@@ -179,10 +141,6 @@ unset($__errorArgs, $__bag); ?>
 
             if (oldCourseIds && oldCourseIds.length > 0) {
                 formHandler.initializeWithData(oldCourseIds, oldChapterId, oldLessonId);
-                // Load notes after initialization
-                setTimeout(function() {
-                    notesHandler.loadNotes();
-                }, 500);
             }
         });
     </script>

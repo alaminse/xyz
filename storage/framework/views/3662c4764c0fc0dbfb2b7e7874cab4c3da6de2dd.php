@@ -25,9 +25,9 @@
         .question-navigation {
             background: white;
             border-radius: 10px;
-            padding: 1rem;
+            padding: 0.5rem;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.5rem;
         }
 
         .question-counter {
@@ -42,7 +42,7 @@
             background: #667eea;
             color: white;
             border: none;
-            padding: 0.5rem 1.25rem;
+            padding: 0.2rem .5rem;
             border-radius: 8px;
             font-weight: 500;
             transition: all 0.3s ease;
@@ -63,7 +63,7 @@
         .question-content-card {
             background: white;
             border-radius: 10px;
-            padding: 2rem;
+            padding: .2rem;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             margin-bottom: 1.5rem;
         }
@@ -71,8 +71,8 @@
         .ospe-image-container {
             background: #f8f9fa;
             border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            padding: .1rem;
+            margin-bottom: .5rem;
             text-align: center;
         }
 
@@ -99,7 +99,7 @@
 
         .question-box {
             background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-            padding: 1rem 1.25rem;
+            padding: .5rem;
             cursor: pointer;
             font-weight: 600;
             color: #1565c0;
@@ -126,7 +126,7 @@
 
         .answer-box {
             background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-            padding: 1rem 1.25rem;
+            padding: 0.25rem;
             color: #2e7d32;
             border-top: 2px solid #a5d6a7;
         }
@@ -171,80 +171,97 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
-    <div class="ospe-container">
-        <!-- Header -->
-        <div class="ospe-header">
-            <h5><i class="bi bi-clipboard-check"></i> OSPE Station Test</h5>
-        </div>
+    
+    <!-- Header -->
+    
 
-        <!-- Navigation -->
-        <div class="question-navigation">
-            <div class="d-flex justify-content-between align-items-center">
-                <button type="button" class="nav-button" disabled id="prevBtn">
-                    <i class="bi bi-arrow-left"></i> Previous
-                </button>
+    <!-- Navigation -->
+    <div class="mb-3">
+    <div class="question-navigation">
+        <div class="d-flex justify-content-between align-items-center">
+            <!-- Left: Previous Button -->
+            <button type="button" class="nav-button" disabled id="prevBtn">
+                <i class="bi bi-arrow-left"></i>
+            </button>
 
-                <div class="question-counter">
-                    Question <span id="current-question-number">1</span> of
-                    <span id="total-question-number"><?php echo e(count($questions)); ?></span>
-                </div>
-
-                <button type="button" class="nav-button" id="nextBtn">
-                    Next <i class="bi bi-arrow-right"></i>
-                </button>
+            <!-- Center: Question Counter -->
+            <div class="question-counter">
+                Q <span id="current-question-number">1</span> of
+                <span id="total-question-number"><?php echo e(count($questions)); ?></span>
             </div>
-        </div>
 
-        <!-- Question Cards -->
-        <div id="question-container">
-            <?php $__currentLoopData = $questions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $in => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <?php $questionList = json_decode($item->questions); ?>
-
-                <div class="question-card" id="question-<?php echo e($in); ?>" style="display: none;">
-                    <div class="question-content-card">
-                        <!-- Image -->
-                        <?php if($item->image): ?>
-                            <div class="ospe-image-container">
-                                <img src="<?php echo e(asset('uploads/'.$item->image)); ?>" alt="OSPE Image">
-                            </div>
-                        <?php endif; ?>
-
-                        <!-- Questions & Answers -->
-                        <?php $__currentLoopData = $questionList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $q): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <div class="qa-item">
-                                <div class="question-box"
-                                     data-bs-toggle="collapse"
-                                     data-bs-target="#answer-<?php echo e($in); ?>-<?php echo e($index); ?>"
-                                     aria-expanded="false"
-                                     aria-controls="answer-<?php echo e($in); ?>-<?php echo e($index); ?>">
-                                    <span class="badge-question">Q<?php echo e($index + 1); ?></span>
-                                    <?php echo e($q->question); ?>
-
-                                </div>
-                                <div class="answer-box collapse" id="answer-<?php echo e($in); ?>-<?php echo e($index); ?>">
-                                    <strong><i class="bi bi-check-circle"></i> Answer:</strong>
-                                    <div class="mt-2"><?php echo $q->answer; ?></div>
-                                </div>
-                            </div>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                    </div>
-                </div>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-
-            <!-- Finish Section -->
-            <div class="finish-section" id="finishSection" style="display: none;">
-                <h5 class="mb-3">🎉 Test Completed!</h5>
-                <p class="text-muted mb-4">You have reviewed all questions.</p>
-                <a href="<?php echo e(route('ospes.index', ['course' => $course_slug])); ?>" class="finish-button">
-                    <i class="bi bi-house-door"></i> Return to OSPE List
+            <!-- Right: Next Button and Back Button -->
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="nav-button" id="nextBtn">
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+                <a href="<?php echo e(route('ospes.index', $course_slug)); ?>" class="btn btn-secondary btn-sm">
+                    <i class="bi bi-arrow-left"></i> Back
                 </a>
             </div>
         </div>
     </div>
+</div>
+
+
+    <!-- Question Cards -->
+    <div id="question-container">
+        <?php $__currentLoopData = $questions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $in => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php $questionList = json_decode($item->questions); ?>
+
+            <div class="question-card" id="question-<?php echo e($in); ?>" style="display: none;">
+                <div class="question-content-card">
+                    <!-- Image -->
+                    <?php if($item->image): ?>
+                        <div class="ospe-image-container">
+                            <img src="<?php echo e(asset('uploads/' . $item->image)); ?>" alt="OSPE Image">
+                        </div>
+                    <?php endif; ?>
+
+                    <!-- Questions & Answers -->
+                    <?php $__currentLoopData = $questionList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $q): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <div class="qa-item">
+                            <div class="question-box" data-bs-toggle="collapse"
+                                data-bs-target="#answer-<?php echo e($in); ?>-<?php echo e($index); ?>" aria-expanded="false"
+                                aria-controls="answer-<?php echo e($in); ?>-<?php echo e($index); ?>">
+                                <span class="badge-question">Q<?php echo e($index + 1); ?></span>
+                                <?php echo $q->question; ?>
+
+                            </div>
+                            <div class="answer-box collapse" id="answer-<?php echo e($in); ?>-<?php echo e($index); ?>">
+                                <strong><i class="bi bi-check-circle"></i> Answer:</strong>
+                                <div class="mt-2"><?php echo $q->answer; ?></div>
+                            </div>
+                        </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+                    <?php if($item->note): ?>
+                        <div class="note-card">
+                            <h6><?php echo e($item->note?->title); ?></h6>
+                            <div>
+                                <?php echo $item->note?->description; ?>
+
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+        <!-- Finish Section -->
+        <div class="finish-section" id="finishSection" style="display: none;">
+            <h5 class="mb-3">🎉 Test Completed!</h5>
+            <p class="text-muted mb-4">You have reviewed all questions.</p>
+            <a href="<?php echo e(route('ospes.index', ['course' => $course_slug])); ?>" class="finish-button">
+                <i class="bi bi-house-door"></i> Return to OSPE List
+            </a>
+        </div>
+    </div>
+    
 
     <?php $__env->startPush('scripts'); ?>
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('DOMContentLoaded', function() {
                 const questions = document.querySelectorAll('.question-card');
                 const prevBtn = document.getElementById('prevBtn');
                 const nextBtn = document.getElementById('nextBtn');
@@ -284,11 +301,14 @@
                     }
 
                     // Scroll to top smoothly
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
                 }
 
                 // Next button handler
-                nextBtn.addEventListener('click', function () {
+                nextBtn.addEventListener('click', function() {
                     if (currentIndex < questions.length - 1) {
                         currentIndex++;
                         showQuestion(currentIndex);
@@ -296,7 +316,7 @@
                 });
 
                 // Previous button handler
-                prevBtn.addEventListener('click', function () {
+                prevBtn.addEventListener('click', function() {
                     if (currentIndex > 0) {
                         currentIndex--;
                         showQuestion(currentIndex);
