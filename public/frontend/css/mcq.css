@@ -1,10 +1,10 @@
     .explanation-card,
     .note-card {
         background: #f8f9fa;
-        border-left: 4px solid #667eea;
+        border-left: 2px solid #667eea;
         border-radius: 8px;
-        padding: 20px;
         margin-bottom: 20px;
+        padding: 5px;
         max-height: 400px;
         overflow-y: auto;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
