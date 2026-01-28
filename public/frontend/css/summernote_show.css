@@ -153,15 +153,6 @@
 /* =====================================================
    EXPLANATION SECTION
 ===================================================== */
-.explanation-section {
-    background: #f8f9fa;
-    border-left: 4px solid #4A90E2;
-    border-radius: 8px;
-    padding: 16px;
-    margin-top: 16px;
-    color: #2c3e50;
-    line-height: 1.7;
-}
 
 .explanation-section * {
     max-width: 100%;
@@ -285,9 +276,6 @@
    RESPONSIVE STYLES
 ===================================================== */
 @media (max-width: 768px) {
-    .explanation-section {
-        padding: 14px;
-    }
 
     .explanation-section p,
     .explanation-section li {

@@ -1,3 +1,73 @@
+    .explanation-card,
+    .note-card {
+        background: #f8f9fa;
+        border-left: 4px solid #667eea;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        max-height: 400px;
+        overflow-y: auto;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .explanation-card h6,
+    .note-card h6 {
+        color: #495057;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+    }
+
+    .explanation-card p,
+    .note-card div {
+        color: #6c757d;
+        font-size: 0.9rem;
+        line-height: 1.7;
+        margin: 0;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* Scrollbar styling for note card */
+    .note-card::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .note-card::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .note-card::-webkit-scrollbar-thumb {
+        background: #667eea;
+        border-radius: 10px;
+    }
+
+    .note-card::-webkit-scrollbar-thumb:hover {
+        background: #5568d3;
+    }
+
+    /* Handle content inside note description */
+    .note-card div p {
+        margin-bottom: 10px;
+    }
+
+    .note-card div p:last-child {
+        margin-bottom: 0;
+    }
+
+    .note-card div ul,
+    .note-card div ol {
+        padding-left: 20px;
+        margin-bottom: 10px;
+    }
+
+    .note-card div li {
+        margin-bottom: 5px;
+    }
+
     /* Main Container */
     .test-wrapper {
         min-height: 80vh;
@@ -9,7 +79,7 @@
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border-radius: 12px;
         padding: 20px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     }
 
     /* Navigation Header */
@@ -47,7 +117,7 @@
         background: white;
         border-radius: 10px;
         padding: 20px;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     }
 
     .question-card h5 {
@@ -154,34 +224,6 @@
     /* Explanation Section */
     .explanation-section {
         display: none;
-        margin-top: 20px;
-        padding-top: 20px;
-        border-top: 2px dashed #e9ecef;
-    }
-
-    .explanation-card,
-    .note-card {
-        background: #f8f9fa;
-        border-left: 4px solid #667eea;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 15px;
-    }
-
-    .explanation-card h6,
-    .note-card h6 {
-        color: #495057;
-        font-size: 0.9rem;
-        font-weight: 600;
-        margin-bottom: 10px;
-    }
-
-    .explanation-card p,
-    .note-card div {
-        color: #6c757d;
-        font-size: 0.85rem;
-        line-height: 1.6;
-        margin: 0;
     }
 
     /* Navigation Buttons in Explanation */
@@ -209,7 +251,7 @@
     }
 
     .score-display {
-        background: rgba(255,255,255,0.2);
+        background: rgba(255, 255, 255, 0.2);
         padding: 15px;
         border-radius: 10px;
         text-align: center;
@@ -238,17 +280,17 @@
     }
 
     .status-list::-webkit-scrollbar-track {
-        background: rgba(255,255,255,0.1);
+        background: rgba(255, 255, 255, 0.1);
         border-radius: 10px;
     }
 
     .status-list::-webkit-scrollbar-thumb {
-        background: rgba(255,255,255,0.3);
+        background: rgba(255, 255, 255, 0.3);
         border-radius: 10px;
     }
 
     .status-item {
-        background: rgba(255,255,255,0.15);
+        background: rgba(255, 255, 255, 0.15);
         border: none;
         color: white;
         margin-bottom: 8px;
@@ -332,6 +374,76 @@
     .badge.bg-success {
         background-color: #d4edda !important;
         color: #155724;
+    }
+
+
+
+
+    .note-preview {
+        margin-top: 1rem;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .note-preview h6 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .note-preview strong {
+        display: block;
+    }
+
+    .note-preview div {
+        line-height: 1.7;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* Scrollbar styling for note preview */
+    .note-preview::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    /* Handle content inside note description */
+    .note-preview div p {
+        margin-bottom: 10px;
+    }
+
+    .note-preview div p:last-child {
+        margin-bottom: 0;
+    }
+
+    .note-preview div ul,
+    .note-preview div ol {
+        padding-left: 20px;
+        margin-bottom: 10px;
+    }
+
+    .note-preview div li {
+        margin-bottom: 5px;
+        line-height: 1.6;
+    }
+
+    .note-preview div table {
+        width: 100%;
+        max-width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+    }
+
+    .note-preview div img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+        margin: 10px 0;
+    }
+
+    .note-preview div pre {
+        padding: 2px;
+        border-radius: 5px;
+        overflow-x: auto;
     }
 
 

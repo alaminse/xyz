@@ -126,7 +126,6 @@
                                         <div class="mt-2"><?php echo $question->note_description; ?></div>
                                     </div>
                                 <?php endif; ?>
-
                             </div>
                         </div>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

@@ -125,7 +125,6 @@
                                         <div class="mt-2">{!! $question->note_description !!}</div>
                                     </div>
                                 @endif
-
                             </div>
                         </div>
                     @endforeach
