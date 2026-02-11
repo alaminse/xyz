@@ -6,12 +6,12 @@
     .review-container {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border-radius: 15px;
-        padding: 20px;
+        padding: 5px;
     }
     .review-card {
         background: white;
         border-radius: 12px;
-        padding: 25px;
+        padding: 5px;
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
     .option-correct {
@@ -44,9 +44,9 @@
         margin-top: 15px;
     }
     .sidebar-card {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border-radius: 12px;
-        padding: 20px;
+        padding: 5px;
         position: sticky;
         top: 20px;
     }

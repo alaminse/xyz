@@ -244,7 +244,7 @@
     .status-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border-radius: 12px;
-        padding: 20px;
+        padding: 5px;
         color: white;
         position: sticky;
         top: 20px;
@@ -451,11 +451,11 @@
     /* Responsive */
     @media (max-width: 768px) {
         .test-container {
-            padding: 15px;
+            padding: 5px;
         }
 
         .question-card {
-            padding: 15px;
+            padding: 5px;
         }
 
         .status-card {

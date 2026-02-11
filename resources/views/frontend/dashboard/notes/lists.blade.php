@@ -18,7 +18,7 @@
                     @isset($notes)
                         <div id="notes-container">
                             @foreach ($notes as $key => $note)
-                                <div class="bg-light mb-1 p-2 d-flex note-item rounded">
+                                <div class="bg-light mb-1 d-flex note-item rounded">
                                     <h5 class="flex-grow-1 note-title">{{ $note->title }}</h5>
                                     <a href="{{ route('notes.single.details', ['slug' => $note->slug, 'query' => $query ?? null]) }}" class="btn btn-sm button-yellow">Details</a>
                                 </div>

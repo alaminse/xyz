@@ -11,7 +11,7 @@
     </div>
 
     <div class="row mt-4">
-        <div class="col-sm-12 col-md-7 col-lg-5 mx-auto">
+        <div class="col-12 mx-auto">
             <div class="card">
                 <div class="card-body">
                     <div id="question-container">

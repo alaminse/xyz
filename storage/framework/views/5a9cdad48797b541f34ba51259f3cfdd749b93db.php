@@ -1,6 +1,5 @@
-@extends('layouts.frontend')
-@section('title', 'Contact')
-@section('content')
+<?php $__env->startSection('title', 'Contact'); ?>
+<?php $__env->startSection('content'); ?>
 
     <style>
         .form-control.is-invalid {
@@ -69,26 +68,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-sm-12 col-md-6">
-                    {{-- <div class="form-card">
-                    <h3 class="mb-4">Keep In Touch</h3>
-                    <div class="form">
-                        <div class="mb-3">
-                            <input type="text" class="form-control" id="name" placeholder="Your Name">
-                        </div>
-                        <div class="mb-3">
-                            <input type="email" class="form-control" id="email" placeholder="Your Email">
-                        </div>
-                        <div class="mb-3">
-                            <input type="text" class="form-control" id="phone" placeholder="Phone">
-                        </div>
-                        <div class="mb-3">
-                            <textarea class="form-control" id="message" rows="3" placeholder="Message"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <button>Send Message</button>
-                        </div>
-                    </div>
-                </div> --}}
+                    
 
 
                     <div class="form-card">
@@ -107,7 +87,7 @@
                         </div>
 
                         <form id="contactForm" method="POST">
-                            @csrf
+                            <?php echo csrf_field(); ?>
 
                             <div class="mb-3">
                                 <input type="text" class="form-control" name="name" id="name"
@@ -145,32 +125,34 @@
                     </div>
                 </div>
                 <div class="col-sm-12 col-md-6">
-                    @php
+                    <?php
                         $value = [];
                         if ($faqs?->value) {
                             $value = json_decode($faqs->value);
                         }
-                    @endphp
+                    ?>
                     <div class="accordion" id="accordionExample">
-                        @if (!empty($value))
-                            @foreach ($value as $index => $item)
+                        <?php if(!empty($value)): ?>
+                            <?php $__currentLoopData = $value; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <div class="accordion-item">
                                     <h2 class="accordion-header">
                                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                            data-bs-target="#collapse-{{ $index }}" aria-expanded="false'"
-                                            aria-controls="collapse-{{ $index }}">
-                                            {{ $item->question }}
+                                            data-bs-target="#collapse-<?php echo e($index); ?>" aria-expanded="false'"
+                                            aria-controls="collapse-<?php echo e($index); ?>">
+                                            <?php echo e($item->question); ?>
+
                                         </button>
                                     </h2>
-                                    <div id="collapse-{{ $index }}" class="accordion-collapse collapse"
+                                    <div id="collapse-<?php echo e($index); ?>" class="accordion-collapse collapse"
                                         data-bs-parent="#accordionExample">
                                         <div class="accordion-body">
-                                            {{ $item->answer }}
+                                            <?php echo e($item->answer); ?>
+
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
-                        @endif
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -203,7 +185,7 @@
                 const formData = new FormData(form);
 
                 // Send AJAX request
-                fetch('{{ route('contact.send') }}', {
+                fetch('<?php echo e(route('contact.send')); ?>', {
                         method: 'POST',
                         body: formData,
                         headers: {
@@ -283,4 +265,6 @@
             }
         });
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.frontend', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/medimaniac/resources/views/frontend/settings/contact.blade.php ENDPATH**/ ?>

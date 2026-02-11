@@ -39,11 +39,11 @@ class FlashCardController extends Controller
         }
 
         $chapters = course_chapters($course, 'flush');
-        $progress = UserFlashProgress::where('user_id', $this->user->id)
-            ->where('course_id', $course->id)
+        $progress = FlashCard::where('course_id', $course->id)
             ->latest()
             ->take(5)
             ->get();
+
 
         return view('frontend.dashboard.flash.index', compact(
             'course',

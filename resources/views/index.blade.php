@@ -95,45 +95,6 @@
         </div>
     </section>
 
-    <section class="rectangle-div container-xl">
-        <div class="main-div">
-            <div class="row">
-                <div class="col-md-3 single-ractangle p-5">
-                    <div class="d-flex">
-                        <img class="p-2" src="{{ getImageUrl($snotes->img1 ?? '') }}" />
-                        <h4 class="text-center p-2 flex-shrink-1">
-                            {{$snotes->note1 ?? ''}}
-                        </h4>
-                    </div>
-                </div>
-                <div class="col-md-3 single-ractangle p-5">
-                    <div class="d-flex">
-                        <img class="p-2" src="{{ getImageUrl($snotes->img2 ?? '') }}" />
-                        <h4 class="text-center p-2 flex-shrink-1">
-                            {{$snotes->note2 ?? ''}}
-                        </h4>
-                    </div>
-                </div>
-                <div class="col-md-3 single-ractangle p-5">
-                    <div class="d-flex">
-                        <img class="p-2" src="{{ getImageUrl($snotes->img3 ?? '') }}" />
-                        <h4 class="text-center p-2 flex-shrink-1">
-                            {{$snotes->note3 ?? ''}}
-                        </h4>
-                    </div>
-                </div>
-                <div class="col-md-3 single-ractangle p-5">
-                    <div class="d-flex">
-                        <img class="p-2" src="{{ getImageUrl($snotes->img4 ?? '') }}" />
-                        <h4 class="text-center p-2 flex-shrink-1">
-                            {{$snotes->note4 ?? ''}}
-                        </h4>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <div style="margin-top: 50px"></div>
 
     <section id="thehero">
@@ -167,10 +128,14 @@
                         if (entry.isIntersecting) {
                             const courseSlug = $(entry.target).attr('id');
 
+                            console.log(courseSlug);
+
                             $.ajax({
                                 url: `/courses/${courseSlug}`,
                                 type: 'GET',
                                 success: function(data) {
+                                    console.log(data);
+
                                     const coursesContainer = $(entry.target).find('.load-course');
 
                                     coursesContainer.html(data.html);

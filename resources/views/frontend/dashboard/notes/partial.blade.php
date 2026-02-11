@@ -1,4 +1,4 @@
-<div class="mt-3 p-3">
+<div class="mt-3">
     <div class="row">
         <div class="col-sm-12 col-md-12">
             <h2 class="mb-4 text-center note-title"> <u>{{ $note->title }}</u> </h2>

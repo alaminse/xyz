@@ -18,22 +18,10 @@ class HomeController extends Controller
         if($slider) {
             $sliders = json_decode($slider->value);
         }
-        $snote = Setting::where('title', 'snote')->first();
-
-        $snotes = [];
-        if ($snote?->value) {
-            $snotes = json_decode($snote->value);
-        }
 
         $courses = Course::where('status', Status::ACTIVE())->get();
 
-        return view('index', compact('courses', 'sliders', 'snotes'));
-    }
-
-    public function contact()
-    {
-        $faqs = Setting::where('title', 'faqs')->first();
-        return view('frontend.settings.contact', compact('faqs'));
+        return view('index', compact('courses', 'sliders'));
     }
 
     public function about()
@@ -91,5 +79,8 @@ class HomeController extends Controller
 
         return view('frontend.dashboard.course-details', compact('course'));
     }
+
+
+
 
 }

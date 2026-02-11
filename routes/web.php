@@ -1,6 +1,7 @@
 <?php
 // FrontEnd Controllers
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ContactController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
@@ -146,10 +147,11 @@ Route::middleware(['auth', 'role:user'])
     });
 
 Route::get('/about', [HomeController::class, 'about'])->name('about');
-Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 Route::get('/privacy/policy', [HomeController::class, 'privacy'])->name('privacy.policy');
 Route::get('/terms/condition', [HomeController::class, 'terms'])->name('terms.condition');
 Route::get('/states/{country}', [DashboardController::class, 'states']);
+Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+Route::post('/contact/send', [ContactController::class, 'send'])->name('contact.send');
 
 Route::controller(CourseController::class)
     ->prefix('courses')
