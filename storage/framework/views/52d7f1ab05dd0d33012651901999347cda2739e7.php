@@ -1,6 +1,5 @@
-@extends('layouts.backend')
-@section('title', 'Contact Info')
-@section('content')
+<?php $__env->startSection('title', 'Contact Info'); ?>
+<?php $__env->startSection('content'); ?>
     <div class="x_panel">
         <div class="x_title">
             <h2>Site Setting</h2>
@@ -12,7 +11,7 @@
             </ul>
             <div class="clearfix"></div>
         </div>
-        @include('backend.includes.message')
+        <?php echo $__env->make('backend.includes.message', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
         <div class="x_content">
             <!-- Contact Info Section -->
             <div id="contact-display">
@@ -21,38 +20,38 @@
                     <button type="button" id="edit-contact-btn" class="btn btn-primary btn-sm">Edit</button>
                 </div>
 
-                @php
+                <?php
                     $value = [];
                     if ($contact?->value) {
                         $value = json_decode($contact->value);
                     }
-                @endphp
+                ?>
 
                 <div class="field item form-group">
                     <label class="col-form-label col-md-3 col-sm-3 label-align">Address</label>
                     <div class="col-md-6 col-sm-6">
-                        <span class="form-control-plaintext">{{ $value->address ?? 'Not set' }}</span>
+                        <span class="form-control-plaintext"><?php echo e($value->address ?? 'Not set'); ?></span>
                     </div>
                 </div>
 
                 <div class="field item form-group">
                     <label class="col-form-label col-md-3 col-sm-3 label-align">Phone Number</label>
                     <div class="col-md-6 col-sm-6">
-                        <span class="form-control-plaintext">{{ $value->phone ?? 'Not set' }}</span>
+                        <span class="form-control-plaintext"><?php echo e($value->phone ?? 'Not set'); ?></span>
                     </div>
                 </div>
 
                 <div class="field item form-group">
                     <label class="col-form-label col-md-3 col-sm-3 label-align">Email</label>
                     <div class="col-md-6 col-sm-6">
-                        <span class="form-control-plaintext">{{ $value->email ?? 'Not set' }}</span>
+                        <span class="form-control-plaintext"><?php echo e($value->email ?? 'Not set'); ?></span>
                     </div>
                 </div>
             </div>
 
             <!-- Contact Info Edit Form (Initially Hidden) -->
-            <form id="contact-form" action="{{ route('admin.settings.contact.update', $contact->id ?? null) }}" method="POST" style="display: none;">
-                @csrf
+            <form id="contact-form" action="<?php echo e(route('admin.settings.contact.update', $contact->id ?? null)); ?>" method="POST" style="display: none;">
+                <?php echo csrf_field(); ?>
 
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <span class="section">Contact Info</span>
@@ -61,21 +60,21 @@
                 <div class="field item form-group">
                     <label class="col-form-label col-md-3 col-sm-3 label-align">Address</label>
                     <div class="col-md-6 col-sm-6">
-                        <input class="form-control" type="text" name="address" value="{{ $value->address ?? '' }}" />
+                        <input class="form-control" type="text" name="address" value="<?php echo e($value->address ?? ''); ?>" />
                     </div>
                 </div>
 
                 <div class="field item form-group">
                     <label class="col-form-label col-md-3 col-sm-3 label-align">Phone Number</label>
                     <div class="col-md-6 col-sm-6">
-                        <input class="form-control" type="number" name="phone" value="{{ $value->phone ?? '' }}" />
+                        <input class="form-control" type="number" name="phone" value="<?php echo e($value->phone ?? ''); ?>" />
                     </div>
                 </div>
 
                 <div class="field item form-group">
                     <label class="col-form-label col-md-3 col-sm-3 label-align">Email</label>
                     <div class="col-md-6 col-sm-6">
-                        <input class="form-control" type="email" name="email" value="{{ $value->email ?? '' }}" />
+                        <input class="form-control" type="email" name="email" value="<?php echo e($value->email ?? ''); ?>" />
                     </div>
                 </div>
 
@@ -96,38 +95,38 @@
                     <button type="button" id="edit-social-btn" class="btn btn-primary btn-sm">Edit</button>
                 </div>
 
-                @php
+                <?php
                     $svalue = [];
                     if ($socials?->value) {
                         $svalue = json_decode($socials->value);
                     }
-                @endphp
+                ?>
 
                 <div class="field item form-group">
                     <label class="col-form-label col-md-3 col-sm-3 label-align">Facebook <span class="required text-danger">*</span></label>
                     <div class="col-md-6 col-sm-6">
-                        <span class="form-control-plaintext">{{ $svalue->facebook ?? 'Not set' }}</span>
+                        <span class="form-control-plaintext"><?php echo e($svalue->facebook ?? 'Not set'); ?></span>
                     </div>
                 </div>
 
                 <div class="field item form-group">
                     <label class="col-form-label col-md-3 col-sm-3 label-align">Instagram</label>
                     <div class="col-md-6 col-sm-6">
-                        <span class="form-control-plaintext">{{ $svalue->instagram ?? 'Not set' }}</span>
+                        <span class="form-control-plaintext"><?php echo e($svalue->instagram ?? 'Not set'); ?></span>
                     </div>
                 </div>
 
                 <div class="field item form-group">
                     <label class="col-form-label col-md-3 col-sm-3 label-align">Linked In</label>
                     <div class="col-md-6 col-sm-6">
-                        <span class="form-control-plaintext">{{ $svalue->linkedin ?? 'Not set' }}</span>
+                        <span class="form-control-plaintext"><?php echo e($svalue->linkedin ?? 'Not set'); ?></span>
                     </div>
                 </div>
             </div>
 
             <!-- Social Info Edit Form (Initially Hidden) -->
-            <form id="social-form" action="{{ route('admin.settings.socials.update', $socials->id ?? null) }}" method="POST" style="display: none;">
-                @csrf
+            <form id="social-form" action="<?php echo e(route('admin.settings.socials.update', $socials->id ?? null)); ?>" method="POST" style="display: none;">
+                <?php echo csrf_field(); ?>
 
                 <div class="d-flex justify-content-between align-items-center mb-3 mt-5">
                     <span class="section">Social Info</span>
@@ -136,21 +135,21 @@
                 <div class="field item form-group">
                     <label class="col-form-label col-md-3 col-sm-3 label-align">Facebook <span class="required text-danger">*</span></label>
                     <div class="col-md-6 col-sm-6">
-                        <input class="form-control" type="text" name="facebook" value="{{ $svalue->facebook ?? '' }}" />
+                        <input class="form-control" type="text" name="facebook" value="<?php echo e($svalue->facebook ?? ''); ?>" />
                     </div>
                 </div>
 
                 <div class="field item form-group">
                     <label class="col-form-label col-md-3 col-sm-3 label-align">Instagram</label>
                     <div class="col-md-6 col-sm-6">
-                        <input class="form-control" type="text" name="instagram" value="{{ $svalue->instagram ?? '' }}" />
+                        <input class="form-control" type="text" name="instagram" value="<?php echo e($svalue->instagram ?? ''); ?>" />
                     </div>
                 </div>
 
                 <div class="field item form-group">
                     <label class="col-form-label col-md-3 col-sm-3 label-align">Linked In</label>
                     <div class="col-md-6 col-sm-6">
-                        <input class="form-control" type="text" name="linkedin" value="{{ $svalue->linkedin ?? '' }}" />
+                        <input class="form-control" type="text" name="linkedin" value="<?php echo e($svalue->linkedin ?? ''); ?>" />
                     </div>
                 </div>
 
@@ -201,4 +200,6 @@
             });
         });
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.backend', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/medimaniac/resources/views/backend/settings/contact.blade.php ENDPATH**/ ?>

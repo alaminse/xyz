@@ -47,7 +47,7 @@ class McqController extends Controller
 
         $progress = UserMcqProgress::where('user_id', $this->user->id)
             ->whereIn('course_id', $enrolledCourseIds)
-            ->latest()
+            ->orderBy('updated_at', 'desc') // latest updated first
             ->take(5)
             ->get();
 

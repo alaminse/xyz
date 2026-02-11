@@ -4,35 +4,46 @@
     <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
 @endsection
 @section('content')
-<div class="x_panel">
-    <div class="x_title">
-        <h2>Site Setting</h2>
-        <ul class="nav navbar-right panel_toolbox">
-            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-            </li>
-            <li><a class="close-link"><i class="fa fa-close"></i></a>
-            </li>
-        </ul>
-        <div class="clearfix"></div>
-    </div>
-    <div class="x_content">
-        <form action="{{ route('admin.settings.terms.update', $terms->id ?? null) }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            <span class="section">Terms & Condition</span>
-            @include('backend.includes.message')
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>Site Setting</h2>
+            <ul class="nav navbar-right panel_toolbox">
+                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                </li>
+                <li><a class="close-link"><i class="fa fa-close"></i></a>
+                </li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+            <form action="{{ route('admin.settings.terms.update', $terms->id ?? null) }}" method="POST"
+                enctype="multipart/form-data">
+                @csrf
+                <span class="section">Terms & Condition</span>
+                @include('backend.includes.message')
 
-            <div class="row">
-                <div class="col-12 mb-3">
-                    <label class="label-align">Terms & Condition <span class="required text-danger">*</span></label>
-                    <textarea class="form-control summernote" name="description" cols="30" rows="5">{{ old('description', $terms->value ?? '') }}</textarea>
+                <div class="row">
+                    @php
+                        $termValue = is_array($terms->value ?? null)
+                            ? $terms->value
+                            : json_decode($terms->value ?? '', true);
+                    @endphp
+
+                    <div class="col-12 mb-3">
+                        <label class="label-align">
+                            Terms & Condition <span class="required text-danger">*</span>
+                        </label>
+
+                        <textarea class="form-control summernote" name="description" cols="30" rows="5">{{ old('description', $termValue['description'] ?? '') }}</textarea>
+                    </div>
+
+                    <div class="col-12">
+                        <button type='submit' class="btn btn-warning">Update</button>
+                    </div>
                 </div>
-                <div class="col-12">
-                    <button type='submit' class="btn btn-warning">Update</button>
-                </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 

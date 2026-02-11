@@ -1,38 +1,44 @@
-
 <?php $__env->startSection('title', 'Privacy Policy'); ?>
 <?php $__env->startSection('css'); ?>
     <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('content'); ?>
-<div class="x_panel">
-    <div class="x_title">
-        <h2>Site Setting</h2>
-        <ul class="nav navbar-right panel_toolbox">
-            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-            </li>
-            <li><a class="close-link"><i class="fa fa-close"></i></a>
-            </li>
-        </ul>
-        <div class="clearfix"></div>
-    </div>
-    <div class="x_content">
-        <form action="<?php echo e(route('admin.settings.privacy.update', $privacy->id ?? null)); ?>" method="POST" enctype="multipart/form-data">
-            <?php echo csrf_field(); ?>
-            <span class="section">Privacy Policy</span>
-            <?php echo $__env->make('backend.includes.message', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>Site Setting</h2>
+            <ul class="nav navbar-right panel_toolbox">
+                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                </li>
+                <li><a class="close-link"><i class="fa fa-close"></i></a>
+                </li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+            <form action="<?php echo e(route('admin.settings.privacy.update', $privacy->id ?? null)); ?>" method="POST"
+                enctype="multipart/form-data">
+                <?php echo csrf_field(); ?>
+                <span class="section">Privacy Policy</span>
+                <?php echo $__env->make('backend.includes.message', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
-            <div class="row">
-                <div class="col-12 mb-3">
-                    <label class="label-align">Privacy Policy <span class="required text-danger">*</span></label>
-                    <textarea class="form-control summernote" name="description" cols="30" rows="5"><?php echo e(old('description', $privacy->value ?? '')); ?></textarea>
+                <?php
+                    $privacyValue = is_array($privacy->value ?? null)
+                        ? $privacy->value
+                        : json_decode($privacy->value ?? '', true);
+                ?>
+
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <label class="label-align">Privacy Policy <span class="required text-danger">*</span></label>
+                        <textarea class="form-control summernote" name="description" cols="30" rows="5"><?php echo e(old('description', $privacyValue['description'] ?? '')); ?></textarea>
+                    </div>
+                    <div class="col-12">
+                        <button type='submit' class="btn btn-warning">Update</button>
+                    </div>
                 </div>
-                <div class="col-12">
-                    <button type='submit' class="btn btn-warning">Update</button>
-                </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
     <?php $__env->startPush('scripts'); ?>
         <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 

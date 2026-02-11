@@ -1,12 +1,11 @@
-@extends('layouts.backend')
-@section('title', 'Profile')
-@section('content')
+<?php $__env->startSection('title', 'Profile'); ?>
+<?php $__env->startSection('content'); ?>
     <div class="x_panel">
         <div class="x_title">
             <h2>Profile Info</h2>
             <ul class="nav navbar-right panel_toolbox">
                 <li>
-                    <a class="btn btn-sm btn-success text-light" href="{{ route('admin.edit.profile') }}">
+                    <a class="btn btn-sm btn-success text-light" href="<?php echo e(route('admin.edit.profile')); ?>">
                         <i class="fa fa-edit"></i> Edit Profile
                     </a>
                 </li>
@@ -21,22 +20,22 @@
                 <div class="row align-items-center">
                     <div class="col-md-4 text-center">
                         <div class="profile-avatar position-relative d-inline-block">
-                            @if ($user->profile?->photo)
-                                <img src="{{ getImageUrl($user->profile->photo) }}" alt="Profile Image"
+                            <?php if($user->profile?->photo): ?>
+                                <img src="<?php echo e(getImageUrl($user->profile->photo)); ?>" alt="Profile Image"
                                      class="img-fluid rounded-circle shadow-lg profile-img" style="max-width: 40% ">
                                 <span class="status-indicator position-absolute bottom-0 end-0">
                                     <span class="badge bg-success rounded-circle p-2 border border-white">
                                         <i class="fa fa-check"></i>
                                     </span>
                                 </span>
-                            @else
+                            <?php else: ?>
                                 <div class="avatar-placeholder rounded-circle shadow-lg d-flex align-items-center justify-content-center">
                                     <i class="fa fa-user fa-4x text-muted"></i>
                                 </div>
-                            @endif
+                            <?php endif; ?>
                         </div>
-                        <h3 class="mt-3 mb-1 fw-bold">{{ $user->name }}</h3>
-                        <p class="text-muted mb-2">{{ $user->email }}</p>
+                        <h3 class="mt-3 mb-1 fw-bold"><?php echo e($user->name); ?></h3>
+                        <p class="text-muted mb-2"><?php echo e($user->email); ?></p>
                         <div class="profile-badges">
                             <span class="badge bg-primary rounded-pill px-3 py-1">
                                 <i class="fa fa-shield-alt mr-1"></i> Admin
@@ -52,14 +51,14 @@
                                 <div class="stat-card bg-gradient-primary text-white rounded p-3 text-center">
                                     <i class="fa fa-calendar-check fa-2x mb-2"></i>
                                     <h5 class="mb-0">Member Since</h5>
-                                    <p class="mb-0 small">{{ $user->created_at->format('M Y') }}</p>
+                                    <p class="mb-0 small"><?php echo e($user->created_at->format('M Y')); ?></p>
                                 </div>
                             </div>
                             <div class="col-6 col-md-3">
                                 <div class="stat-card bg-gradient-success text-white rounded p-3 text-center">
                                     <i class="fa fa-clock fa-2x mb-2"></i>
                                     <h5 class="mb-0">Last Login</h5>
-                                    <p class="mb-0 small">{{ $user->last_login?->diffForHumans() ?? 'Never' }}</p>
+                                    <p class="mb-0 small"><?php echo e($user->last_login?->diffForHumans() ?? 'Never'); ?></p>
                                 </div>
                             </div>
                             <div class="col-6 col-md-3">
@@ -97,19 +96,19 @@
                                 <div class="info-grid">
                                     <div class="info-item">
                                         <label class="info-label">Full Name</label>
-                                        <p class="info-value">{{ $user->name }} {{ $user->profile?->lname ?? '' }}</p>
+                                        <p class="info-value"><?php echo e($user->name); ?> <?php echo e($user->profile?->lname ?? ''); ?></p>
                                     </div>
                                     <div class="info-item">
                                         <label class="info-label">Email Address</label>
-                                        <p class="info-value">{{ $user->email }}</p>
+                                        <p class="info-value"><?php echo e($user->email); ?></p>
                                     </div>
                                     <div class="info-item">
                                         <label class="info-label">Phone Number</label>
-                                        <p class="info-value">{{ $user->profile?->phone ?? 'Not provided' }}</p>
+                                        <p class="info-value"><?php echo e($user->profile?->phone ?? 'Not provided'); ?></p>
                                     </div>
                                     <div class="info-item">
                                         <label class="info-label">Date of Birth</label>
-                                        <p class="info-value">{{ $user->profile?->dob ?? 'Not provided' }}</p>
+                                        <p class="info-value"><?php echo e($user->profile?->dob ?? 'Not provided'); ?></p>
                                     </div>
                                 </div>
                             </div>
@@ -130,25 +129,27 @@
                                     <div class="info-item">
                                         <label class="info-label">Blood Group</label>
                                         <p class="info-value">
-                                            @if($user->profile?->blood_group)
+                                            <?php if($user->profile?->blood_group): ?>
                                                 <span class="badge bg-danger rounded-pill px-3 py-1 text-white">
-                                                    {{ $user->profile->blood_group }}
+                                                    <?php echo e($user->profile->blood_group); ?>
+
                                                 </span>
-                                            @else
+                                            <?php else: ?>
                                                 Not provided
-                                            @endif
+                                            <?php endif; ?>
                                         </p>
                                     </div>
                                     <div class="info-item">
                                         <label class="info-label">Gender</label>
                                         <p class="info-value">
-                                            @if($user->profile?->gender)
+                                            <?php if($user->profile?->gender): ?>
                                                 <span class="badge bg-secondary rounded-pill px-3 py-1 text-white">
-                                                    {{ ucfirst($user->profile->gender) }}
+                                                    <?php echo e(ucfirst($user->profile->gender)); ?>
+
                                                 </span>
-                                            @else
+                                            <?php else: ?>
                                                 Not provided
-                                            @endif
+                                            <?php endif; ?>
                                         </p>
                                     </div>
                                     <div class="info-item">
@@ -176,7 +177,7 @@
         </div>
     </div>
 
-    @push('styles')
+    <?php $__env->startPush('styles'); ?>
     <style>
         .profile-img {
             width: 900px;
@@ -305,9 +306,9 @@
             }
         }
     </style>
-    @endpush
+    <?php $__env->stopPush(); ?>
 
-    @push('scripts')
+    <?php $__env->startPush('scripts'); ?>
         <script>
             $(document).ready(function() {
                 // Add animation to stat cards on page load
@@ -340,5 +341,7 @@
                 });
             });
         </script>
-    @endpush
-@endsection
+    <?php $__env->stopPush(); ?>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.backend', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/medimaniac/resources/views/backend/profile.blade.php ENDPATH**/ ?>

@@ -3,8 +3,12 @@
 @section('content')
 <section class="about-us">
     <div class="container" style="overflow: hidden">
-        @if (isset($value) && !empty($value))
-            {!! $value !!}
+        @php
+            $data = json_decode($value, true);
+        @endphp
+
+        @if (!empty($data['description']))
+            {!! $data['description'] !!}
         @endif
     </div>
 </section>

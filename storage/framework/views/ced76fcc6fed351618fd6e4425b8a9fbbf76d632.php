@@ -2,10 +2,14 @@
 <?php $__env->startSection('content'); ?>
     <section class="about-us">
         <div class="container" style="overflow: hidden">
-            <?php if(isset($value) && !empty($value)): ?>
-                <?php echo e($value); ?>
+        <?php
+            $data = json_decode($value, true);
+        ?>
 
-            <?php endif; ?>
+        <?php if(!empty($data['description'])): ?>
+            <?php echo $data['description']; ?>
+
+        <?php endif; ?>
         </div>
     </section>
 <?php $__env->stopSection(); ?>

@@ -201,7 +201,7 @@ class SettingsController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'description'   => 'required|string', // Ensure the description is provided and is a string
-            'banner'        => 'required|image|max:5048',
+            'banner'        => 'nullable|image|max:5048',
         ]);
 
         if ($validator->fails()) {
@@ -256,6 +256,7 @@ class SettingsController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
         $validator = $validator->validated();
+        // return $validator['description'];
 
         if ($setting) {
             $setting->update([
@@ -264,7 +265,7 @@ class SettingsController extends Controller
         } else {
             Setting::create(attributes: [
                 'title' => 'terms',
-                'value' => $validator['description']
+                'value' => json_encode($validator['description'])
             ]);
         }
 

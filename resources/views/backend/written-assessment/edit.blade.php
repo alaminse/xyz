@@ -61,8 +61,7 @@
                         <div class="col-sm-12 mb-2">
                             <label for="question" class="form-label">Question <span
                                     class="required text-danger">*</span></label>
-                            <input class="form-control" id="question" name="question" placeholder="Enter question"
-                                value="{{ old('question', $written->question) }}" />
+                            <textarea class="form-control summernote" name="question" cols="30" rows="2" required>{{ old('question', $written->question) }}</textarea>
                         </div>
                         <div class="col-sm-12 mb-2">
                             <label for="answer" class="form-label">Answer <span

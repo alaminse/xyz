@@ -1,10 +1,13 @@
-
 <?php $__env->startSection('title', 'Privacy Policy'); ?>
 <?php $__env->startSection('content'); ?>
 <section class="about-us">
     <div class="container" style="overflow: hidden">
-        <?php if(isset($value) && !empty($value)): ?>
-            <?php echo $value; ?>
+        <?php
+            $data = json_decode($value, true);
+        ?>
+
+        <?php if(!empty($data['description'])): ?>
+            <?php echo $data['description']; ?>
 
         <?php endif; ?>
     </div>

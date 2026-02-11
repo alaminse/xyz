@@ -80,7 +80,7 @@
                     <div class="card mb-2">
                         <div class="card-body">
                             <div class="d-flex">
-                                <h5 class="flex-grow-1">{{ $item->question }}</h5>
+                                <h5 class="flex-grow-1">{!! $item->question !!}</h5>
                                 <a href="{{ route('writtens.single.details', $item->slug) }}"
                                     class="btn btn-sm button-yellow">Details</a>
                             </div>

@@ -1,7 +1,6 @@
-@extends('layouts.backend')
-@section('title', 'Written Assessment Details')
+<?php $__env->startSection('title', 'Written Assessment Details'); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-lg-9 col-md-12">
@@ -14,7 +13,7 @@
                         Written Assessment Details
                     </h5>
 
-                    <a href="{{ route('admin.writtenassessments.index') }}"
+                    <a href="<?php echo e(route('admin.writtenassessments.index')); ?>"
                        class="btn btn-sm btn-outline-secondary">
                         <i class="fa fa-arrow-left"></i> Back
                     </a>
@@ -29,7 +28,8 @@
                             Chapter
                         </div>
                         <div class="col-md-9">
-                            {{ $written->chapter->name }}
+                            <?php echo e($written->chapter->name); ?>
+
                         </div>
                     </div>
 
@@ -38,7 +38,8 @@
                             Lesson
                         </div>
                         <div class="col-md-9">
-                            {{ $written->lesson->name }}
+                            <?php echo e($written->lesson->name); ?>
+
                         </div>
                     </div>
 
@@ -50,7 +51,8 @@
                             Question
                         </div>
                         <div class="p-3 bg-light border rounded">
-                            {!! $written->question !!}
+                            <?php echo e($written->question); ?>
+
                         </div>
                     </div>
 
@@ -60,7 +62,8 @@
                             Answer
                         </div>
                         <div class="p-3 border rounded bg-white">
-                            {!! $written->answer !!}
+                            <?php echo $written->answer; ?>
+
                         </div>
                     </div>
 
@@ -68,14 +71,14 @@
 
                     <!-- Action Buttons -->
                     <div class="text-right">
-                        <a href="{{ route('admin.writtenassessments.edit', $written->id) }}"
+                        <a href="<?php echo e(route('admin.writtenassessments.edit', $written->id)); ?>"
                            class="btn btn-sm btn-primary mr-1">
                             <i class="fa fa-edit"></i> Edit
                         </a>
 
-                        <a href="{{ route('admin.writtenassessments.destroy', $written->id) }}"
+                        <a href="<?php echo e(route('admin.writtenassessments.destroy', $written->id)); ?>"
                            onclick="showDeleteConfirmation(event)"
-                           class="btn btn-sm btn-danger {{ $written->status == 3 ? 'disabled' : '' }}">
+                           class="btn btn-sm btn-danger <?php echo e($written->status == 3 ? 'disabled' : ''); ?>">
                             <i class="fa fa-trash"></i> Delete
                         </a>
                     </div>
@@ -86,4 +89,6 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.backend', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/medimaniac/resources/views/backend/written-assessment/show.blade.php ENDPATH**/ ?>

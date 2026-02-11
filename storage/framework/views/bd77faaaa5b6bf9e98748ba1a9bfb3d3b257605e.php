@@ -1,6 +1,5 @@
-@extends('frontend.dashboard.app')
-@section('title', 'Profile')
-@section('content')
+<?php $__env->startSection('title', 'Profile'); ?>
+<?php $__env->startSection('content'); ?>
     <div class="profile-wrapper">
         <!-- Animated Background -->
         <div class="animated-bg">
@@ -22,13 +21,13 @@
                     <div class="col-lg-3 col-md-4">
                         <div class="profile-avatar-container">
                             <div class="avatar-wrapper">
-                                @if($user->profile?->photo)
-                                    <img src="{{ getImageUrl($user->profile?->photo) }}" alt="Profile" class="avatar-image">
-                                @else
+                                <?php if($user->profile?->photo): ?>
+                                    <img src="<?php echo e(getImageUrl($user->profile?->photo)); ?>" alt="Profile" class="avatar-image">
+                                <?php else: ?>
                                     <div class="avatar-placeholder">
                                         <i class="fas fa-user"></i>
                                     </div>
-                                @endif
+                                <?php endif; ?>
                                 <div class="avatar-ring"></div>
                             </div>
                             <div class="status-indicator">
@@ -40,21 +39,21 @@
 
                     <div class="col-lg-6 col-md-5">
                         <div class="profile-info">
-                            <h1 class="profile-name">{{ $user->name }} {{ $user->profile?->lname }}</h1>
+                            <h1 class="profile-name"><?php echo e($user->name); ?> <?php echo e($user->profile?->lname); ?></h1>
                             <div class="profile-meta">
                                 <div class="meta-item">
                                     <i class="fas fa-envelope"></i>
-                                    <span>{{ $user->email }}</span>
+                                    <span><?php echo e($user->email); ?></span>
                                 </div>
-                                @if($user->profile?->phone)
+                                <?php if($user->profile?->phone): ?>
                                     <div class="meta-item">
                                         <i class="fas fa-phone"></i>
-                                        <span>{{ $user->profile?->phone }}</span>
+                                        <span><?php echo e($user->profile?->phone); ?></span>
                                     </div>
-                                @endif
+                                <?php endif; ?>
                                 <div class="meta-item">
                                     <i class="fas fa-calendar-alt"></i>
-                                    <span>Joined {{ $user->created_at->format('M Y') }}</span>
+                                    <span>Joined <?php echo e($user->created_at->format('M Y')); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -89,7 +88,7 @@
                             <i class="fas fa-shield-alt"></i>
                         </div>
                         <div class="stat-info">
-                            <h3>{{ $user->profile?->blood_group ?? 'N/A' }}</h3>
+                            <h3><?php echo e($user->profile?->blood_group ?? 'N/A'); ?></h3>
                             <p>Blood Group</p>
                         </div>
                     </div>
@@ -98,7 +97,7 @@
                             <i class="fas fa-user-check"></i>
                         </div>
                         <div class="stat-info">
-                            <h3>{{ ucfirst($user->profile?->gender ?? 'Not Set') }}</h3>
+                            <h3><?php echo e(ucfirst($user->profile?->gender ?? 'Not Set')); ?></h3>
                             <p>Gender</p>
                         </div>
                     </div>
@@ -120,29 +119,32 @@
                                 <div class="info-field">
                                     <label>Full Name</label>
                                     <div class="field-value">
-                                        {{ $user->name }} {{ $user->profile?->lname ?? '' }}
+                                        <?php echo e($user->name); ?> <?php echo e($user->profile?->lname ?? ''); ?>
+
                                     </div>
                                 </div>
                                 <div class="info-field">
                                     <label>Date of Birth</label>
                                     <div class="field-value">
-                                        {{ $user->profile?->dob ?? 'Not provided' }}
+                                        <?php echo e($user->profile?->dob ?? 'Not provided'); ?>
+
                                     </div>
                                 </div>
                                 <div class="info-field">
                                     <label>Gender</label>
                                     <div class="field-value">
-                                        {{ ucfirst($user->profile?->gender ?? 'Not specified') }}
+                                        <?php echo e(ucfirst($user->profile?->gender ?? 'Not specified')); ?>
+
                                     </div>
                                 </div>
                                 <div class="info-field">
                                     <label>Blood Group</label>
                                     <div class="field-value">
-                                        @if($user->profile?->blood_group)
-                                            <span class="blood-badge">{{ $user->profile->blood_group }}</span>
-                                        @else
+                                        <?php if($user->profile?->blood_group): ?>
+                                            <span class="blood-badge"><?php echo e($user->profile->blood_group); ?></span>
+                                        <?php else: ?>
                                             Not provided
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
@@ -164,14 +166,16 @@
                                     <label>Email Address</label>
                                     <div class="field-value">
                                         <i class="fas fa-envelope field-icon"></i>
-                                        {{ $user->email }}
+                                        <?php echo e($user->email); ?>
+
                                     </div>
                                 </div>
                                 <div class="info-field">
                                     <label>Phone Number</label>
                                     <div class="field-value">
                                         <i class="fas fa-phone field-icon"></i>
-                                        {{ $user->profile?->phone ?? 'Not provided' }}
+                                        <?php echo e($user->profile?->phone ?? 'Not provided'); ?>
+
                                     </div>
                                 </div>
                                 <div class="info-field">
@@ -185,7 +189,8 @@
                                     <label>Member Since</label>
                                     <div class="field-value">
                                         <i class="fas fa-calendar field-icon"></i>
-                                        {{ $user->created_at->format('F d, Y') }}
+                                        <?php echo e($user->created_at->format('F d, Y')); ?>
+
                                     </div>
                                 </div>
                             </div>
@@ -202,9 +207,9 @@
                         <p>Update your personal details and contact information</p>
                     </div>
 
-                    <form action="{{ route('update.profile', Auth::id()) }}" method="post" enctype="multipart/form-data" class="modern-form">
-                        @csrf
-                        @include('backend.includes.message')
+                    <form action="<?php echo e(route('update.profile', Auth::id())); ?>" method="post" enctype="multipart/form-data" class="modern-form">
+                        <?php echo csrf_field(); ?>
+                        <?php echo $__env->make('backend.includes.message', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
                         <!-- Personal Information -->
                         <div class="form-section">
@@ -217,21 +222,21 @@
                                     <label class="floating-label">First Name</label>
                                     <div class="input-wrapper">
                                         <i class="fas fa-user input-icon"></i>
-                                        <input type="text" class="modern-input" name="name" value="{{ $user->name }}" required>
+                                        <input type="text" class="modern-input" name="name" value="<?php echo e($user->name); ?>" required>
                                     </div>
                                 </div>
                                 <div class="form-group-modern">
                                     <label class="floating-label">Last Name</label>
                                     <div class="input-wrapper">
                                         <i class="fas fa-user input-icon"></i>
-                                        <input type="text" class="modern-input" name="lname" value="{{ $user->profile?->lname }}">
+                                        <input type="text" class="modern-input" name="lname" value="<?php echo e($user->profile?->lname); ?>">
                                     </div>
                                 </div>
                                 <div class="form-group-modern">
                                     <label class="floating-label">Date of Birth</label>
                                     <div class="input-wrapper">
                                         <i class="fas fa-calendar input-icon"></i>
-                                        <input type="date" class="modern-input" name="dob" value="{{ $user->profile?->dob }}">
+                                        <input type="date" class="modern-input" name="dob" value="<?php echo e($user->profile?->dob); ?>">
                                     </div>
                                 </div>
                                 <div class="form-group-modern">
@@ -240,7 +245,8 @@
                                         <i class="fas fa-venus-mars input-icon"></i>
                                         <select name="gender" class="modern-input">
                                             <option value="">Select Gender</option>
-                                            {!! generateGenderOptions(old('gender', $user->profile?->gender ?? null)) !!}
+                                            <?php echo generateGenderOptions(old('gender', $user->profile?->gender ?? null)); ?>
+
                                         </select>
                                     </div>
                                 </div>
@@ -250,7 +256,8 @@
                                         <i class="fas fa-tint input-icon"></i>
                                         <select name="blood_group" class="modern-input">
                                             <option value="">Select Blood Group</option>
-                                            {!! generateBloodGroupOptions(old('blood_group', $user->profile?->blood_group ?? null)) !!}
+                                            <?php echo generateBloodGroupOptions(old('blood_group', $user->profile?->blood_group ?? null)); ?>
+
                                         </select>
                                     </div>
                                 </div>
@@ -268,14 +275,14 @@
                                     <label class="floating-label">Email Address</label>
                                     <div class="input-wrapper">
                                         <i class="fas fa-envelope input-icon"></i>
-                                        <input type="email" class="modern-input" name="email" value="{{ $user->email }}" required>
+                                        <input type="email" class="modern-input" name="email" value="<?php echo e($user->email); ?>" required>
                                     </div>
                                 </div>
                                 <div class="form-group-modern">
                                     <label class="floating-label">Phone Number</label>
                                     <div class="input-wrapper">
                                         <i class="fas fa-phone input-icon"></i>
-                                        <input type="tel" class="modern-input" name="phone" value="{{ $user->profile?->phone }}">
+                                        <input type="tel" class="modern-input" name="phone" value="<?php echo e($user->profile?->phone); ?>">
                                     </div>
                                 </div>
                             </div>
@@ -289,7 +296,7 @@
                             </div>
                             <div class="photo-upload-section">
                                 <div class="current-photo">
-                                    <img id="preview-image" src="{{ getImageUrl($user->profile?->photo) }}" alt="Profile">
+                                    <img id="preview-image" src="<?php echo e(getImageUrl($user->profile?->photo)); ?>" alt="Profile">
                                     <div class="photo-overlay">
                                         <i class="fas fa-camera"></i>
                                     </div>
@@ -1053,7 +1060,7 @@
     </style>
 
 
-    @push('scripts')
+    <?php $__env->startPush('scripts'); ?>
         <script>
             $(document).ready(function() {
                 // Toggle between display and edit modes
@@ -1102,5 +1109,7 @@
                 });
             });
         </script>
-    @endpush
-@endsection
+    <?php $__env->stopPush(); ?>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('frontend.dashboard.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/medimaniac/resources/views/frontend/settings/profile.blade.php ENDPATH**/ ?>
