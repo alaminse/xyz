@@ -1,4 +1,3 @@
-
 <?php $__env->startSection('title', 'Dashboard'); ?>
 <?php $__env->startSection('css'); ?>
     <link href="<?php echo e(asset('backend/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css')); ?>" rel="stylesheet">
@@ -26,7 +25,7 @@
           <div class="card">
             <div class="card-body tile_stats_count text-center">
                 <h2><i class="fa fa-play"></i> Course</h2>
-                <div class="count green" style="font-size: 44px"><?php echo e($data['assessments']); ?></div>
+                <div class="count green" style="font-size: 44px"><?php echo e($data['courses']); ?></div>
             </div>
           </div>
         </div>
@@ -34,7 +33,7 @@
           <div class="card">
             <div class="card-body tile_stats_count text-center">
                 <h2><i class="fa fa-tasks"></i> Assessment</h2>
-                <div class="count green" style="font-size: 44px"><?php echo e($data['courses']); ?></div>
+                <div class="count green" style="font-size: 44px"><?php echo e($data['assessments']); ?></div>
             </div>
           </div>
         </div>

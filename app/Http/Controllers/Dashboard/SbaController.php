@@ -185,7 +185,7 @@ class SbaController extends Controller
 
     public function updateProgress(Request $request)
     {
-        try {
+        // try {
             $validator = Validator::make($request->all(), [
                 'quiz_id' => 'required|exists:user_sba_progress,id',
                 'sba_id' => 'required|exists:sbas,id',
@@ -295,14 +295,14 @@ class SbaController extends Controller
                 ],
             ]);
 
-        } catch (\Exception $e) {
-            Log::error('SBA Progress Update Error: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
+        // } catch (\Exception $e) {
+        //     Log::error('SBA Progress Update Error: ' . $e->getMessage());
+        //     Log::error($e->getTraceAsString());
 
-            return response()->json([
-                'error' => 'Failed to update progress. Please try again.'
-            ], 500);
-        }
+        //     return response()->json([
+        //         'error' => 'Failed to update progress. Please try again.'
+        //     ], 500);
+        // }
     }
 
     public function review($slug)

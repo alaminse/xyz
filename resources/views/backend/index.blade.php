@@ -26,7 +26,7 @@
           <div class="card">
             <div class="card-body tile_stats_count text-center">
                 <h2><i class="fa fa-play"></i> Course</h2>
-                <div class="count green" style="font-size: 44px">{{ $data['assessments'] }}</div>
+                <div class="count green" style="font-size: 44px">{{ $data['courses'] }}</div>
             </div>
           </div>
         </div>
@@ -34,7 +34,7 @@
           <div class="card">
             <div class="card-body tile_stats_count text-center">
                 <h2><i class="fa fa-tasks"></i> Assessment</h2>
-                <div class="count green" style="font-size: 44px">{{ $data['courses'] }}</div>
+                <div class="count green" style="font-size: 44px">{{ $data['assessments'] }}</div>
             </div>
           </div>
         </div>

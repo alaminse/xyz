@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use Illuminate\Http\Request;
+use App\Models\EnrollUser;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
@@ -14,8 +15,21 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $data = User::orderBy('id','DESC')->get();
-        return view('backend.users.index',compact('data'));
+        // Get users with paid enrollments
+        $paidUserIds = EnrollUser::where('sell_price', '>', 0)
+            ->pluck('user_id')
+            ->unique();
+
+        $paidUsers = User::whereIn('id', $paidUserIds)
+            ->orderBy('id', 'DESC')
+            ->get();
+
+        // Get all other users (free users)
+        $freeUsers = User::whereNotIn('id', $paidUserIds)
+            ->orderBy('id', 'DESC')
+            ->get();
+
+        return view('backend.users.index', compact('paidUsers', 'freeUsers'));
     }
 
     public function create()
