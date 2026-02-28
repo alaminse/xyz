@@ -78,7 +78,8 @@ class SbaController extends Controller
             $sbaQuery->where('lesson_id', $lesson->id);
         }
 
-        if ($enrolled->status === Status::FREETRIAL()) {
+        if ($enrolled->status === Status::FREETRIAL()->value) {
+        // if ($enrolled->status === Status::FREETRIAL()) {
             $sbaQuery->where('isPaid', 0);
         }
 
@@ -161,7 +162,7 @@ class SbaController extends Controller
         // শুধু remaining Questions load করা
         $sbaQuestionsFiltered = SbaQuestion::with(['note'])
             ->whereIn('id', $remainingQuestionIds)
-            ->when($enrolled && $enrolled->status === Status::FREETRIAL(), function ($query) {
+            ->when($enrolled && $enrolled->status === Status::FREETRIAL()->value, function ($query) {
                 return $query->whereHas('sba', function ($q) {
                     $q->where('isPaid', 0);
                 });

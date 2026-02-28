@@ -149,7 +149,9 @@ class AssessmentController extends Controller
             })
             // ->whereNotIn('id', $attendedAssessmentIds)
             ->when($enrolled, function ($query) use ($enrolled) {
-                if ($enrolled->status === Status::FREETRIAL()) {
+
+                if ($enrolled->status === Status::FREETRIAL()->value) {
+                // if ($enrolled->status === Status::FREETRIAL()) {
                     return $query->where('isPaid', 0);
                 }
 

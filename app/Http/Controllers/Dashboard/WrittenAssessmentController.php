@@ -84,7 +84,8 @@ class WrittenAssessmentController extends Controller
             $written->where('lesson_id', $lesson->id);
         }
 
-        if ($enrolled->status === Status::FREETRIAL()) {
+        if ($enrolled->status === Status::FREETRIAL()->value) {
+        // if ($enrolled->status === Status::FREETRIAL()) {
             $written->where('isPaid', 0);
         }
 
