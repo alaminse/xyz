@@ -220,6 +220,29 @@
     margin: 12px 0;
 }
 
+/* Note/Explanation এর ভেতরে টেবিল responsive */
+.note-card table,
+.explanation-card table,
+.note-card div table,
+.explanation-section table {
+    width: 100% !important;
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+}
+
+.note-card table td,
+.note-card table th,
+.explanation-section table td,
+.explanation-section table th {
+    min-width: 120px;
+    font-size: 12px !important;
+    padding: 6px 8px !important;
+    white-space: normal;
+    word-break: break-word;
+}
+
 .explanation-section table,
 .note-card table {
     width: 100%;

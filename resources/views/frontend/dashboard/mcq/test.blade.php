@@ -262,112 +262,112 @@
                         options[`option${optNum}`] = selected;
                     }
                 });
-form.find('.submit-btn').prop('disabled', true).html(
-    '<i class="bi bi-hourglass-split me-2"></i> Submitting...');
+                form.find('.submit-btn').prop('disabled', true).html(
+                    '<i class="bi bi-hourglass-split me-2"></i> Submitting...');
 
-$.ajax({
-    url: '{{ route('mcqs.updateProgress') }}',
-    method: 'POST',
-    data: {
-        _token: '{{ csrf_token() }}',
-        quiz_id: form.find('[name=quiz_id]').val(),
-        mcq_id: mcqId,
-        question_id: questionId,
-        answers: options
-    },
-    success: function(response) {
-        if (response.status === 'success') {
-            answered.push(answerKey);
-            let correctCount = 0;
+                $.ajax({
+                    url: '{{ route('mcqs.updateProgress') }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        quiz_id: form.find('[name=quiz_id]').val(),
+                        mcq_id: mcqId,
+                        question_id: questionId,
+                        answers: options
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            answered.push(answerKey);
+                            let correctCount = 0;
 
-            form.find('.option-item').each(function() {
-                let optNum = $(this).data('option');
-                let selected = options.hasOwnProperty(`option${optNum}`)
-                                ? options[`option${optNum}`]
-                                : null;
+                            form.find('.option-item').each(function() {
+                                let optNum = $(this).data('option');
+                                let selected = options.hasOwnProperty(`option${optNum}`)
+                                                ? options[`option${optNum}`]
+                                                : null;
 
-                if (selected === null) return;
+                                if (selected === null) return;
 
-                let result = response.answer_results[`option${optNum}`];
-                if (!result) return;
+                                let result = response.answer_results[`option${optNum}`];
+                                if (!result) return;
 
-                let isCorrect = result.is_correct;
-                let chosenText = parseInt(selected) == 1 ? 'True' : 'False';
-                let correctText = result.correct == 1 ? 'True' : 'False';
+                                let isCorrect = result.is_correct;
+                                let chosenText = parseInt(selected) == 1 ? 'True' : 'False';
+                                let correctText = result.correct == 1 ? 'True' : 'False';
 
-                if (isCorrect) {
-                    $(this).removeClass('wrong')
-                        .addClass('correct')
-                        .css({'background': '#f0fff4', 'border-left': '4px solid #28a745', 'border-color': '#28a745'});
-                    $(this).find('.correct-label').removeClass('d-none');
-                    $(this).find('.chosen-label').addClass('d-none').html('');
-                    correctCount++;
-                } else {
-                    $(this).removeClass('correct')
-                        .addClass('wrong')
-                        .css({'background': '#fff5f5', 'border-left': '4px solid #dc3545', 'border-color': '#dc3545'});
-                    $(this).find('.correct-label').addClass('d-none');
-                    $(this).find('.chosen-label')
-                        .removeClass('d-none')
-                        .html(`
-                            <span class="text-danger">
-                                You chose: <strong>${chosenText}</strong><br>
-                                Correct: <strong>${correctText}</strong>
-                            </span>
-                        `);
-                }
-            });
+                                if (isCorrect) {
+                                    $(this).removeClass('wrong')
+                                        .addClass('correct')
+                                        .css({'background': '#f0fff4', 'border-left': '4px solid #28a745', 'border-color': '#28a745'});
+                                    $(this).find('.correct-label').removeClass('d-none');
+                                    $(this).find('.chosen-label').addClass('d-none').html('');
+                                    correctCount++;
+                                } else {
+                                    $(this).removeClass('correct')
+                                        .addClass('wrong')
+                                        .css({'background': '#fff5f5', 'border-left': '4px solid #dc3545', 'border-color': '#dc3545'});
+                                    $(this).find('.correct-label').addClass('d-none');
+                                    $(this).find('.chosen-label')
+                                        .removeClass('d-none')
+                                        .html(`
+                                            <span class="text-danger">
+                                                You chose: <strong>${chosenText}</strong><br>
+                                                Correct: <strong>${correctText}</strong>
+                                            </span>
+                                        `);
+                                }
+                            });
 
-            // ✅ এগুলো আগে মিসিং ছিল
-            correct += correctCount;
-            totalAnswered += Object.keys(options).length;
+                            // ✅ এগুলো আগে মিসিং ছিল
+                            correct += correctCount;
+                            totalAnswered += Object.keys(options).length;
 
-            let percent = totalAnswered > 0 ? Math.round((correct / totalAnswered) * 100) : 0;
-            $('#scorePercent').text(percent);
+                            let percent = totalAnswered > 0 ? Math.round((correct / totalAnswered) * 100) : 0;
+                            $('#scorePercent').text(percent);
 
-            let statusBadge = correctCount === Object.keys(options).length ?
-                '<span class="badge bg-success">Perfect!</span>' :
-                `<span>${correctCount}/${Object.keys(options).length}</span>`;
+                            let statusBadge = correctCount === Object.keys(options).length ?
+                                '<span class="badge bg-success">Perfect!</span>' :
+                                `<span>${correctCount}/${Object.keys(options).length}</span>`;
 
-            let iconClass = correctCount === Object.keys(options).length ?
-                'check-circle-fill' :
-                correctCount === 0 ? 'x-circle' : 'dash-circle';
+                            let iconClass = correctCount === Object.keys(options).length ?
+                                'check-circle-fill' :
+                                correctCount === 0 ? 'x-circle' : 'dash-circle';
 
-            $('#statusList').append(`
-                <li class="list-group-item status-item d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-${iconClass}"></i> Q${current + 1}</span>
-                    ${statusBadge}
-                </li>
-            `);
+                            $('#statusList').append(`
+                                <li class="list-group-item status-item d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-${iconClass}"></i> Q${current + 1}</span>
+                                    ${statusBadge}
+                                </li>
+                            `);
 
-            $('.status-list').animate({
-                scrollTop: $('.status-list')[0].scrollHeight
-            }, 300);
+                            $('.status-list').animate({
+                                scrollTop: $('.status-list')[0].scrollHeight
+                            }, 300);
 
-            // ✅ এটাই submit বাটন hide করে explanation দেখায়
-            form.find('.submit-btn').hide();
-            form.closest('.question-card').find('.explanation-section').slideDown();
+                            // ✅ এটাই submit বাটন hide করে explanation দেখায়
+                            form.find('.submit-btn').hide();
+                            form.closest('.question-card').find('.explanation-section').slideDown();
 
-        } else {
-            alert('Something went wrong! Please try again.');
-            form.find('.submit-btn').prop('disabled', false).html(
-                '<i class="bi bi-check-circle me-2"></i>Submit Answer');
-        }
-    },
-    error: function(xhr) {
-        let errorMsg = 'Failed to submit! Please try again.';
-        if (xhr.responseJSON) {
-            if (xhr.responseJSON.error) {
-                errorMsg = xhr.responseJSON.error;
-            } else if (xhr.responseJSON.message) {
-                errorMsg = xhr.responseJSON.message;
-            }
-        }
-        alert(errorMsg);
-        form.find('.submit-btn').prop('disabled', false).html(
-            '<i class="bi bi-check-circle me-2"></i>Submit Answer');
-    }
-});
+                        } else {
+                            alert('Something went wrong! Please try again.');
+                            form.find('.submit-btn').prop('disabled', false).html(
+                                '<i class="bi bi-check-circle me-2"></i>Submit Answer');
+                        }
+                    },
+                    error: function(xhr) {
+                        let errorMsg = 'Failed to submit! Please try again.';
+                        if (xhr.responseJSON) {
+                            if (xhr.responseJSON.error) {
+                                errorMsg = xhr.responseJSON.error;
+                            } else if (xhr.responseJSON.message) {
+                                errorMsg = xhr.responseJSON.message;
+                            }
+                        }
+                        alert(errorMsg);
+                        form.find('.submit-btn').prop('disabled', false).html(
+                            '<i class="bi bi-check-circle me-2"></i>Submit Answer');
+                    }
+                });
             });
 
             // Navigation
@@ -378,6 +378,23 @@ $.ajax({
             });
 
             updateNav();
+        });
+
+        // JS দিয়ে automatically wrap করুন
+        $(document).ready(function() {
+            // সব টেবিলকে responsive wrapper এ রাখুন
+            $('.note-card table, .explanation-card table').each(function() {
+                $(this).wrap('<div style="overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%;"></div>');
+            });
+
+            // explanation slideDown এর পরেও apply করতে
+            $(document).on('DOMNodeInserted', '.explanation-section', function() {
+                $(this).find('table').each(function() {
+                    if (!$(this).parent().hasClass('table-scroll')) {
+                        $(this).wrap('<div class="table-scroll" style="overflow-x:auto; width:100%;"></div>');
+                    }
+                });
+            });
         });
     </script>
 @endpush
