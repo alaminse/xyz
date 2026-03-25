@@ -366,7 +366,7 @@
                             <?php if($isLocked): ?>
                                 <div
                                     style="padding:10px; background:#fff3cd; border:1px solid #ffeeba; font-weight:bold;">
-                                    🔒 Answers are locked. Upgrade to Premium.
+                                    [LOCKED] Answers are locked. Upgrade to Premium.
                                 </div>
                             <?php else: ?>
                                 <?php for($i = 1; $i <= 5; $i++): ?>
@@ -403,7 +403,7 @@
                             <?php if($isLocked): ?>
                                 <div
                                     style="padding:10px; background:#fff3cd; border:1px solid #ffeeba; font-weight:bold;">
-                                    🔒 Answers are locked. Upgrade to Premium.
+                                    [LOCKED] Answers are locked. Upgrade to Premium.
                                 </div>
                             <?php else: ?>
                                 <?php for($i = 1; $i <= 5; $i++): ?>
@@ -442,12 +442,15 @@
                         </div>
                     <?php endif; ?>
 
-                    <?php if(!empty($question['explanation'])): ?>
-                        <div class="explanation-section">
-                            <h3><u>Explanation</u></h3>
-                            <?php echo $question['explanation']; ?>
+                    <?php if($isLocked): ?>
+                    <?php else: ?>
+                        <?php if(!empty($question['explanation'])): ?>
+                            <div class="explanation-section">
+                                <h3><u>Explanation</u></h3>
+                                <?php echo $question['explanation']; ?>
 
-                        </div>
+                            </div>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

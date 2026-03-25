@@ -365,7 +365,7 @@
                             @if ($isLocked)
                                 <div
                                     style="padding:10px; background:#fff3cd; border:1px solid #ffeeba; font-weight:bold;">
-                                    🔒 Answers are locked. Upgrade to Premium.
+                                    [LOCKED] Answers are locked. Upgrade to Premium.
                                 </div>
                             @else
                                 @for ($i = 1; $i <= 5; $i++)
@@ -401,7 +401,7 @@
                             @if ($isLocked)
                                 <div
                                     style="padding:10px; background:#fff3cd; border:1px solid #ffeeba; font-weight:bold;">
-                                    🔒 Answers are locked. Upgrade to Premium.
+                                    [LOCKED] Answers are locked. Upgrade to Premium.
                                 </div>
                             @else
                                 @for ($i = 1; $i <= 5; $i++)
@@ -439,11 +439,14 @@
                         </div>
                     @endif
 
-                    @if (!empty($question['explanation']))
-                        <div class="explanation-section">
-                            <h3><u>Explanation</u></h3>
-                            {!! $question['explanation'] !!}
-                        </div>
+                    @if ($isLocked)
+                    @else
+                        @if (!empty($question['explanation']))
+                            <div class="explanation-section">
+                                <h3><u>Explanation</u></h3>
+                                {!! $question['explanation'] !!}
+                            </div>
+                        @endif
                     @endif
                 </div>
             @endforeach
