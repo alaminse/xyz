@@ -68,21 +68,31 @@
                         <h5 class="card-title">Recent</h5>
                     </div>
                     @forelse ($progress as $item)
-                        <div class="sba-item">
-                            <div class="sba-item-header">
-                                <h5>{{ $item->chapter->name }} / {{ $item->lesson->name }}</h5>
-                                <a href="{{ route('mockvivas.test', ['course' => $course->slug, 'chapter' => $item->chapter->slug, 'lesson' => $item->lesson->slug]) }}"
-                                    class="btn btn-primary">Re-Test</a>
-                            </div>
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: {{ $item->status ? 100 : 0 }}%;"
-                                    aria-valuenow="{{ $item->status ? 100 : 0 }}" aria-valuemin="0" aria-valuemax="100">
-                                    {{ $item->status ? 100 : 0 }}%</div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="text-center">No recent activity</div>
-                    @endforelse
+    <div class="sba-item">
+        <div class="sba-item-header">
+            <h5>{{ $item->chapter->name }} / {{ $item->lesson->name }}</h5>
+            @if($isLocked)
+                <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
+                   class="btn btn-warning fw-bold">
+                    <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
+                </a>
+            @else
+                <a href="{{ route('mockvivas.test', ['course' => $course->slug, 'chapter' => $item->chapter->slug, 'lesson' => $item->lesson->slug]) }}"
+                   class="btn btn-primary">Re-Test</a>
+            @endif
+        </div>
+        <div class="progress">
+            <div class="progress-bar" role="progressbar"
+                style="width: {{ $item->status ? 100 : 0 }}%;"
+                aria-valuenow="{{ $item->status ? 100 : 0 }}"
+                aria-valuemin="0" aria-valuemax="100">
+                {{ $item->status ? 100 : 0 }}%
+            </div>
+        </div>
+    </div>
+@empty
+    <div class="text-center">No recent activity</div>
+@endforelse
                 </div>
             </div>
         </div>

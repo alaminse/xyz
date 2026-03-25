@@ -6,6 +6,7 @@
         .button-white:hover {
             color: white;
         }
+
         .list-group {
             background-color: transparent !important;
         }
@@ -13,11 +14,12 @@
         .list-group .list-group-item {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        .list-group .list-group-item a{
+
+        .list-group .list-group-item a {
             color: white;
             text-decoration: none;
         }
-</style>
+    </style>
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('content'); ?>
     <div class="row">
@@ -49,7 +51,8 @@
                                                 <ul class="list-group">
                                                     <?php $__currentLoopData = $topic->lessons; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $lesson): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                         <li class="list-group-item">
-                                                            <a href="<?php echo e(route('ospes.test', ['course' => $course->slug, 'chapter' => $topic->slug, 'lesson' => $lesson->slug])); ?>"><?php echo e($lesson->name); ?></a>
+                                                            <a
+                                                                href="<?php echo e(route('ospes.test', ['course' => $course->slug, 'chapter' => $topic->slug, 'lesson' => $lesson->slug])); ?>"><?php echo e($lesson->name); ?></a>
                                                         </li>
                                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                 </ul>
@@ -71,11 +74,19 @@
                     </div>
                     <ul class="list-group">
                         <?php $__currentLoopData = $recentOspeStations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $station): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <li class="list-group-item">
-                                <a href="<?php echo e(route('ospes.test', ['course' => $course->slug, 'chapter' => $station->chapter->slug, 'lesson' => $station->lesson->slug])); ?>">
-                                    <?php echo e($station->chapter->name); ?> - <?php echo e($station->lesson->name); ?>
-
-                                </a>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><?php echo e($station->chapter->name); ?> - <?php echo e($station->lesson->name); ?></span>
+                                <?php if($isLocked): ?>
+                                    <a href="<?php echo e(route('courses.checkout', ['course' => $course->slug])); ?>"
+                                        class="btn btn-warning btn-sm fw-bold flex-shrink-0">
+                                        <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
+                                    </a>
+                                <?php else: ?>
+                                    <a href="<?php echo e(route('ospes.test', ['course' => $course->slug, 'chapter' => $station->chapter->slug, 'lesson' => $station->lesson->slug])); ?>"
+                                        class="btn btn-sm button-yellow flex-shrink-0">
+                                        Start
+                                    </a>
+                                <?php endif; ?>
                             </li>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </ul>

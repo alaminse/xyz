@@ -77,14 +77,21 @@
                         </h4>
                     </div>
                     @forelse ($latest as $item)
-                    <div class="card mb-2">
-                        <div class="card-body">
-                            <div class="d-flex">
-                                <h5 class="flex-grow-1">{!! $item->question !!}</h5>
-                                <a href="{{ route('writtens.single.details', $item->slug) }}"
-                                    class="btn btn-sm button-yellow">Details</a>
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2">
+                                    <h5 class="flex-grow-1 mb-0">{!! $item->question !!}</h5>
+                                    @if($isLocked)
+                                        <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
+                                        class="btn btn-sm btn-warning fw-bold flex-shrink-0">
+                                            <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
+                                        </a>
+                                    @else
+                                        <a href="{{ route('writtens.single.details', $item->slug) }}"
+                                        class="btn btn-sm button-yellow flex-shrink-0">Details</a>
+                                    @endif
+                                </div>
                             </div>
-                        </div>
                         </div>
                     @empty
                         <div class="alert alert-info">

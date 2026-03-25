@@ -1,7 +1,7 @@
 @foreach ($writtenassessments as $index => $written)
     <tr>
         <td>{{ $index + 1 }}</td>
-        <td>{{ $written->question }}</td>
+        <td>{!! $written->question !!}</td>
         <td>{{ $written->getCourseNames() }}</td>
         <td>{{ $written->getChapterName() }}</td>
         <td>

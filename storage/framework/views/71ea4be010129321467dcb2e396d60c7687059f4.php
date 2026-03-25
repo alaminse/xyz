@@ -17,9 +17,17 @@
                     <?php if(isset($notes)): ?>
                         <div id="notes-container">
                             <?php $__currentLoopData = $notes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $note): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <div class="bg-light mb-1 p-2 d-flex note-item rounded">
-                                    <h5 class="flex-grow-1 note-title"><?php echo e($note->title); ?></h5>
-                                    <a href="<?php echo e(route('notes.single.details', ['slug' => $note->slug, 'query' => $query ?? null])); ?>" class="btn btn-sm button-yellow">Details</a>
+                                <div class="bg-light mb-1 d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2 note-item rounded">
+                                    <h5 class="flex-grow-1 note-title mb-0"><?php echo e($note->title); ?></h5>
+                                    <?php if($isLocked): ?>
+                                        <a href="<?php echo e(route('courses.checkout', ['course' => $course_slug])); ?>"
+                                        class="btn btn-sm btn-warning fw-bold flex-shrink-0">
+                                            <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
+                                        </a>
+                                    <?php else: ?>
+                                        <a href="<?php echo e(route('notes.single.details', ['slug' => $note->slug, 'query' => $query ?? null])); ?>"
+                                        class="btn btn-sm button-yellow flex-shrink-0">Details</a>
+                                    <?php endif; ?>
                                 </div>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>

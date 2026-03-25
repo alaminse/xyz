@@ -68,6 +68,9 @@ class SbaController extends Controller
             return redirect()->back()->with('error', 'You are not enrolled in this course.');
         }
 
+        // ✅ FREETRIAL হলে answer locked, কিন্তু সব question দেখাবে
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
+
         // SBA query
         $sbaQuery = Sba::query()
             ->where('chapter_id', $chapter->id)
@@ -76,11 +79,6 @@ class SbaController extends Controller
 
         if ($lesson) {
             $sbaQuery->where('lesson_id', $lesson->id);
-        }
-
-        if ($enrolled->status === Status::FREETRIAL()->value) {
-        // if ($enrolled->status === Status::FREETRIAL()) {
-            $sbaQuery->where('isPaid', 0);
         }
 
         $sba = $sbaQuery->first();
@@ -103,10 +101,10 @@ class SbaController extends Controller
 
         // User Progress খোঁজা বা তৈরি করা
         $quiz = UserSbaProgress::firstOrNew([
-            'user_id' => $this->user->id,
-            'course_id' => $course->id,
+            'user_id'    => $this->user->id,
+            'course_id'  => $course->id,
             'chapter_id' => $chapter->id,
-            'lesson_id' => $lesson?->id,
+            'lesson_id'  => $lesson?->id,
         ]);
 
         if ($quiz->exists) {
@@ -123,17 +121,17 @@ class SbaController extends Controller
         } else {
             // নতুন quiz তৈরি করা
             $quiz->fill([
-                'slug' => checkSlug('user_sba_progress'),
-                'total' => count($questionIds),
+                'slug'                   => checkSlug('user_sba_progress'),
+                'total'                  => count($questionIds),
                 'current_question_index' => 0,
-                'sbas_id' => json_encode($questionIds),
-                'remaining_sba' => json_encode($questionIds),
-                'answered_sba' => json_encode([]),
-                'progress' => 0,
-                'progress_cut' => 0,
-                'answers' => json_encode([]),
-                'correct' => 0,
-                'wrong' => 0,
+                'sbas_id'                => json_encode($questionIds),
+                'remaining_sba'          => json_encode($questionIds),
+                'answered_sba'           => json_encode([]),
+                'progress'               => 0,
+                'progress_cut'           => 0,
+                'answers'                => json_encode([]),
+                'correct'                => 0,
+                'wrong'                  => 0,
             ]);
         }
 
@@ -142,18 +140,18 @@ class SbaController extends Controller
         // বাকি Questions বের করা
         $remainingQuestionIds = json_decode($quiz->remaining_sba, true) ?? [];
 
-        // ✅ যদি কোনো প্রশ্ন না থাকে তাহলে রিসেট করে আবার শুরু করা
+        // যদি কোনো প্রশ্ন না থাকে তাহলে রিসেট করে আবার শুরু করা
         if (empty($remainingQuestionIds)) {
             $quiz->update([
-                'total' => count($questionIds),
+                'total'                  => count($questionIds),
                 'current_question_index' => 0,
-                'remaining_sba' => json_encode($questionIds),
-                'answered_sba' => json_encode([]),
-                'progress' => 0,
-                'progress_cut' => 0,
-                'answers' => json_encode([]),
-                'correct' => 0,
-                'wrong' => 0,
+                'remaining_sba'          => json_encode($questionIds),
+                'answered_sba'           => json_encode([]),
+                'progress'               => 0,
+                'progress_cut'           => 0,
+                'answers'                => json_encode([]),
+                'correct'                => 0,
+                'wrong'                  => 0,
             ]);
 
             $remainingQuestionIds = $questionIds;
@@ -162,11 +160,6 @@ class SbaController extends Controller
         // শুধু remaining Questions load করা
         $sbaQuestionsFiltered = SbaQuestion::with(['note'])
             ->whereIn('id', $remainingQuestionIds)
-            ->when($enrolled && $enrolled->status === Status::FREETRIAL()->value, function ($query) {
-                return $query->whereHas('sba', function ($q) {
-                    $q->where('isPaid', 0);
-                });
-            })
             ->inRandomOrder()
             ->get();
 
@@ -180,7 +173,8 @@ class SbaController extends Controller
             'chapter',
             'lesson',
             'course',
-            'sba'
+            'sba',
+            'isLocked'
         ));
     }
 

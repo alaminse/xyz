@@ -50,15 +50,23 @@ class LectureVideoController extends Controller
         $isPaid = $this->isPaid(course: $course->id);
         if ($isPaid == 9) return redirect()->back()->with('error', 'Something is Wrong!!');
 
+        $isLocked = $isPaid == 0; // ✅
+
         $latest = LectureVideo::select('id', 'slug', 'title', 'status')
             ->whereHas('courses', fn($q) => $q->where('course_id', $course->id));
+
         if ($isPaid == 0) {
             $latest = $latest->where('isPaid', $isPaid);
         }
 
         $latest = $latest->orderBy('id', 'desc')->where('status', Status::ACTIVE())->take(5)->get();
 
-        return view('frontend.dashboard.lecture-video.index', compact('chapters', 'latest', 'course'));
+        return view('frontend.dashboard.lecture-video.index', compact(
+            'chapters',
+            'latest',
+            'course',
+            'isLocked' // ✅
+        ));
     }
 
     public function details($course_slug, $chapter, $lesson = null)
@@ -67,17 +75,33 @@ class LectureVideoController extends Controller
         $chapter = Chapter::select('id')->where('slug', $chapter)->firstOrFail();
         $lesson = $lesson ? Lesson::select('id')->where('slug', $lesson)->firstOrFail() : null;
 
+        $enrolled = EnrollUser::where('user_id', $this->user->id)
+            ->where('course_id', $course->id)
+            ->first();
+
+        if (! $enrolled) {
+            return redirect()->back()->with('error', 'You are not enrolled in this course.');
+        }
+
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value; // ✅
+
         $data = LectureVideo::whereHas('courses', fn($q) => $q->where('course_id', $course->id))
             ->where('chapter_id', $chapter->id);
+
         if ($lesson) {
             $data->where('lesson_id', $lesson->id);
         }
+
         $data->where('status', Status::ACTIVE());
         $videos = $data->latest()->get();
 
         if ($videos->isEmpty()) return redirect()->back()->with('error', 'This lesson is Empty!');
 
-        return view('frontend.dashboard.lecture-video.lists', compact('videos', 'course'));
+        return view('frontend.dashboard.lecture-video.lists', compact(
+            'videos',
+            'course',
+            'isLocked' // ✅
+        ));
     }
 
     public function single_details($slug, $course_slug = null)

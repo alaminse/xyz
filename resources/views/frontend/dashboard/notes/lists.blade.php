@@ -18,9 +18,17 @@
                     @isset($notes)
                         <div id="notes-container">
                             @foreach ($notes as $key => $note)
-                                <div class="bg-light mb-1 d-flex note-item rounded">
-                                    <h5 class="flex-grow-1 note-title">{{ $note->title }}</h5>
-                                    <a href="{{ route('notes.single.details', ['slug' => $note->slug, 'query' => $query ?? null]) }}" class="btn btn-sm button-yellow">Details</a>
+                                <div class="bg-light mb-1 d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2 note-item rounded">
+                                    <h5 class="flex-grow-1 note-title mb-0">{{ $note->title }}</h5>
+                                    @if($isLocked)
+                                        <a href="{{ route('courses.checkout', ['course' => $course_slug]) }}"
+                                        class="btn btn-sm btn-warning fw-bold flex-shrink-0">
+                                            <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
+                                        </a>
+                                    @else
+                                        <a href="{{ route('notes.single.details', ['slug' => $note->slug, 'query' => $query ?? null]) }}"
+                                        class="btn btn-sm button-yellow flex-shrink-0">Details</a>
+                                    @endif
                                 </div>
                             @endforeach
                         </div>

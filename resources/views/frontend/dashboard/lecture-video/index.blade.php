@@ -134,15 +134,22 @@
                     <div class="recent-videos-list">
                         @foreach ($latest as $item)
                             <div class="recent-video-item mb-3 p-3 border rounded-3 bg-light hover-shadow transition">
-                                <div class="d-flex align-items-center gap-3">
+                                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3">
                                     <div class="video-icon">
                                         <i class="bi bi-play-circle-fill text-primary fs-4"></i>
                                     </div>
                                     <h6 class="flex-grow-1 mb-0 text-dark">{{ $item->title }}</h6>
-                                    <a href="{{ route('videos.single.details', ['slug' => $item->slug, 'course' => $course->slug]) }}"
-                                        class="btn btn-sm button-yellow text-nowrap">
-                                        <i class="bi bi-eye me-1"></i>Details
-                                    </a>
+                                    @if($isLocked)
+                                        <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
+                                        class="btn btn-sm btn-warning fw-bold flex-shrink-0">
+                                            <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
+                                        </a>
+                                    @else
+                                        <a href="{{ route('videos.single.details', ['slug' => $item->slug, 'course' => $course->slug]) }}"
+                                        class="btn btn-sm button-yellow flex-shrink-0 text-nowrap">
+                                            <i class="bi bi-eye me-1"></i>Details
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach

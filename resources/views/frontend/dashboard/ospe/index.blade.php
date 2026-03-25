@@ -7,6 +7,7 @@
         .button-white:hover {
             color: white;
         }
+
         .list-group {
             background-color: transparent !important;
         }
@@ -14,11 +15,12 @@
         .list-group .list-group-item {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        .list-group .list-group-item a{
+
+        .list-group .list-group-item a {
             color: white;
             text-decoration: none;
         }
-</style>
+    </style>
 @endsection
 @section('content')
     <div class="row">
@@ -49,7 +51,8 @@
                                                 <ul class="list-group">
                                                     @foreach ($topic->lessons as $key => $lesson)
                                                         <li class="list-group-item">
-                                                            <a href="{{ route('ospes.test', ['course' => $course->slug, 'chapter' => $topic->slug, 'lesson' => $lesson->slug]) }}">{{ $lesson->name }}</a>
+                                                            <a
+                                                                href="{{ route('ospes.test', ['course' => $course->slug, 'chapter' => $topic->slug, 'lesson' => $lesson->slug]) }}">{{ $lesson->name }}</a>
                                                         </li>
                                                     @endforeach
                                                 </ul>
@@ -71,10 +74,19 @@
                     </div>
                     <ul class="list-group">
                         @foreach ($recentOspeStations as $station)
-                            <li class="list-group-item">
-                                <a href="{{ route('ospes.test', ['course' => $course->slug, 'chapter' => $station->chapter->slug, 'lesson' => $station->lesson->slug]) }}">
-                                    {{ $station->chapter->name }} - {{ $station->lesson->name }}
-                                </a>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ $station->chapter->name }} - {{ $station->lesson->name }}</span>
+                                @if ($isLocked)
+                                    <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
+                                        class="btn btn-warning btn-sm fw-bold flex-shrink-0">
+                                        <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
+                                    </a>
+                                @else
+                                    <a href="{{ route('ospes.test', ['course' => $course->slug, 'chapter' => $station->chapter->slug, 'lesson' => $station->lesson->slug]) }}"
+                                        class="btn btn-sm button-yellow flex-shrink-0">
+                                        Start
+                                    </a>
+                                @endif
                             </li>
                         @endforeach
                     </ul>

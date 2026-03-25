@@ -17,11 +17,21 @@
                     <?php if(isset($written)): ?>
                     <div id="notes-container">
                         <?php $__currentLoopData = $written; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $assessment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <div class="card mb-2">
-                            <div class="card-body mb-1 p-2 d-flex note-item">
-                                <h5 class="flex-grow-1 note-title"><?php echo e($assessment->question); ?></h5>
-                                <a href="<?php echo e(route('writtens.single.details', ['slug' => $assessment->slug, 'query' => $query ?? null])); ?>" class="btn btn-sm button-yellow">Details</a>
-                            </div>
+                            <div class="card mb-2">
+                                <div class="card-body mb-1 p-2 note-item">
+                                    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2">
+                                        <h5 class="flex-grow-1 note-title mb-0"><?php echo $assessment->question; ?></h5>
+                                        <?php if($isLocked): ?>
+                                            <a href="<?php echo e(route('courses.checkout', ['course' => $course_slug])); ?>"
+                                               class="btn btn-sm btn-warning fw-bold flex-shrink-0">
+                                                <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
+                                            </a>
+                                        <?php else: ?>
+                                            <a href="<?php echo e(route('writtens.single.details', ['slug' => $assessment->slug, 'query' => $query ?? null])); ?>"
+                                               class="btn btn-sm button-yellow flex-shrink-0">Details</a>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
                             </div>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>

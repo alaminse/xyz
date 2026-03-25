@@ -205,10 +205,17 @@
                                     <div class="video-number">{{ $key + 1 }}</div>
                                     <i class="bi bi-play-circle-fill video-icon"></i>
                                     <h6 class="video-title">{{ $video->title }}</h6>
-                                    <a href="{{ route('videos.single.details', ['slug' => $video->slug, 'course' => $course->slug]) }}"
+                                    @if($isLocked)
+                                        <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
+                                        class="btn btn-warning btn-sm fw-bold">
+                                            <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
+                                        </a>
+                                    @else
+                                        <a href="{{ route('videos.single.details', ['slug' => $video->slug, 'course' => $course->slug]) }}"
                                         class="btn details-btn">
-                                        <i class="bi bi-eye me-1"></i>Details
-                                    </a>
+                                            <i class="bi bi-eye me-1"></i>Details
+                                        </a>
+                                    @endif
                                 </div>
                             @empty
                                 <div class="empty-state">
@@ -219,7 +226,6 @@
                             @endforelse
                         </div>
                     @endisset
-
                 </div>
             </div>
         </div>

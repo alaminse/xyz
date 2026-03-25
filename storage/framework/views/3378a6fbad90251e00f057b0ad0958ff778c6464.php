@@ -38,15 +38,28 @@
                                 <?php $__currentLoopData = $questionList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $q): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <div class="mt-3 p-3 border rounded text-dark">
                                         <div class="question-text p-2 mb-2 rounded"
-                                             style="cursor: pointer; font-weight: bold; background-color: #e2f0fb;">
+                                            style="cursor: pointer; font-weight: bold; background-color: #e2f0fb;">
                                             <?php echo e($index + 1); ?>: <?php echo e($q->question); ?>
 
                                         </div>
-                                        <div class="answer-text p-2 rounded"
-                                             style="display: none; background-color: #d4edda;">
-                                            <?php echo $q->answer; ?>
 
-                                        </div>
+                                        <?php if($isLocked): ?>
+                                            <div class="p-2 rounded text-center"
+                                                style="background-color: #fff8e1; border: 2px dashed #ffc107; border-radius: 8px;">
+                                                <i class="bi bi-lock-fill text-warning fs-5"></i>
+                                                <p class="mb-2 mt-1 small">Answer is locked</p>
+                                                <a href="<?php echo e(route('courses.checkout', ['course' => $course_slug])); ?>"
+                                                    class="btn btn-warning btn-sm fw-bold">
+                                                    <i class="bi bi-unlock-fill me-1"></i> Upgrade to Premium
+                                                </a>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="answer-text p-2 rounded"
+                                                style="display: none; background-color: #d4edda;">
+                                                <?php echo $q->answer; ?>
+
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </div>
@@ -54,7 +67,8 @@
 
                         <!-- Finish Button -->
                         <div class="mt-4 text-center" id="finishSection" style="display: none;">
-                            <a href="<?php echo e(route('mockvivas.index', ['course' => $course_slug])); ?>" class="btn button-yellow px-5">
+                            <a href="<?php echo e(route('mockvivas.index', ['course' => $course_slug])); ?>"
+                                class="btn button-yellow px-5">
                                 Finish
                             </a>
                         </div>
@@ -68,7 +82,7 @@
     <?php $__env->startPush('scripts'); ?>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
-            $(function () {
+            $(function() {
                 let questions = $('.question-card');
                 let currentIndex = 0;
 
@@ -88,18 +102,18 @@
                     }
                 }
 
-                $(document).on('click', '.question-text', function () {
+                $(document).on('click', '.question-text', function() {
                     $(this).next('.answer-text').slideToggle();
                 });
 
-                $('#nextBtn').on('click', function () {
+                $('#nextBtn').on('click', function() {
                     if (currentIndex < questions.length - 1) {
                         currentIndex++;
                         showQuestion(currentIndex);
                     }
                 });
 
-                $('#prevBtn').on('click', function () {
+                $('#prevBtn').on('click', function() {
                     if (currentIndex > 0) {
                         currentIndex--;
                         showQuestion(currentIndex);

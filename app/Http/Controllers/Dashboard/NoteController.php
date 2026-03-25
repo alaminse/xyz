@@ -47,13 +47,14 @@ class NoteController extends Controller
         }
 
         $isPaid = $this->isPaid(course: $course->id);
+        $isLocked = $isPaid == 0; // ✅ free user হলে locked
 
         $chapters = course_chapters($course, 'note');
 
         $latest = Note::select('id', 'slug', 'title', 'status')
-        ->whereHas('courses', function ($q) use ($course) {
-            $q->where('courses.id', $course->id);
-        });
+            ->whereHas('courses', function ($q) use ($course) {
+                $q->where('courses.id', $course->id);
+            });
 
         if ($isPaid == 0) {
             $latest = $latest->where('isPaid', $isPaid);
@@ -61,41 +62,43 @@ class NoteController extends Controller
 
         $latest = $latest->orderBy('id', 'desc')->where('status', Status::ACTIVE())->take(5)->get();
 
-        return view('frontend.dashboard.notes.index', compact('chapters', 'latest', 'course'));
+        return view('frontend.dashboard.notes.index', compact('chapters', 'latest', 'course', 'isLocked'));
     }
 
     public function details($course_slug, $chapter_slug, $lesson_slug = null)
     {
-        // Course
         $course = Course::select('id', 'parent_id', 'slug', 'name')->where('slug', $course_slug)->firstOrFail();
-
-        // Chapter
         $chapter = Chapter::where('slug', $chapter_slug)->firstOrFail();
-
-        // Lesson (optional)
         $lesson = Lesson::where('slug', $lesson_slug)->firstOrFail();
 
-        $notesQuery = Note::select('id', 'chapter_id', 'lesson_id', 'title', 'slug')->where('chapter_id', $chapter->id)
+        // ✅ Enrollment check
+        $enrolled = EnrollUser::where('user_id', auth()->id())
+            ->where('course_id', $course->id)
+            ->first();
+
+        $isLocked = $enrolled && $enrolled->status === Status::FREETRIAL()->value;
+
+        $notesQuery = Note::select('id', 'chapter_id', 'lesson_id', 'title', 'slug')
+            ->where('chapter_id', $chapter->id)
             ->where('status', 1)
             ->whereHas('courses', function ($q) use ($course) {
                 $q->where('courses.id', $course->id);
             });
 
-        // If lesson exists
         if ($lesson) {
             $notesQuery->where('lesson_id', $lesson->id);
         }
 
         $notes = $notesQuery->get();
 
-        // Empty check
         if ($notes->isEmpty()) {
             return redirect()->back()->with('error', 'This lesson is empty!');
         }
 
         return view('frontend.dashboard.notes.lists', compact(
             'notes',
-            'course_slug'
+            'course_slug',
+            'isLocked'
         ));
     }
 

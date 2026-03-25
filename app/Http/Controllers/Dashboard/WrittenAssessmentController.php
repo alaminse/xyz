@@ -49,15 +49,23 @@ class WrittenAssessmentController extends Controller
         $chapters = course_chapters($course, 'written');
 
         $isPaid = $this->isPaid(course: $course->id);
+        $isLocked = $isPaid == 0; // ✅
 
         $latest = WrittenAssessment::select('id', 'slug', 'question', 'status')
             ->whereHas('courses', fn ($q) => $q->where('course_id', $course->id));
+
         if ($isPaid == 0) {
             $latest = $latest->where('isPaid', $isPaid);
         }
+
         $latest = $latest->orderBy('id', 'desc')->where('status', Status::ACTIVE())->take(5)->get();
 
-        return view('frontend.dashboard.written-assessment.index', compact('chapters', 'latest', 'course'));
+        return view('frontend.dashboard.written-assessment.index', compact(
+            'chapters',
+            'latest',
+            'course',
+            'isLocked' // ✅
+        ));
     }
 
     public function details($course_slug, $chapter, $lesson = null)
@@ -74,35 +82,29 @@ class WrittenAssessmentController extends Controller
             return redirect()->back()->with('error', 'You are not enrolled in this course.');
         }
 
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
+
         $written = WrittenAssessment::query()
             ->where('chapter_id', $chapter->id)
             ->where('status', Status::ACTIVE())
-            ->whereHas('courses', fn ($q) => $q->where('courses.id', $course->id)
-            );
+            ->whereHas('courses', fn ($q) => $q->where('courses.id', $course->id));
 
         if ($lesson) {
             $written->where('lesson_id', $lesson->id);
         }
 
-        if ($enrolled->status === Status::FREETRIAL()->value) {
-        // if ($enrolled->status === Status::FREETRIAL()) {
-            $written->where('isPaid', 0);
-        }
-
-        // $data = WrittenAssessment::whereHas('courses', fn ($q) => $q->where('course_id', $course->id))
-        //     ->where('chapter_id', $chapter->id);
-        // if ($lesson) {
-        //     $data->where('lesson_id', $lesson->id);
-        // }
-        // $data->where('status', Status::ACTIVE());
-
+        // ❌ isPaid filter সরিয়ে দিন — সব question দেখাবে, শুধু answer locked
         $written = $written->latest()->get();
 
         if ($written->isEmpty()) {
             return redirect()->back()->with('error', 'This lesson is Empty!');
         }
 
-        return view('frontend.dashboard.written-assessment.lists', compact('written', 'course_slug'));
+        return view('frontend.dashboard.written-assessment.lists', compact(
+            'written',
+            'course_slug',
+            'isLocked'
+        ));
     }
 
     public function single_details($slug, $query = null)

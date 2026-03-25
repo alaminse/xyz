@@ -1,7 +1,7 @@
 <?php $__currentLoopData = $writtenassessments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $written): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
     <tr>
         <td><?php echo e($index + 1); ?></td>
-        <td><?php echo e($written->question); ?></td>
+        <td><?php echo $written->question; ?></td>
         <td><?php echo e($written->getCourseNames()); ?></td>
         <td><?php echo e($written->getChapterName()); ?></td>
         <td>

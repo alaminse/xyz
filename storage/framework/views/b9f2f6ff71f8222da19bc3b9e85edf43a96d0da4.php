@@ -8,18 +8,17 @@
             <div class="d-flex flex-lg-row justify-content-between align-items-start align-items-lg-center gap-2">
                 <div class="flex-grow-1">
                     <div class="d-flex justify-content-between align-items-center">
-                    <button type="button" class="btn btn-light btn-sm" id="previous-button">
-                        <i class="bi bi-arrow-left-circle"></i>
-                    </button>
-                    <h6 class="text-white mb-0">
-                        Q <span id="current-question-number">1</span> of
-                        <span id="total-question-number"><?php echo e(count($sbaQuestionsFiltered)); ?></span>
-                    </h6>
-                    <button type="button" class="btn btn-light btn-sm" id="next-button">
-                        <i class="bi bi-arrow-right-circle"></i>
-                    </button>
-                </div>
-                    
+                        <button type="button" class="btn btn-light btn-sm" id="previous-button">
+                            <i class="bi bi-arrow-left-circle"></i>
+                        </button>
+                        <h6 class="text-white mb-0">
+                            Q <span id="current-question-number">1</span> of
+                            <span id="total-question-number"><?php echo e(count($sbaQuestionsFiltered)); ?></span>
+                        </h6>
+                        <button type="button" class="btn btn-light btn-sm" id="next-button">
+                            <i class="bi bi-arrow-right-circle"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="flex-shrink-0">
                     <a href="<?php echo e(route('sbas.index', ['course' => $quiz->course?->slug])); ?>"
@@ -30,6 +29,7 @@
             </div>
         </div>
     </div>
+
     <div class="row">
         <div class="col-sm-12 col-md-8 mb-2">
             <div id="sba-container">
@@ -38,19 +38,28 @@
                         style="<?php echo e($index == 0 ? '' : 'display:none;'); ?>">
                         <div class="question-card">
                             <h5><?php echo $question->question; ?></h5>
+
                             <form class="sba-form" data-question-id="<?php echo e($question->id); ?>"
                                 data-sba-id="<?php echo e($question->sba_id); ?>">
                                 <input type="hidden" name="quiz_id" value="<?php echo e($quiz->id); ?>" required>
                                 <input type="hidden" name="sba_id" value="<?php echo e($question->sba_id); ?>" required>
                                 <input type="hidden" name="question_id" value="<?php echo e($question->id); ?>" required>
 
+                                
+                                <?php if($isLocked): ?>
+                                    <a href="<?php echo e(route('courses.checkout', ['course' => $course->slug])); ?>"
+                                       class="btn btn-warning w-100 fw-bold mt-3">
+                                        <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
+                                    </a>
+                                <?php else: ?>
                                 <ul class="list-group">
                                     <?php $__currentLoopData = ['option1', 'option2', 'option3', 'option4', 'option5']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <?php if($question->{$option}): ?>
                                             <li class="list-group-item custom-list-item">
                                                 <label class="w-100">
                                                     <input type="radio" name="selected_option"
-                                                        value="<?php echo e($option); ?>" required class="me-2">
+                                                        value="<?php echo e($option); ?>" required class="me-2"
+                                                        <?php echo e($isLocked ? 'disabled' : ''); ?>>
                                                     <?php echo e($question->{$option}); ?>
 
                                                 </label>
@@ -59,9 +68,10 @@
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </ul>
 
-                                <button type="submit" class="btn btn-primary w-100">
-                                    <i class="bi bi-check-circle me-2"></i>Submit Answer
-                                </button>
+                                    <button type="submit" class="btn btn-primary w-100 mt-3">
+                                        <i class="bi bi-check-circle me-2"></i>Submit Answer
+                                    </button>
+                                <?php endif; ?>
 
                                 <div class="explanation-card" style="display:none;">
                                     <h6><i class="bi bi-lightbulb text-warning me-2"></i>Explanation</h6>
@@ -74,12 +84,8 @@
                                             <div class="mb-3"><?php echo $question->note?->description; ?></div>
                                         </div>
                                         <div class="d-flex justify-content-between mt-3">
-                                            <button type="button" class="btn btn-outline-secondary btn-sm prev-btn">
-                                                ←
-                                            </button>
-                                            <button type="button" class="btn btn-outline-primary btn-sm next-btn">
-                                                →
-                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm prev-btn">←</button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm next-btn">→</button>
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -99,14 +105,15 @@
 
                 <div class="score-display">
                     <h6 class="text-white mb-2">Your Score</h6>
-                    <small class="text-white">Correct: <span id="correctCount"><?php echo e($quiz->correct ?? 0); ?></span> | Wrong:
-                        <span id="wrongCount"><?php echo e($quiz->wrong ?? 0); ?></span></small>
+                    <small class="text-white">
+                        Correct: <span id="correctCount"><?php echo e($quiz->correct ?? 0); ?></span> |
+                        Wrong: <span id="wrongCount"><?php echo e($quiz->wrong ?? 0); ?></span>
+                    </small>
                 </div>
 
                 <h6 class="text-white mb-3"><i class="bi bi-list-check me-2"></i>Question Status</h6>
-                <ul id="question-status" class="list-group">
-                    <!-- Answered questions will be dynamically added here -->
-                </ul>
+                <ul id="question-status" class="list-group"></ul>
+
             </div>
         </div>
     </div>
@@ -114,6 +121,7 @@
     <?php $__env->startPush('scripts'); ?>
         <script>
             $(document).ready(function() {
+                let isLocked = <?php echo e($isLocked ? 'true' : 'false'); ?>;
                 let totalQuestions = $('.sba-question').length;
                 let currentQuestionIndex = 0;
 
@@ -136,7 +144,7 @@
                         currentQuestionIndex++;
                         showQuestion(currentQuestionIndex);
                     } else {
-                        showFinishedButton();
+                        if (!isLocked) showFinishedButton();
                     }
                 }
 
@@ -158,17 +166,15 @@
                 }
 
                 function updateScoreDisplay(quizData) {
-                    $('#scorePercentage').text(quizData.progress_cut);
                     $('#correctCount').text(quizData.correct);
                     $('#wrongCount').text(quizData.wrong);
-                    $('#progressBar').css('width', quizData.progress + '%');
-                    $('#progressBar').attr('aria-valuenow', quizData.progress);
-                    $('#progressText').text(quizData.progress + '%');
                 }
 
                 // Submit Answer
                 $('.sba-form').on('submit', function(e) {
                     e.preventDefault();
+
+                    if (isLocked) return; // 🔒 locked হলে submit হবে না
 
                     let form = $(this);
                     let selectedOption = form.find('input[name="selected_option"]:checked').val();
@@ -178,7 +184,6 @@
                         return;
                     }
 
-                    // Disable submit button to prevent double submission
                     let submitBtn = form.find('button[type="submit"]');
                     submitBtn.prop('disabled', true).html(
                         '<i class="spinner-border spinner-border-sm me-2"></i>Submitting...');
@@ -194,15 +199,11 @@
                             selected_option: selectedOption
                         },
                         success: function(response) {
-                            console.log(response);
-
-                            // Show explanation
                             let explanationCard = form.find('.explanation-card');
-                            explanationCard.find('.explanation-here').html(response.question.explain ||
-                                'No explanation available.');
+                            explanationCard.find('.explanation-here').html(
+                                response.question.explain || 'No explanation available.');
                             explanationCard.show();
 
-                            // Disable all options and highlight correct/wrong
                             form.find('input[name="selected_option"]').each(function() {
                                 let option = $(this).val();
                                 let li = $(this).closest('li');
@@ -219,12 +220,9 @@
                                 $(this).prop('disabled', true);
                             });
 
-                            // Update score display
                             updateScoreDisplay(response.quiz);
 
-                            // Add to status panel
-                            if (!$(`#question-status li[data-index="${currentQuestionIndex}"]`)
-                                .length) {
+                            if (!$(`#question-status li[data-index="${currentQuestionIndex}"]`).length) {
                                 $('#question-status').append(`
                                     <li class="list-group-item question-status-item d-flex justify-content-between"
                                         data-index="${currentQuestionIndex}">
@@ -238,7 +236,6 @@
                                 `);
                             }
 
-                            // Hide submit button
                             submitBtn.hide();
                         },
                         error: function(xhr) {
@@ -247,15 +244,12 @@
                                 errorMsg = xhr.responseJSON.error;
                             }
                             alert(errorMsg);
-
-                            // Re-enable submit button on error
                             submitBtn.prop('disabled', false).html(
                                 '<i class="bi bi-check-circle me-2"></i>Submit Answer');
                         }
                     });
                 });
 
-                // Global navigation buttons
                 $('#next-button').on('click', showNextQuestion);
 
                 $('#previous-button').on('click', function() {
@@ -265,7 +259,6 @@
                     }
                 });
 
-                // Explanation card navigation buttons
                 $(document).on('click', '.next-btn', showNextQuestion);
 
                 $(document).on('click', '.prev-btn', function() {

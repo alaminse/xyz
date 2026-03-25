@@ -177,31 +177,31 @@
 
     <!-- Navigation -->
     <div class="mb-3">
-    <div class="question-navigation">
-        <div class="d-flex justify-content-between align-items-center">
-            <!-- Left: Previous Button -->
-            <button type="button" class="nav-button" disabled id="prevBtn">
-                <i class="bi bi-arrow-left"></i>
-            </button>
-
-            <!-- Center: Question Counter -->
-            <div class="question-counter">
-                Q <span id="current-question-number">1</span> of
-                <span id="total-question-number"><?php echo e(count($questions)); ?></span>
-            </div>
-
-            <!-- Right: Next Button and Back Button -->
-            <div class="d-flex align-items-center gap-2">
-                <button type="button" class="nav-button" id="nextBtn">
-                    <i class="bi bi-arrow-right"></i>
+        <div class="question-navigation">
+            <div class="d-flex justify-content-between align-items-center">
+                <!-- Left: Previous Button -->
+                <button type="button" class="nav-button" disabled id="prevBtn">
+                    <i class="bi bi-arrow-left"></i>
                 </button>
-                <a href="<?php echo e(route('ospes.index', $course_slug)); ?>" class="btn btn-secondary btn-sm">
-                    <i class="bi bi-arrow-left"></i> Back
-                </a>
+
+                <!-- Center: Question Counter -->
+                <div class="question-counter">
+                    Q <span id="current-question-number">1</span> of
+                    <span id="total-question-number"><?php echo e(count($questions)); ?></span>
+                </div>
+
+                <!-- Right: Next Button and Back Button -->
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="nav-button" id="nextBtn">
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                    <a href="<?php echo e(route('ospes.index', $course_slug)); ?>" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 
     <!-- Question Cards -->
@@ -211,44 +211,54 @@
 
             <div class="question-card" id="question-<?php echo e($in); ?>" style="display: none;">
                 <div class="question-content-card">
-                    <!-- Image -->
+
                     <?php if($item->image): ?>
                         <div class="ospe-image-container">
                             <img src="<?php echo e(asset('uploads/' . $item->image)); ?>" alt="OSPE Image">
                         </div>
                     <?php endif; ?>
 
-                    <!-- Questions & Answers -->
                     <?php $__currentLoopData = $questionList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $q): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <div class="qa-item">
-                            <div class="question-box" data-bs-toggle="collapse"
-                                data-bs-target="#answer-<?php echo e($in); ?>-<?php echo e($index); ?>" aria-expanded="false"
-                                aria-controls="answer-<?php echo e($in); ?>-<?php echo e($index); ?>">
+                            <div class="question-box"
+                                <?php if(!$isLocked): ?> data-bs-toggle="collapse"
+                                 data-bs-target="#answer-<?php echo e($in); ?>-<?php echo e($index); ?>"
+                                 aria-expanded="false"
+                                 aria-controls="answer-<?php echo e($in); ?>-<?php echo e($index); ?>" <?php endif; ?>>
                                 <span class="badge-question">Q<?php echo e($index + 1); ?></span>
                                 <?php echo $q->question; ?>
 
                             </div>
-                            <div class="answer-box collapse" id="answer-<?php echo e($in); ?>-<?php echo e($index); ?>">
-                                <strong><i class="bi bi-check-circle"></i> Answer:</strong>
-                                <div class="mt-2"><?php echo $q->answer; ?></div>
-                            </div>
+
+                            <?php if($isLocked): ?>
+                                <div class="p-2 rounded text-center mt-2"
+                                    style="background-color: #fff8e1; border: 2px dashed #ffc107; border-radius: 8px;">
+                                    <i class="bi bi-lock-fill text-warning fs-5"></i>
+                                    <p class="mb-2 mt-1 small">Answer is locked</p>
+                                    <a href="<?php echo e(route('courses.checkout', ['course' => $course_slug])); ?>"
+                                        class="btn btn-warning btn-sm fw-bold">
+                                        <i class="bi bi-unlock-fill me-1"></i> Upgrade to Premium
+                                    </a>
+                                </div>
+                            <?php else: ?>
+                                <div class="answer-box collapse" id="answer-<?php echo e($in); ?>-<?php echo e($index); ?>">
+                                    <strong><i class="bi bi-check-circle"></i> Answer:</strong>
+                                    <div class="mt-2"><?php echo $q->answer; ?></div>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                     <?php if($item->note): ?>
                         <div class="note-card">
                             <h6><?php echo e($item->note?->title); ?></h6>
-                            <div>
-                                <?php echo $item->note?->description; ?>
-
-                            </div>
+                            <div><?php echo $item->note?->description; ?></div>
                         </div>
                     <?php endif; ?>
                 </div>
             </div>
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-        <!-- Finish Section -->
         <div class="finish-section" id="finishSection" style="display: none;">
             <h5 class="mb-3">🎉 Test Completed!</h5>
             <p class="text-muted mb-4">You have reviewed all questions.</p>

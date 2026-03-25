@@ -68,21 +68,31 @@
                         <h5 class="card-title">Recent</h5>
                     </div>
                     <?php $__empty_1 = true; $__currentLoopData = $progress; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                        <div class="sba-item">
-                            <div class="sba-item-header">
-                                <h5><?php echo e($item->chapter->name); ?> / <?php echo e($item->lesson->name); ?></h5>
-                                <a href="<?php echo e(route('mockvivas.test', ['course' => $course->slug, 'chapter' => $item->chapter->slug, 'lesson' => $item->lesson->slug])); ?>"
-                                    class="btn btn-primary">Re-Test</a>
-                            </div>
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: <?php echo e($item->status ? 100 : 0); ?>%;"
-                                    aria-valuenow="<?php echo e($item->status ? 100 : 0); ?>" aria-valuemin="0" aria-valuemax="100">
-                                    <?php echo e($item->status ? 100 : 0); ?>%</div>
-                            </div>
-                        </div>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                        <div class="text-center">No recent activity</div>
-                    <?php endif; ?>
+    <div class="sba-item">
+        <div class="sba-item-header">
+            <h5><?php echo e($item->chapter->name); ?> / <?php echo e($item->lesson->name); ?></h5>
+            <?php if($isLocked): ?>
+                <a href="<?php echo e(route('courses.checkout', ['course' => $course->slug])); ?>"
+                   class="btn btn-warning fw-bold">
+                    <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
+                </a>
+            <?php else: ?>
+                <a href="<?php echo e(route('mockvivas.test', ['course' => $course->slug, 'chapter' => $item->chapter->slug, 'lesson' => $item->lesson->slug])); ?>"
+                   class="btn btn-primary">Re-Test</a>
+            <?php endif; ?>
+        </div>
+        <div class="progress">
+            <div class="progress-bar" role="progressbar"
+                style="width: <?php echo e($item->status ? 100 : 0); ?>%;"
+                aria-valuenow="<?php echo e($item->status ? 100 : 0); ?>"
+                aria-valuemin="0" aria-valuemax="100">
+                <?php echo e($item->status ? 100 : 0); ?>%
+            </div>
+        </div>
+    </div>
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+    <div class="text-center">No recent activity</div>
+<?php endif; ?>
                 </div>
             </div>
         </div>

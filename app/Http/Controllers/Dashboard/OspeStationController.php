@@ -9,8 +9,6 @@ use App\Models\Course;
 use App\Models\EnrollUser;
 use App\Models\Lesson;
 use App\Models\OspeStation;
-use App\Models\VerbalAssessment;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class OspeStationController extends Controller
@@ -21,6 +19,7 @@ class OspeStationController extends Controller
     {
         $this->middleware(function ($request, $next) {
             $this->user = Auth::user();
+
             return $next($request);
         });
     }
@@ -49,15 +48,23 @@ class OspeStationController extends Controller
 
         $chapters = course_chapters($course, 'ospe');
 
+        $isPaid = $this->isPaid(course: $course->id);
+        $isLocked = $isPaid == 0; // ✅
+
         $recentOspeStations = OspeStation::whereHas('courses', function ($query) use ($course) {
-                $query->where('course_id', $course->id);
-            })
+            $query->where('course_id', $course->id);
+        })
             ->with(['chapter', 'lesson'])
             ->latest()
             ->take(10)
             ->get();
 
-        return view('frontend.dashboard.ospe.index', compact('chapters', 'course', 'recentOspeStations'));
+        return view('frontend.dashboard.ospe.index', compact(
+            'chapters',
+            'course',
+            'recentOspeStations',
+            'isLocked' // ✅
+        ));
     }
 
     public function test($course_slug, $chapter, $lesson = null)
@@ -66,15 +73,29 @@ class OspeStationController extends Controller
         $chapter = Chapter::select('id')->where('slug', $chapter)->firstOrFail();
         $lesson = $lesson ? Lesson::select('id')->where('slug', $lesson)->firstOrFail() : null;
 
-        $data = OspeStation::whereHas('courses', fn($q) => $q->where('course_id', $course->id))
+        $enrolled = EnrollUser::where('user_id', $this->user->id)
+            ->where('course_id', $course->id)
+            ->first();
+
+        if (! $enrolled) {
+            return redirect()->back()->with('error', 'You are not enrolled in this course.');
+        }
+
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value; // ✅
+
+        $data = OspeStation::whereHas('courses', fn ($q) => $q->where('course_id', $course->id))
             ->where('chapter_id', $chapter->id);
+
         if ($lesson) {
             $data->where('lesson_id', $lesson->id);
         }
+
         $data->where('status', Status::ACTIVE());
         $ospe = $data->first();
 
-        if (!$ospe) return redirect()->back()->with('error', 'This lesson is Empty!');
+        if (! $ospe) {
+            return redirect()->back()->with('error', 'This lesson is Empty!');
+        }
         $questions = $ospe->questions;
 
         if ($questions && $questions->count() > 0) {
@@ -83,8 +104,11 @@ class OspeStationController extends Controller
             return redirect()->back()->with('error', 'No questions found!');
         }
 
-        return view('frontend.dashboard.ospe.test', compact('ospe', 'course_slug', 'questions'));
+        return view('frontend.dashboard.ospe.test', compact(
+            'ospe',
+            'course_slug',
+            'questions',
+            'isLocked' // ✅
+        ));
     }
-
-
 }

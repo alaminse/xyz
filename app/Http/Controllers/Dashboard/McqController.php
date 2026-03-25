@@ -56,7 +56,6 @@ class McqController extends Controller
 
     public function getTest($course_slug, $chapter, $lesson = null)
     {
-        // Course, Chapter, Lesson খোঁজা
         $course = Course::where('slug', $course_slug)->firstOrFail();
         $chapter = Chapter::where('slug', $chapter)->firstOrFail();
         $lesson = Lesson::where('slug', $lesson)->firstOrFail();
@@ -69,19 +68,16 @@ class McqController extends Controller
             return redirect()->back()->with('error', 'You are not enrolled in this course.');
         }
 
+        // ✅ FREETRIAL হলে answer locked
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
+
         $mcqQuery = Mcq::query()
             ->where('chapter_id', $chapter->id)
             ->where('status', Status::ACTIVE())
-            ->whereHas('courses', fn ($q) => $q->where('courses.id', $course->id)
-            );
+            ->whereHas('courses', fn ($q) => $q->where('courses.id', $course->id));
 
         if ($lesson) {
             $mcqQuery->where('lesson_id', $lesson->id);
-        }
-
-        if ($enrolled->status === Status::FREETRIAL()->value) {
-        // if ($enrolled->status === Status::FREETRIAL()) {
-            $mcqQuery->where('isPaid', 0);
         }
 
         $mcq = $mcqQuery->first();
@@ -89,7 +85,6 @@ class McqController extends Controller
             return redirect()->back()->with('error', 'No flash card or questions available for this topic.');
         }
 
-        // MCQ Questions load করা
         $mcqQuestions = McqQuestion::with('note')
             ->where('mcq_id', $mcq->id)
             ->get();
@@ -98,19 +93,16 @@ class McqController extends Controller
             return redirect()->back()->with('error', 'No questions available.');
         }
 
-        // MCQ Question IDs collect করা
         $questionIds = $mcqQuestions->pluck('id')->toArray();
 
-        // User Progress খোঁজা বা তৈরি করা
         $quiz = UserMcqProgress::firstOrNew([
-            'user_id' => $this->user->id,
-            'course_id' => $course->id,
+            'user_id'    => $this->user->id,
+            'course_id'  => $course->id,
             'chapter_id' => $chapter->id,
-            'lesson_id' => $lesson->id,
+            'lesson_id'  => $lesson->id,
         ]);
 
         if ($quiz->exists) {
-            // নতুন Questions যোগ করা
             $existingIds = json_decode($quiz->mcq_ids, true) ?? [];
             $newQuestions = array_diff($questionIds, $existingIds);
 
@@ -121,57 +113,44 @@ class McqController extends Controller
                 $quiz->total = count(json_decode($quiz->mcq_ids, true));
             }
         } else {
-            // নতুন quiz তৈরি করা
             $quiz->fill([
-                'slug' => checkSlug('user_mcq_progress'),
-                'total' => count($questionIds),
+                'slug'                   => checkSlug('user_mcq_progress'),
+                'total'                  => count($questionIds),
                 'current_question_index' => 0,
-                'mcq_ids' => json_encode($questionIds),
-                'remaining_mcq' => json_encode($questionIds),
-                'answered_mcq' => json_encode([]),
-                'progress' => 0,
-                'progress_cut' => 0,
-                'answers' => json_encode([]),
-                'correct' => 0,
-                'wrong' => 0,
+                'mcq_ids'                => json_encode($questionIds),
+                'remaining_mcq'          => json_encode($questionIds),
+                'answered_mcq'           => json_encode([]),
+                'progress'               => 0,
+                'progress_cut'           => 0,
+                'answers'                => json_encode([]),
+                'correct'                => 0,
+                'wrong'                  => 0,
             ]);
         }
 
         $quiz->save();
 
-        // বাকি Questions বের করা
         $remainingQuestionIds = json_decode($quiz->remaining_mcq, true) ?? [];
 
-        // ✅ যদি কোনো প্রশ্ন না থাকে তাহলে রিসেট করে আবার শুরু করা
         if (empty($remainingQuestionIds)) {
             $quiz->update([
-                'total' => count($questionIds),
+                'total'                  => count($questionIds),
                 'current_question_index' => 0,
-                'remaining_mcq' => json_encode($questionIds),
-                'answered_mcq' => json_encode([]),
-                'progress' => 0,
-                'progress_cut' => 0,
-                'answers' => json_encode([]),
-                'correct' => 0,
-                'wrong' => 0,
+                'remaining_mcq'          => json_encode($questionIds),
+                'answered_mcq'           => json_encode([]),
+                'progress'               => 0,
+                'progress_cut'           => 0,
+                'answers'                => json_encode([]),
+                'correct'                => 0,
+                'wrong'                  => 0,
             ]);
 
             $remainingQuestionIds = $questionIds;
         }
 
-        // Enrolled user check করা
-        $enrolled = EnrollUser::where('user_id', $this->user->id)
-            ->where('course_id', $course->id)
-            ->first();
-
-        // শুধু remaining Questions load করা
+        // ✅ isPaid filter নেই — সব question দেখাবে, শুধু answer locked
         $mcqQuestionsFiltered = McqQuestion::with('note')
             ->whereIn('id', $remainingQuestionIds)
-            ->when($enrolled && $enrolled->status === Status::FREETRIAL()->value, function ($query) {
-                return $query->whereHas('mcq', function ($q) {
-                    $q->where('isPaid', 0);
-                });
-            })
             ->inRandomOrder()
             ->get();
 
@@ -179,7 +158,15 @@ class McqController extends Controller
             return redirect()->back()->with('error', 'No questions available.');
         }
 
-        return view('frontend.dashboard.mcq.test', compact('mcqQuestionsFiltered', 'quiz', 'chapter', 'lesson', 'course', 'mcq'));
+        return view('frontend.dashboard.mcq.test', compact(
+            'mcqQuestionsFiltered',
+            'quiz',
+            'chapter',
+            'lesson',
+            'course',
+            'mcq',
+            'isLocked'  // ✅ যোগ করুন
+        ));
     }
 
     public function updateProgress(Request $request)

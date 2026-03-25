@@ -204,10 +204,17 @@
                                     <div class="video-number"><?php echo e($key + 1); ?></div>
                                     <i class="bi bi-play-circle-fill video-icon"></i>
                                     <h6 class="video-title"><?php echo e($video->title); ?></h6>
-                                    <a href="<?php echo e(route('videos.single.details', ['slug' => $video->slug, 'course' => $course->slug])); ?>"
+                                    <?php if($isLocked): ?>
+                                        <a href="<?php echo e(route('courses.checkout', ['course' => $course->slug])); ?>"
+                                        class="btn btn-warning btn-sm fw-bold">
+                                            <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
+                                        </a>
+                                    <?php else: ?>
+                                        <a href="<?php echo e(route('videos.single.details', ['slug' => $video->slug, 'course' => $course->slug])); ?>"
                                         class="btn details-btn">
-                                        <i class="bi bi-eye me-1"></i>Details
-                                    </a>
+                                            <i class="bi bi-eye me-1"></i>Details
+                                        </a>
+                                    <?php endif; ?>
                                 </div>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <div class="empty-state">
@@ -218,7 +225,6 @@
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
-
                 </div>
             </div>
         </div>

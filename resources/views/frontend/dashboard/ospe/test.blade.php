@@ -180,31 +180,31 @@
 
     <!-- Navigation -->
     <div class="mb-3">
-    <div class="question-navigation">
-        <div class="d-flex justify-content-between align-items-center">
-            <!-- Left: Previous Button -->
-            <button type="button" class="nav-button" disabled id="prevBtn">
-                <i class="bi bi-arrow-left"></i>
-            </button>
-
-            <!-- Center: Question Counter -->
-            <div class="question-counter">
-                Q <span id="current-question-number">1</span> of
-                <span id="total-question-number">{{ count($questions) }}</span>
-            </div>
-
-            <!-- Right: Next Button and Back Button -->
-            <div class="d-flex align-items-center gap-2">
-                <button type="button" class="nav-button" id="nextBtn">
-                    <i class="bi bi-arrow-right"></i>
+        <div class="question-navigation">
+            <div class="d-flex justify-content-between align-items-center">
+                <!-- Left: Previous Button -->
+                <button type="button" class="nav-button" disabled id="prevBtn">
+                    <i class="bi bi-arrow-left"></i>
                 </button>
-                <a href="{{ route('ospes.index', $course_slug) }}" class="btn btn-secondary btn-sm">
-                    <i class="bi bi-arrow-left"></i> Back
-                </a>
+
+                <!-- Center: Question Counter -->
+                <div class="question-counter">
+                    Q <span id="current-question-number">1</span> of
+                    <span id="total-question-number">{{ count($questions) }}</span>
+                </div>
+
+                <!-- Right: Next Button and Back Button -->
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="nav-button" id="nextBtn">
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                    <a href="{{ route('ospes.index', $course_slug) }}" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 
     <!-- Question Cards -->
@@ -214,42 +214,53 @@
 
             <div class="question-card" id="question-{{ $in }}" style="display: none;">
                 <div class="question-content-card">
-                    <!-- Image -->
+
                     @if ($item->image)
                         <div class="ospe-image-container">
                             <img src="{{ asset('uploads/' . $item->image) }}" alt="OSPE Image">
                         </div>
                     @endif
 
-                    <!-- Questions & Answers -->
                     @foreach ($questionList as $index => $q)
                         <div class="qa-item">
-                            <div class="question-box" data-bs-toggle="collapse"
-                                data-bs-target="#answer-{{ $in }}-{{ $index }}" aria-expanded="false"
-                                aria-controls="answer-{{ $in }}-{{ $index }}">
+                            <div class="question-box"
+                                @if (!$isLocked) data-bs-toggle="collapse"
+                                 data-bs-target="#answer-{{ $in }}-{{ $index }}"
+                                 aria-expanded="false"
+                                 aria-controls="answer-{{ $in }}-{{ $index }}" @endif>
                                 <span class="badge-question">Q{{ $index + 1 }}</span>
                                 {!! $q->question !!}
                             </div>
-                            <div class="answer-box collapse" id="answer-{{ $in }}-{{ $index }}">
-                                <strong><i class="bi bi-check-circle"></i> Answer:</strong>
-                                <div class="mt-2">{!! $q->answer !!}</div>
-                            </div>
+
+                            @if ($isLocked)
+                                <div class="p-2 rounded text-center mt-2"
+                                    style="background-color: #fff8e1; border: 2px dashed #ffc107; border-radius: 8px;">
+                                    <i class="bi bi-lock-fill text-warning fs-5"></i>
+                                    <p class="mb-2 mt-1 small">Answer is locked</p>
+                                    <a href="{{ route('courses.checkout', ['course' => $course_slug]) }}"
+                                        class="btn btn-warning btn-sm fw-bold">
+                                        <i class="bi bi-unlock-fill me-1"></i> Upgrade to Premium
+                                    </a>
+                                </div>
+                            @else
+                                <div class="answer-box collapse" id="answer-{{ $in }}-{{ $index }}">
+                                    <strong><i class="bi bi-check-circle"></i> Answer:</strong>
+                                    <div class="mt-2">{!! $q->answer !!}</div>
+                                </div>
+                            @endif
                         </div>
                     @endforeach
 
                     @if ($item->note)
                         <div class="note-card">
                             <h6>{{ $item->note?->title }}</h6>
-                            <div>
-                                {!! $item->note?->description !!}
-                            </div>
+                            <div>{!! $item->note?->description !!}</div>
                         </div>
                     @endif
                 </div>
             </div>
         @endforeach
 
-        <!-- Finish Section -->
         <div class="finish-section" id="finishSection" style="display: none;">
             <h5 class="mb-3">🎉 Test Completed!</h5>
             <p class="text-muted mb-4">You have reviewed all questions.</p>
