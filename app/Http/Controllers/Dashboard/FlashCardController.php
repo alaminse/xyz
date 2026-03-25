@@ -45,8 +45,6 @@ class FlashCardController extends Controller
             ->take(5)
             ->get();
 
-
-
         return view('frontend.dashboard.flash.index', compact(
             'course',
             'chapters',
@@ -84,6 +82,9 @@ class FlashCardController extends Controller
             return redirect()->back()->with('error', 'You are not enrolled in this course.');
         }
 
+        // ✅ FREETRIAL হলে answer locked, কিন্তু সব question দেখাবে
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
+
         /* =====================
         FLASHCARD
         ====================== */
@@ -94,11 +95,6 @@ class FlashCardController extends Controller
 
         if ($lesson) {
             $flashCardQuery->where('lesson_id', $lesson->id);
-        }
-
-        if ($enrolled->status === Status::FREETRIAL()->value) {
-        // if ($enrolled->status === Status::FREETRIAL()) {
-            $flashCardQuery->where('isPaid', 0);
         }
 
         $flashCard = $flashCardQuery->first();
@@ -200,7 +196,8 @@ class FlashCardController extends Controller
             'lesson',
             'remainingQuestionIds',
             'repeatQueueIds',
-            'totalOriginalQuestions'
+            'totalOriginalQuestions',
+            'isLocked'
         ));
     }
 
@@ -225,13 +222,13 @@ class FlashCardController extends Controller
             ->where('user_id', auth()->id())
             ->firstOrFail();
 
-        $answered  = json_decode($quiz->answered_flashcards, true) ?? [];
+        $answered = json_decode($quiz->answered_flashcards, true) ?? [];
         $remaining = json_decode($quiz->remaining_flashcards, true) ?? [];
-        $answers   = json_decode($quiz->answers, true) ?? [];
+        $answers = json_decode($quiz->answers, true) ?? [];
 
-        $rating     = $request->rating;
+        $rating = $request->rating;
         $questionId = $request->question_id;
-        $isRepeat   = filter_var($request->is_repeat, FILTER_VALIDATE_BOOLEAN);
+        $isRepeat = filter_var($request->is_repeat, FILTER_VALIDATE_BOOLEAN);
 
         /* =====================
         SCORE HANDLING
@@ -282,9 +279,9 @@ class FlashCardController extends Controller
         SAVE
         ====================== */
 
-        $quiz->answered_flashcards  = json_encode($answered);
+        $quiz->answered_flashcards = json_encode($answered);
         $quiz->remaining_flashcards = json_encode($remaining);
-        $quiz->answers              = json_encode($answers);
+        $quiz->answers = json_encode($answers);
         $quiz->current_question_index += 1;
         $quiz->save();
 
@@ -296,7 +293,6 @@ class FlashCardController extends Controller
             'is_complete' => empty($remaining),
         ]);
     }
-
 
     public function review(string $slug)
     {

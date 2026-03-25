@@ -1,7 +1,5 @@
 @extends('frontend.dashboard.app')
-
 @section('title', 'MCQ Test')
-
 @section('css')
     <link rel="stylesheet" href="{{ asset('frontend/css/summernote_show.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/css/mcq.css') }}">
@@ -9,23 +7,21 @@
 
 @section('content')
     <div class="test-wrapper">
-        {{-- Header Section --}}
         <div class="card mb-3">
             <div class="">
-                <div
-                    class="d-flex flex-lg-row justify-content-between align-items-start align-items-lg-center gap-2">
+                <div class="d-flex flex-lg-row justify-content-between align-items-start align-items-lg-center gap-2">
                     <div class="flex-grow-1">
-                    <div class="nav-header d-flex justify-content-between align-items-center">
-                        <button type="button" class="btn nav-btn" id="prevBtn" disabled>
-                            <i class="bi bi-arrow-left me-1"></i>
-                        </button>
-                        <h6 class="mb-0">
-                            Q <span id="currentQ">1</span> of <span id="totalQ">0</span>
-                        </h6>
-                        <button type="button" class="btn nav-btn" id="nextBtn">
-                            <i class="bi bi-arrow-right ms-1"></i>
-                        </button>
-                    </div>
+                        <div class="nav-header d-flex justify-content-between align-items-center">
+                            <button type="button" class="btn nav-btn" id="prevBtn" disabled>
+                                <i class="bi bi-arrow-left me-1"></i>
+                            </button>
+                            <h6 class="mb-0">
+                                Q <span id="currentQ">1</span> of <span id="totalQ">0</span>
+                            </h6>
+                            <button type="button" class="btn nav-btn" id="nextBtn">
+                                <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                        </div>
                         {{-- <h5 class="card-title mb-2">Mcq Test</h5>
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb mb-0">
@@ -47,12 +43,9 @@
             </div>
         </div>
         <div class="row">
-
             <!-- Left Side: Questions -->
             <div class="col-lg-8 col-md-7">
                 <div class="test-container">
-                    <!-- Navigation Header -->
-
                     <!-- Questions Container -->
                     <div id="mcqContainer">
                         @php $globalIndex = 0; @endphp
@@ -219,19 +212,19 @@
 
             function showCompletion() {
                 $('#mcqContainer').html(`
-            <div class="question-card completion-screen">
-                <i class="bi bi-check-circle-fill"></i>
-                <h4>Test Completed!</h4>
-                <p>You've answered all questions. Great job!</p>
-                <div class="mt-3">
-                    <p><strong>Total Score:</strong> ${$('#scorePercent').text()}%</p>
-                    <p><strong>Correct Answers:</strong> ${correct} / ${totalAnswered}</p>
-                </div>
-                <a href="{{ route('mcqs.index', $course->slug) }}" class="btn btn-primary mt-3">
-                    <i class="bi bi-arrow-left me-2"></i>Back to Topics
-                </a>
-            </div>
-        `);
+                    <div class="question-card completion-screen">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <h4>Test Completed!</h4>
+                        <p>You've answered all questions. Great job!</p>
+                        <div class="mt-3">
+                            <p><strong>Total Score:</strong> ${$('#scorePercent').text()}%</p>
+                            <p><strong>Correct Answers:</strong> ${correct} / ${totalAnswered}</p>
+                        </div>
+                        <a href="{{ route('mcqs.index', $course->slug) }}" class="btn btn-primary mt-3">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Topics
+                        </a>
+                    </div>
+                `);
                 $('.nav-header').hide();
             }
 
@@ -282,9 +275,10 @@
 
                             form.find('.option-item').each(function() {
                                 let optNum = $(this).data('option');
-                                let selected = options.hasOwnProperty(`option${optNum}`)
-                                                ? options[`option${optNum}`]
-                                                : null;
+                                let selected = options.hasOwnProperty(
+                                    `option${optNum}`) ?
+                                    options[`option${optNum}`] :
+                                    null;
 
                                 if (selected === null) return;
 
@@ -292,20 +286,32 @@
                                 if (!result) return;
 
                                 let isCorrect = result.is_correct;
-                                let chosenText = parseInt(selected) == 1 ? 'True' : 'False';
-                                let correctText = result.correct == 1 ? 'True' : 'False';
+                                let chosenText = parseInt(selected) == 1 ? 'True' :
+                                    'False';
+                                let correctText = result.correct == 1 ? 'True' :
+                                'False';
 
                                 if (isCorrect) {
                                     $(this).removeClass('wrong')
                                         .addClass('correct')
-                                        .css({'background': '#f0fff4', 'border-left': '4px solid #28a745', 'border-color': '#28a745'});
-                                    $(this).find('.correct-label').removeClass('d-none');
-                                    $(this).find('.chosen-label').addClass('d-none').html('');
+                                        .css({
+                                            'background': '#f0fff4',
+                                            'border-left': '4px solid #28a745',
+                                            'border-color': '#28a745'
+                                        });
+                                    $(this).find('.correct-label').removeClass(
+                                    'd-none');
+                                    $(this).find('.chosen-label').addClass('d-none')
+                                        .html('');
                                     correctCount++;
                                 } else {
                                     $(this).removeClass('correct')
                                         .addClass('wrong')
-                                        .css({'background': '#fff5f5', 'border-left': '4px solid #dc3545', 'border-color': '#dc3545'});
+                                        .css({
+                                            'background': '#fff5f5',
+                                            'border-left': '4px solid #dc3545',
+                                            'border-color': '#dc3545'
+                                        });
                                     $(this).find('.correct-label').addClass('d-none');
                                     $(this).find('.chosen-label')
                                         .removeClass('d-none')
@@ -322,7 +328,8 @@
                             correct += correctCount;
                             totalAnswered += Object.keys(options).length;
 
-                            let percent = totalAnswered > 0 ? Math.round((correct / totalAnswered) * 100) : 0;
+                            let percent = totalAnswered > 0 ? Math.round((correct /
+                                totalAnswered) * 100) : 0;
                             $('#scorePercent').text(percent);
 
                             let statusBadge = correctCount === Object.keys(options).length ?
@@ -346,7 +353,8 @@
 
                             // ✅ এটাই submit বাটন hide করে explanation দেখায়
                             form.find('.submit-btn').hide();
-                            form.closest('.question-card').find('.explanation-section').slideDown();
+                            form.closest('.question-card').find('.explanation-section')
+                                .slideDown();
 
                         } else {
                             alert('Something went wrong! Please try again.');
@@ -380,18 +388,22 @@
             updateNav();
         });
 
-        // JS দিয়ে automatically wrap করুন
+        // JS automatically wrap
         $(document).ready(function() {
-            // সব টেবিলকে responsive wrapper এ রাখুন
+            // responsive wrapper
             $('.note-card table, .explanation-card table').each(function() {
-                $(this).wrap('<div style="overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%;"></div>');
+                $(this).wrap(
+                    '<div style="overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%;"></div>'
+                    );
             });
 
-            // explanation slideDown এর পরেও apply করতে
+            // explanation slideDown apply
             $(document).on('DOMNodeInserted', '.explanation-section', function() {
                 $(this).find('table').each(function() {
                     if (!$(this).parent().hasClass('table-scroll')) {
-                        $(this).wrap('<div class="table-scroll" style="overflow-x:auto; width:100%;"></div>');
+                        $(this).wrap(
+                            '<div class="table-scroll" style="overflow-x:auto; width:100%;"></div>'
+                            );
                     }
                 });
             });
