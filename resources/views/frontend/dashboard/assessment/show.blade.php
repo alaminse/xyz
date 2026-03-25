@@ -107,53 +107,60 @@
                         @endphp
 
                         <div class="row g-3 sba-options-container">
-                            @for ($i = 1; $i <= 5; $i++)
-                                @php
-                                    $optionKey = 'option' . $i;
-                                    $optionValue = $question['options'][$optionKey] ?? null;
+                            @if ($isLocked)
+                                <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
+                                    class="btn btn-warning w-100 fw-bold mt-3">
+                                    <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
+                                </a>
+                            @else
+                                @for ($i = 1; $i <= 5; $i++)
+                                    @php
+                                        $optionKey = 'option' . $i;
+                                        $optionValue = $question['options'][$optionKey] ?? null;
 
-                                    $class = '';
-                                    $indicator = '';
-                                    $statusBadge = '';
+                                        $class = '';
+                                        $indicator = '';
+                                        $statusBadge = '';
 
-                                    if ($userAnswer === $optionKey && $userAnswer === $correctOption) {
-                                        $class = 'correct';
-                                        $indicator = '✓';
-                                        $statusBadge = '<span class="badge bg-success ms-2">Your Answer</span>';
-                                    } elseif ($userAnswer === $optionKey && $userAnswer != $correctOption) {
-                                        $class = 'incorrect';
-                                        $indicator = '✗';
-                                        $statusBadge = '<span class="badge bg-danger ms-2">Your Answer</span>';
-                                    } elseif ($correctOption === $optionKey) {
-                                        $class = 'correct';
-                                        $indicator = '✓';
-                                        $statusBadge =
-                                            '<span class="badge bg-success-subtle text-success ms-2">Correct</span>';
-                                    }
-                                @endphp
+                                        if ($userAnswer === $optionKey && $userAnswer === $correctOption) {
+                                            $class = 'correct';
+                                            $indicator = '✓';
+                                            $statusBadge = '<span class="badge bg-success ms-2">Your Answer</span>';
+                                        } elseif ($userAnswer === $optionKey && $userAnswer != $correctOption) {
+                                            $class = 'incorrect';
+                                            $indicator = '✗';
+                                            $statusBadge = '<span class="badge bg-danger ms-2">Your Answer</span>';
+                                        } elseif ($correctOption === $optionKey) {
+                                            $class = 'correct';
+                                            $indicator = '✓';
+                                            $statusBadge =
+                                                '<span class="badge bg-success-subtle text-success ms-2">Correct</span>';
+                                        }
+                                    @endphp
 
-                                @if ($optionValue)
-                                    <div class="col-12 col-sm-6 col-lg-4">
-                                        <div
-                                            class="option-box {{ $class }} h-100 d-flex align-items-center justify-content-between">
-                                            <div class="option-content">
-                                                <strong class="option-label">{{ $optionLabels[$i - 1] }}.</strong>
-                                                <span class="option-text">{{ $optionValue }}</span>
-                                            </div>
-                                            <div class="option-status d-flex align-items-center gap-2">
-                                                @if ($indicator)
-                                                    <span class="indicator" style="font-size: 20px; font-weight: bold;">
-                                                        {{ $indicator }}
-                                                    </span>
-                                                @endif
-                                                @if ($statusBadge)
-                                                    {!! $statusBadge !!}
-                                                @endif
+                                    @if ($optionValue)
+                                        <div class="col-12 col-sm-6 col-lg-4">
+                                            <div
+                                                class="option-box {{ $class }} h-100 d-flex align-items-center justify-content-between">
+                                                <div class="option-content">
+                                                    <strong class="option-label">{{ $optionLabels[$i - 1] }}.</strong>
+                                                    <span class="option-text">{{ $optionValue }}</span>
+                                                </div>
+                                                <div class="option-status d-flex align-items-center gap-2">
+                                                    @if ($indicator)
+                                                        <span class="indicator" style="font-size: 20px; font-weight: bold;">
+                                                            {{ $indicator }}
+                                                        </span>
+                                                    @endif
+                                                    @if ($statusBadge)
+                                                        {!! $statusBadge !!}
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                @endif
-                            @endfor
+                                    @endif
+                                @endfor
+                            @endif
                         </div>
                     @elseif ($question['question_type'] == 'mcq')
                         @php
@@ -161,34 +168,41 @@
                         @endphp
 
                         <div class="row g-3 mcq-options-container">
-                            @for ($i = 1; $i <= 5; $i++)
-                                @php
-                                    $optionKey = 'option' . $i;
-                                    $userOptionKey = 'user_option' . $i;
-                                    $answerOption = 'answers' . $i;
-                                    $optionValue = $question['options'][$optionKey] ?? null;
-                                    $userOptionValue = $question['options'][$userOptionKey] ?? null;
-                                    $answerOptionValue = $question['options'][$answerOption] ?? null;
+                            @if ($isLocked)
+                                <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
+                                    class="btn btn-warning w-100 fw-bold mt-3">
+                                    <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
+                                </a>
+                            @else
+                                @for ($i = 1; $i <= 5; $i++)
+                                    @php
+                                        $optionKey = 'option' . $i;
+                                        $userOptionKey = 'user_option' . $i;
+                                        $answerOption = 'answers' . $i;
+                                        $optionValue = $question['options'][$optionKey] ?? null;
+                                        $userOptionValue = $question['options'][$userOptionKey] ?? null;
+                                        $answerOptionValue = $question['options'][$answerOption] ?? null;
 
-                                    $class = '';
-                                    $badgeClass = '';
-                                    $borderClass = '';
-                                    $bgClass = '';
-                                    $indicator = '';
-                                    $userText = '';
-                                    $correctText = '';
+                                        $class = '';
+                                        $badgeClass = '';
+                                        $borderClass = '';
+                                        $bgClass = '';
+                                        $indicator = '';
+                                        $userText = '';
+                                        $correctText = '';
 
-                                    // Determine correct answer
-                                    if ($answerOptionValue == 1) {
-                                        $correctText = 'Correct: True';
-                                    } elseif ($answerOptionValue == 0) {
-                                        $correctText = 'Correct: False';
-                                    }
+                                        // Determine correct answer
+                                        if ($answerOptionValue == 1) {
+                                            $correctText = 'Correct: True';
+                                        } elseif ($answerOptionValue == 0) {
+                                            $correctText = 'Correct: False';
+                                        }
 
-                                    // Check user's answer
+                                        // Check user's answer
 if ($userOptionValue !== null && $answerOptionValue !== null) {
     $userOptionValue = $userOptionValue == 'false' ? 0 : 1;
-    $userText = $userOptionValue == 1 ? 'Your Answer: True' : 'Your Answer: False';
+    $userText =
+        $userOptionValue == 1 ? 'Your Answer: True' : 'Your Answer: False';
 
     if ($userOptionValue == $answerOptionValue) {
         $class = 'correct';
@@ -212,71 +226,74 @@ if ($userOptionValue !== null && $answerOptionValue !== null) {
 } else {
     $borderClass = 'border-secondary';
     $bgClass = 'bg-light';
-                                    }
-                                @endphp
+                                        }
+                                    @endphp
 
-                                @if ($optionValue)
-                                    <div class="col-12 col-sm-6 col-lg-4">
-                                        <div class="card h-100 {{ $borderClass }} {{ $bgClass }}"
-                                            style="border-width: 2px;">
-                                            <div class="card-body d-flex flex-column p-3">
-                                                {{-- Option Content --}}
-                                                <div class="mb-auto">
-                                                    <div class="d-flex align-items-start gap-2">
-                                                        <span class="badge bg-secondary rounded-circle"
-                                                            style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
-                                                            {{ $optionLabels[$i - 1] }}
-                                                        </span>
-                                                        <div class="flex-grow-1">
-                                                            <p class="mb-0 fw-normal"
-                                                                style="font-size: 14px; line-height: 1.6;">
-                                                                {{ $optionValue }}
-                                                            </p>
+                                    @if ($optionValue)
+                                        <div class="col-12 col-sm-6 col-lg-4">
+                                            <div class="card h-100 {{ $borderClass }} {{ $bgClass }}"
+                                                style="border-width: 2px;">
+                                                <div class="card-body d-flex flex-column p-3">
+                                                    {{-- Option Content --}}
+                                                    <div class="mb-auto">
+                                                        <div class="d-flex align-items-start gap-2">
+                                                            <span class="badge bg-secondary rounded-circle"
+                                                                style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                                                                {{ $optionLabels[$i - 1] }}
+                                                            </span>
+                                                            <div class="flex-grow-1">
+                                                                <p class="mb-0 fw-normal"
+                                                                    style="font-size: 14px; line-height: 1.6;">
+                                                                    {{ $optionValue }}
+                                                                </p>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                {{-- Answer Status --}}
-                                                <div class="border-top">
-                                                    @if ($userText)
-                                                        <span
-                                                            class="badge {{ $badgeClass }} text-white d-inline-flex align-items-center gap-1"
-                                                            style="font-size: 11px;">
-                                                            @if ($class == 'correct')
-                                                                <i class="fas fa-check-circle"></i>
-                                                            @elseif ($class == 'incorrect')
-                                                                <i class="fas fa-times-circle"></i>
-                                                            @else
-                                                                <i class="fas fa-minus-circle"></i>
-                                                            @endif
-                                                            {{ $userText }}{{ $indicator }}
-                                                        </span>
-                                                    @endif
-
-                                                    @if ($correctText && $class == 'incorrect')
-                                                        <div>
+                                                    {{-- Answer Status --}}
+                                                    <div class="border-top">
+                                                        @if ($userText)
                                                             <span
-                                                                class="badge bg-success-subtle text-success border border-success d-inline-flex align-items-center gap-1"
+                                                                class="badge {{ $badgeClass }} text-white d-inline-flex align-items-center gap-1"
                                                                 style="font-size: 11px;">
-                                                                <i class="fas fa-lightbulb"></i>
-                                                                {{ $correctText }}
+                                                                @if ($class == 'correct')
+                                                                    <i class="fas fa-check-circle"></i>
+                                                                @elseif ($class == 'incorrect')
+                                                                    <i class="fas fa-times-circle"></i>
+                                                                @else
+                                                                    <i class="fas fa-minus-circle"></i>
+                                                                @endif
+                                                                {{ $userText }}{{ $indicator }}
                                                             </span>
-                                                        </div>
-                                                    @endif
+                                                        @endif
+
+                                                        @if ($correctText && $class == 'incorrect')
+                                                            <div>
+                                                                <span
+                                                                    class="badge bg-success-subtle text-success border border-success d-inline-flex align-items-center gap-1"
+                                                                    style="font-size: 11px;">
+                                                                    <i class="fas fa-lightbulb"></i>
+                                                                    {{ $correctText }}
+                                                                </span>
+                                                            </div>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                @endif
-                            @endfor
+                                    @endif
+                                @endfor
+                            @endif
                         </div>
                     @endif
-
-                    @if (!empty($question['explanation']))
-                        <div class="explanation-section">
-                            <h3><u>Explanation</u></h3>
-                            {!! $question['explanation'] !!}
-                        </div>
+                    @if ($isLocked)
+                    @else
+                        @if (!empty($question['explanation']))
+                            <div class="explanation-section">
+                                <h3><u>Explanation</u></h3>
+                                {!! $question['explanation'] !!}
+                            </div>
+                        @endif
                     @endif
                 </div>
             @endforeach

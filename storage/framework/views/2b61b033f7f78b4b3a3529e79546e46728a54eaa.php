@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -74,7 +75,8 @@
             line-height: 1.4;
         }
 
-        .contact-section a,strong {
+        .contact-section a,
+        strong {
             color: #ffff;
             text-decoration: none;
         }
@@ -115,14 +117,14 @@
             padding: 5px 20px;
             display: table;
             width: 100%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             transition: transform 0.2s;
             margin-bottom: 5px;
         }
 
         .summary-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .summary-card .label {
@@ -156,7 +158,7 @@
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 25px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
         }
 
         .question-header {
@@ -294,6 +296,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Watermark -->
     <div class="watermark">
@@ -349,7 +352,7 @@
             <?php $__currentLoopData = $data['details']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $question): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div class="question-block">
                     <div class="question-header">
-                        <p class="question-text">Q<?php echo e($index + 1); ?>. <?php echo e($question['question']); ?></p>
+                        <p class="question-text">Q<?php echo e($index + 1); ?>. <?php echo $question['question']; ?></p>
                     </div>
 
                     <?php if($question['question_type'] == 'sba'): ?>
@@ -360,69 +363,82 @@
                         ?>
 
                         <div class="options-grid">
-                            <?php for($i = 1; $i <= 5; $i++): ?>
-                                <?php
-                                    $optionKey = 'option' . $i;
-                                    $optionValue = $question['options'][$optionKey] ?? null;
+                            <?php if($isLocked): ?>
+                                <div
+                                    style="padding:10px; background:#fff3cd; border:1px solid #ffeeba; font-weight:bold;">
+                                    🔒 Answers are locked. Upgrade to Premium.
+                                </div>
+                            <?php else: ?>
+                                <?php for($i = 1; $i <= 5; $i++): ?>
+                                    <?php
+                                        $optionKey = 'option' . $i;
+                                        $optionValue = $question['options'][$optionKey] ?? null;
 
-                                    $class = '';
-                                    if ($userAnswer === $optionKey && $userAnswer === $correctOption) {
-                                        $class = 'correct';
-                                    } elseif ($userAnswer === $optionKey && $userAnswer != $correctOption) {
-                                        $class = 'incorrect';
-                                    } elseif ($correctOption === $optionKey) {
-                                        $class = 'correct';
-                                    } else {
-                                    }
-                                ?>
+                                        $class = '';
+                                        if ($userAnswer === $optionKey && $userAnswer === $correctOption) {
+                                            $class = 'correct';
+                                        } elseif ($userAnswer === $optionKey && $userAnswer != $correctOption) {
+                                            $class = 'incorrect';
+                                        } elseif ($correctOption === $optionKey) {
+                                            $class = 'correct';
+                                        } else {
+                                        }
+                                    ?>
 
-                                <?php if($optionValue): ?>
-                                    <div class="option-box <?php echo e($class); ?>">
-                                        <strong><?php echo e($optionLabels[$i-1]); ?>.</strong> <?php echo e($optionValue); ?>
+                                    <?php if($optionValue): ?>
+                                        <div class="option-box <?php echo e($class); ?>">
+                                            <strong><?php echo e($optionLabels[$i - 1]); ?>.</strong> <?php echo e($optionValue); ?>
 
-                                    </div>
-                                <?php endif; ?>
-                            <?php endfor; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                <?php endfor; ?>
+                            <?php endif; ?>
                         </div>
-
                     <?php elseif($question['question_type'] == 'mcq'): ?>
                         <?php
                             $optionLabels = ['A', 'B', 'C', 'D', 'E'];
                         ?>
 
                         <div class="options-grid">
-                            <?php for($i = 1; $i <= 5; $i++): ?>
-                                <?php
-                                    $optionKey = 'option' . $i;
-                                    $userOptionKey = 'user_option' . $i;
-                                    $answerOption = 'answers' . $i;
-                                    $optionValue = $question['options'][$optionKey] ?? null;
-                                    $userOptionValue = $question['options'][$userOptionKey] ?? null;
-                                    $answerOptionValue = $question['options'][$answerOption] ?? null;
+                            <?php if($isLocked): ?>
+                                <div
+                                    style="padding:10px; background:#fff3cd; border:1px solid #ffeeba; font-weight:bold;">
+                                    🔒 Answers are locked. Upgrade to Premium.
+                                </div>
+                            <?php else: ?>
+                                <?php for($i = 1; $i <= 5; $i++): ?>
+                                    <?php
+                                        $optionKey = 'option' . $i;
+                                        $userOptionKey = 'user_option' . $i;
+                                        $answerOption = 'answers' . $i;
+                                        $optionValue = $question['options'][$optionKey] ?? null;
+                                        $userOptionValue = $question['options'][$userOptionKey] ?? null;
+                                        $answerOptionValue = $question['options'][$answerOption] ?? null;
 
-                                    $class = '';
+                                        $class = '';
 
-                                    if($userOptionValue !== null && $answerOptionValue !== null){
-                                        $userOptionValue = $userOptionValue == 'false' ? 0 : 1;
-                                        if ($userOptionValue == $answerOptionValue) {
+                                        if ($userOptionValue !== null && $answerOptionValue !== null) {
+                                            $userOptionValue = $userOptionValue == 'false' ? 0 : 1;
+                                            if ($userOptionValue == $answerOptionValue) {
+                                                $class = 'correct';
+                                                $indicator = ' ✓';
+                                            } else {
+                                                $class = 'incorrect';
+                                                $indicator = ' ✗';
+                                            }
+                                        } elseif ($answerOptionValue == 1) {
                                             $class = 'correct';
-                                            $indicator = ' ✓';
-                                        } else {
-                                            $class = 'incorrect';
-                                            $indicator = ' ✗';
                                         }
-                                    } elseif ($answerOptionValue == 1) {
-                                        $class = 'correct';
-                                    }
-                                ?>
+                                    ?>
 
-                                <?php if($optionValue): ?>
-                                    <div class="option-box <?php echo e($class); ?>">
-                                        <strong><?php echo e($optionLabels[$i-1]); ?>.</strong> <?php echo e($optionValue); ?>
+                                    <?php if($optionValue): ?>
+                                        <div class="option-box <?php echo e($class); ?>">
+                                            <strong><?php echo e($optionLabels[$i - 1]); ?>.</strong> <?php echo e($optionValue); ?>
 
-                                    </div>
-                                <?php endif; ?>
-                            <?php endfor; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                <?php endfor; ?>
+                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
 
@@ -438,5 +454,6 @@
         </div>
     </div>
 </body>
+
 </html>
 <?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/medimaniac/resources/views/frontend/dashboard/assessment/print.blade.php ENDPATH**/ ?>

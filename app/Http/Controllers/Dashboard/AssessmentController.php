@@ -52,6 +52,17 @@ class AssessmentController extends Controller
     {
         $user_assessment = UserAssessmentProgress::where('slug', $slug)->firstOrFail();
 
+
+        $enrolled = EnrollUser::where('user_id', $this->user->id)
+            ->where('course_id', $user_assessment->course_id)
+            ->first();
+
+        if (! $enrolled) {
+            return redirect()->back()->with('error', 'You are not enrolled in this course.');
+        }
+        // ✅ FREETRIAL হলে answer locked
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
+
         $data = $this->getDetails($user_assessment->slug);
 
         // Add this line
@@ -62,7 +73,7 @@ class AssessmentController extends Controller
         $course = Course::select('id', 'name', 'slug')->first($user_assessment->course_id);
 
         // Update compact to include assessment
-        return view('frontend.dashboard.assessment.show', compact('data', 'assessment', 'course'));
+        return view('frontend.dashboard.assessment.show', compact('data', 'assessment', 'course', 'isLocked'));
     }
 
     // Alternative: Accessor ব্যবহার করে rank পেতে - FIXED VERSION
@@ -94,6 +105,18 @@ class AssessmentController extends Controller
             'totalParticipants',
             'topThree'
         ));
+    }
+
+    private function isPaid($course)
+    {
+        $enrolled = EnrollUser::where('user_id', Auth::user()->id)
+            ->where('course_id', $course)
+            ->first();
+
+        return $enrolled->status == Status::ACTIVE()->value
+            ? 1
+            : ($enrolled->status == Status::FREETRIAL()->value ? 0 : 9);
+
     }
 
     public function index(string $course)
@@ -148,17 +171,18 @@ class AssessmentController extends Controller
                 $query->where('courses.id', $cour->id);
             })
             // ->whereNotIn('id', $attendedAssessmentIds)
-            ->when($enrolled, function ($query) use ($enrolled) {
+            // ->when($enrolled, function ($query) use ($enrolled) {
 
-                if ($enrolled->status === Status::FREETRIAL()->value) {
-                // if ($enrolled->status === Status::FREETRIAL()) {
-                    return $query->where('isPaid', 0);
-                }
+                // if ($enrolled->status === Status::FREETRIAL()->value) {
+                // // if ($enrolled->status === Status::FREETRIAL()) {
+                //     return $query->where('isPaid', 0);
+                // }
 
-                return $query->where('status', Status::ACTIVE());
-            }, function ($query) {
-                return $query->where('status', Status::ACTIVE());
-            })
+            //     return $query->where('status', Status::ACTIVE());
+            // }, function ($query) {
+                // $query->where('status', Status::ACTIVE());
+            ->where('status', Status::ACTIVE())
+                // })
             ->orderBy('id', 'DESC')
             ->get();
 
@@ -185,6 +209,15 @@ class AssessmentController extends Controller
 
         $dateToMatch = Carbon::now()->toDateTimeString();
 
+        $enrolled = EnrollUser::where('user_id', $this->user->id)
+            ->where('course_id', $course->id)
+            ->first();
+
+        if (! $enrolled) {
+            return redirect()->back()->with('error', 'You are not enrolled in this course.');
+        }
+        // ✅ FREETRIAL হলে answer locked
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
         // Find assessment with start_date_time check
         $assessment = Assessment::where('start_date_time', '<=', $dateToMatch)
             ->where('end_date_time', '>=', $dateToMatch)
@@ -224,7 +257,7 @@ class AssessmentController extends Controller
             return redirect()->back()->with('error', 'No questions available for this assessment.');
         }
 
-        return view('frontend.dashboard.assessment.test', compact('course', 'assessment', 'questions'));
+        return view('frontend.dashboard.assessment.test', compact('course', 'assessment', 'questions', 'isLocked'));
     }
 
     public function submit(Request $request)
@@ -433,28 +466,68 @@ class AssessmentController extends Controller
 
     public function print($slug)
     {
-        // Increase execution time and memory limit
-        ini_set('max_execution_time', 300); // 5 minutes
+        ini_set('max_execution_time', 300);
         ini_set('memory_limit', '512M');
 
         $data = $this->getDetails($slug);
         $user = Auth::user();
-        $name = $user->name.'-'.$user->id;
+
+        // ✅ Get course properly
+        $course = \App\Models\Course::where('slug', $data['course'])->first();
+
+        // ✅ Enrollment check FIXED
+        $enrolled = EnrollUser::where('user_id', $user->id)
+            ->where('course_id', $course?->id)
+            ->first();
+
+        if (!$enrolled) {
+            return redirect()->back()->with('error', 'You are not enrolled in this course.');
+        }
+
+        // ✅ Lock logic
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
 
         try {
-            // Load the view and generate the PDF
-            $pdf = Pdf::loadView('frontend.dashboard.assessment.print', compact('data'));
+            $pdf = Pdf::loadView(
+                'frontend.dashboard.assessment.print',
+                compact('data', 'isLocked') // ✅ PASS THIS
+            );
 
             $pdf->setPaper('A4', 'portrait');
             $pdf->set_option('isHtml5ParserEnabled', true);
             $pdf->set_option('isRemoteEnabled', true);
 
-            return $pdf->stream('watermarked_pdf.pdf');
+            return $pdf->stream('assessment-'.$user->id.'.pdf');
 
         } catch (\Exception $e) {
             Log::error('PDF Generation Error: '.$e->getMessage());
-
-            return back()->with('error', 'Failed to generate PDF. Please try again.');
+            return back()->with('error', 'Failed to generate PDF.');
         }
     }
+    // public function print($slug)
+    // {
+    //     // Increase execution time and memory limit
+    //     ini_set('max_execution_time', 300); // 5 minutes
+    //     ini_set('memory_limit', '512M');
+
+    //     $data = $this->getDetails($slug);
+    //     $user = Auth::user();
+    //     $name = $user->name.'-'.$user->id;
+
+    //     try {
+    //         // Load the view and generate the PDF
+    //         $pdf = Pdf::loadView('frontend.dashboard.assessment.print', compact('data'));
+
+    //         $pdf->setPaper('A4', 'portrait');
+    //         $pdf->set_option('isHtml5ParserEnabled', true);
+    //         $pdf->set_option('isRemoteEnabled', true);
+
+    //         return $pdf->stream('watermarked_pdf.pdf');
+
+    //     } catch (\Exception $e) {
+    //         Log::error('PDF Generation Error: '.$e->getMessage());
+
+    //         return back()->with('error', 'Failed to generate PDF. Please try again.');
+    //     }
+    // }
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -74,7 +75,8 @@
             line-height: 1.4;
         }
 
-        .contact-section a,strong {
+        .contact-section a,
+        strong {
             color: #ffff;
             text-decoration: none;
         }
@@ -115,14 +117,14 @@
             padding: 5px 20px;
             display: table;
             width: 100%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             transition: transform 0.2s;
             margin-bottom: 5px;
         }
 
         .summary-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .summary-card .label {
@@ -156,7 +158,7 @@
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 25px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
         }
 
         .question-header {
@@ -294,6 +296,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Watermark -->
     <div class="watermark">
@@ -359,67 +362,80 @@
                         @endphp
 
                         <div class="options-grid">
-                            @for ($i = 1; $i <= 5; $i++)
-                                @php
-                                    $optionKey = 'option' . $i;
-                                    $optionValue = $question['options'][$optionKey] ?? null;
+                            @if ($isLocked)
+                                <div
+                                    style="padding:10px; background:#fff3cd; border:1px solid #ffeeba; font-weight:bold;">
+                                    🔒 Answers are locked. Upgrade to Premium.
+                                </div>
+                            @else
+                                @for ($i = 1; $i <= 5; $i++)
+                                    @php
+                                        $optionKey = 'option' . $i;
+                                        $optionValue = $question['options'][$optionKey] ?? null;
 
-                                    $class = '';
-                                    if ($userAnswer === $optionKey && $userAnswer === $correctOption) {
-                                        $class = 'correct';
-                                    } elseif ($userAnswer === $optionKey && $userAnswer != $correctOption) {
-                                        $class = 'incorrect';
-                                    } elseif ($correctOption === $optionKey) {
-                                        $class = 'correct';
-                                    } else {
-                                    }
-                                @endphp
+                                        $class = '';
+                                        if ($userAnswer === $optionKey && $userAnswer === $correctOption) {
+                                            $class = 'correct';
+                                        } elseif ($userAnswer === $optionKey && $userAnswer != $correctOption) {
+                                            $class = 'incorrect';
+                                        } elseif ($correctOption === $optionKey) {
+                                            $class = 'correct';
+                                        } else {
+                                        }
+                                    @endphp
 
-                                @if ($optionValue)
-                                    <div class="option-box {{ $class }}">
-                                        <strong>{{ $optionLabels[$i-1] }}.</strong> {{ $optionValue }}
-                                    </div>
-                                @endif
-                            @endfor
+                                    @if ($optionValue)
+                                        <div class="option-box {{ $class }}">
+                                            <strong>{{ $optionLabels[$i - 1] }}.</strong> {{ $optionValue }}
+                                        </div>
+                                    @endif
+                                @endfor
+                            @endif
                         </div>
-
                     @elseif ($question['question_type'] == 'mcq')
                         @php
                             $optionLabels = ['A', 'B', 'C', 'D', 'E'];
                         @endphp
 
                         <div class="options-grid">
-                            @for ($i = 1; $i <= 5; $i++)
-                                @php
-                                    $optionKey = 'option' . $i;
-                                    $userOptionKey = 'user_option' . $i;
-                                    $answerOption = 'answers' . $i;
-                                    $optionValue = $question['options'][$optionKey] ?? null;
-                                    $userOptionValue = $question['options'][$userOptionKey] ?? null;
-                                    $answerOptionValue = $question['options'][$answerOption] ?? null;
+                            @if ($isLocked)
+                                <div
+                                    style="padding:10px; background:#fff3cd; border:1px solid #ffeeba; font-weight:bold;">
+                                    🔒 Answers are locked. Upgrade to Premium.
+                                </div>
+                            @else
+                                @for ($i = 1; $i <= 5; $i++)
+                                    @php
+                                        $optionKey = 'option' . $i;
+                                        $userOptionKey = 'user_option' . $i;
+                                        $answerOption = 'answers' . $i;
+                                        $optionValue = $question['options'][$optionKey] ?? null;
+                                        $userOptionValue = $question['options'][$userOptionKey] ?? null;
+                                        $answerOptionValue = $question['options'][$answerOption] ?? null;
 
-                                    $class = '';
+                                        $class = '';
 
-                                    if($userOptionValue !== null && $answerOptionValue !== null){
-                                        $userOptionValue = $userOptionValue == 'false' ? 0 : 1;
-                                        if ($userOptionValue == $answerOptionValue) {
+                                        if ($userOptionValue !== null && $answerOptionValue !== null) {
+                                            $userOptionValue = $userOptionValue == 'false' ? 0 : 1;
+                                            if ($userOptionValue == $answerOptionValue) {
+                                                $class = 'correct';
+                                                $indicator = ' ✓';
+                                            } else {
+                                                $class = 'incorrect';
+                                                $indicator = ' ✗';
+                                            }
+                                        } elseif ($answerOptionValue == 1) {
                                             $class = 'correct';
-                                            $indicator = ' ✓';
-                                        } else {
-                                            $class = 'incorrect';
-                                            $indicator = ' ✗';
                                         }
-                                    } elseif ($answerOptionValue == 1) {
-                                        $class = 'correct';
-                                    }
-                                @endphp
+                                    @endphp
 
-                                @if ($optionValue)
-                                    <div class="option-box {{ $class }}">
-                                        <strong>{{ $optionLabels[$i-1] }}.</strong> {{ $optionValue }}
-                                    </div>
-                                @endif
-                            @endfor
+                                    @if ($optionValue)
+                                        <div class="option-box {{ $class }}">
+                                            <strong>{{ $optionLabels[$i - 1] }}.</strong> {{ $optionValue }}
+                                        </div>
+                                    @endif
+                                @endfor
+                            @endif
                         </div>
                     @endif
 
@@ -434,4 +450,5 @@
         </div>
     </div>
 </body>
+
 </html>

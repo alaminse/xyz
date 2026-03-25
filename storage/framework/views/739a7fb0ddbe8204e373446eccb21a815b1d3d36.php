@@ -51,22 +51,30 @@
                                     <input type="hidden" name="question[]" value="<?php echo e($question->id); ?>">
                                     <input type="hidden" name="type[]" value="<?php echo e($question->question_type); ?>">
 
-                                    <!-- Options -->
-                                    <?php for($i = 1; $i <= 5; $i++): ?>
-                                        <?php if(!empty($q->{'option' . $i})): ?>
-                                            <div class="option-container d-flex align-items-center"
-                                                data-option="option<?php echo e($i); ?>"
-                                                onclick="selectOption<?php echo e($index); ?>(<?php echo e($i); ?>)">
-                                                <input type="radio" id="option<?php echo e($i); ?>_<?php echo e($index); ?>"
-                                                    name="question<?php echo e($index); ?>" value="option<?php echo e($i); ?>">
-                                                <label for="option<?php echo e($i); ?>_<?php echo e($index); ?>">
-                                                    <?php echo e($q->{'option' . $i}); ?>
+                                    <?php if($isLocked): ?>
+                                        <a href="<?php echo e(route('courses.checkout', ['course' => $course->slug])); ?>"
+                                            class="btn btn-warning w-100 fw-bold mt-3">
+                                            <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
+                                        </a>
+                                    <?php else: ?>
+                                        <!-- Options -->
+                                        <?php for($i = 1; $i <= 5; $i++): ?>
+                                            <?php if(!empty($q->{'option' . $i})): ?>
+                                                <div class="option-container d-flex align-items-center"
+                                                    data-option="option<?php echo e($i); ?>"
+                                                    onclick="selectOption<?php echo e($index); ?>(<?php echo e($i); ?>)">
+                                                    <input type="radio"
+                                                        id="option<?php echo e($i); ?>_<?php echo e($index); ?>"
+                                                        name="question<?php echo e($index); ?>"
+                                                        value="option<?php echo e($i); ?>">
+                                                    <label for="option<?php echo e($i); ?>_<?php echo e($index); ?>">
+                                                        <?php echo e($q->{'option' . $i}); ?>
 
-                                                </label>
-                                            </div>
-                                        <?php endif; ?>
-                                    <?php endfor; ?>
-
+                                                    </label>
+                                                </div>
+                                            <?php endif; ?>
+                                        <?php endfor; ?>
+                                    <?php endif; ?>
                                     <!-- Buttons -->
                                     <div class="button-group">
                                         <?php if($index > 0): ?>
@@ -122,38 +130,48 @@
                                     <input type="hidden" name="question[]" value="<?php echo e($question->id); ?>">
                                     <input type="hidden" name="type[]" value="<?php echo e($question->question_type); ?>">
 
-                                    <!-- MCQ Options -->
-                                    <?php for($i = 1; $i <= 5; $i++): ?>
-                                        <?php if(!empty($q->{'option' . $i})): ?>
-                                            <div class="mcq-option-row">
-                                                <div class="mcq-option-text">
-                                                    <?php echo e($q->{'option' . $i}); ?>
+                                    <?php if($isLocked): ?>
+                                        <a href="<?php echo e(route('courses.checkout', ['course' => $course->slug])); ?>"
+                                            class="btn btn-warning w-100 fw-bold mt-3">
+                                            <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
+                                        </a>
+                                    <?php else: ?>
+                                        <!-- MCQ Options -->
+                                        <?php for($i = 1; $i <= 5; $i++): ?>
+                                            <?php if(!empty($q->{'option' . $i})): ?>
+                                                <div class="mcq-option-row">
+                                                    <div class="mcq-option-text">
+                                                        <?php echo e($q->{'option' . $i}); ?>
 
-                                                </div>
-                                                <div class="mcq-radio-group">
-                                                    <div class="mcq-radio-item" data-option="option<?php echo e($i); ?>">
-                                                        <input type="radio"
-                                                            id="option<?php echo e($index); ?><?php echo e($i); ?>_true"
-                                                            name="question<?php echo e($index); ?>[option<?php echo e($i); ?>]"
-                                                            value="true">
-                                                        <label for="option<?php echo e($index); ?><?php echo e($i); ?>_true">
-                                                            <i class="fas fa-check"></i> True
-                                                        </label>
                                                     </div>
-                                                    <div class="mcq-radio-item" data-option="option<?php echo e($i); ?>">
-                                                        <input type="radio"
-                                                            id="option<?php echo e($index); ?><?php echo e($i); ?>_false"
-                                                            name="question<?php echo e($index); ?>[option<?php echo e($i); ?>]"
-                                                            value="false">
-                                                        <label for="option<?php echo e($index); ?><?php echo e($i); ?>_false">
-                                                            <i class="fas fa-times"></i> False
-                                                        </label>
+                                                    <div class="mcq-radio-group">
+                                                        <div class="mcq-radio-item"
+                                                            data-option="option<?php echo e($i); ?>">
+                                                            <input type="radio"
+                                                                id="option<?php echo e($index); ?><?php echo e($i); ?>_true"
+                                                                name="question<?php echo e($index); ?>[option<?php echo e($i); ?>]"
+                                                                value="true">
+                                                            <label
+                                                                for="option<?php echo e($index); ?><?php echo e($i); ?>_true">
+                                                                <i class="fas fa-check"></i> True
+                                                            </label>
+                                                        </div>
+                                                        <div class="mcq-radio-item"
+                                                            data-option="option<?php echo e($i); ?>">
+                                                            <input type="radio"
+                                                                id="option<?php echo e($index); ?><?php echo e($i); ?>_false"
+                                                                name="question<?php echo e($index); ?>[option<?php echo e($i); ?>]"
+                                                                value="false">
+                                                            <label
+                                                                for="option<?php echo e($index); ?><?php echo e($i); ?>_false">
+                                                                <i class="fas fa-times"></i> False
+                                                            </label>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        <?php endif; ?>
-                                    <?php endfor; ?>
-
+                                            <?php endif; ?>
+                                        <?php endfor; ?>
+                                    <?php endif; ?>
                                     <!-- Buttons -->
                                     <div class="button-group">
                                         <?php if($index > 0): ?>
@@ -207,14 +225,16 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="submitConfirmModal" tabindex="-1" aria-labelledby="submitConfirmModalLabel" aria-hidden="true">
+    <div class="modal fade" id="submitConfirmModal" tabindex="-1" aria-labelledby="submitConfirmModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="submitConfirmModalLabel">
                         <i class="fas fa-paper-plane"></i> Submit Assessment
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="text-center mb-3">
@@ -236,7 +256,8 @@
                         </div>
                     </div>
                     <p class="text-muted text-center mb-0">
-                        <small><i class="fas fa-info-circle"></i> After submitting, you will not be able to make any changes</small>
+                        <small><i class="fas fa-info-circle"></i> After submitting, you will not be able to make any
+                            changes</small>
                     </p>
                 </div>
                 <div class="modal-footer">
@@ -251,20 +272,20 @@
         </div>
     </div>
 
-<?php $__env->startPush('scripts'); ?>
-    <script>
-        // Assessment configuration
-        const assessmentConfig = {
-            assessmentId: '<?php echo e($assessment->id); ?>',
-            courseId: '<?php echo e($course->id); ?>',
-            questions: <?php echo json_encode($questions); ?>,
-            time: parseInt('<?php echo e($assessment->time); ?>'),
-            csrfToken: '<?php echo e(csrf_token()); ?>',
-            submitRoute: '<?php echo e(route('assessments.submit')); ?>'
-        };
-    </script>
-    <script src="<?php echo e(asset('frontend/js/assessment_test.js')); ?>"></script>
-<?php $__env->stopPush(); ?>
+    <?php $__env->startPush('scripts'); ?>
+        <script>
+            // Assessment configuration
+            const assessmentConfig = {
+                assessmentId: '<?php echo e($assessment->id); ?>',
+                courseId: '<?php echo e($course->id); ?>',
+                questions: <?php echo json_encode($questions); ?>,
+                time: parseInt('<?php echo e($assessment->time); ?>'),
+                csrfToken: '<?php echo e(csrf_token()); ?>',
+                submitRoute: '<?php echo e(route('assessments.submit')); ?>'
+            };
+        </script>
+        <script src="<?php echo e(asset('frontend/js/assessment_test.js')); ?>"></script>
+    <?php $__env->stopPush(); ?>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('frontend.dashboard.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/medimaniac/resources/views/frontend/dashboard/assessment/test.blade.php ENDPATH**/ ?>

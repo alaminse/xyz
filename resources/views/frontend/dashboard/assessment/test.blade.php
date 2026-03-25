@@ -63,21 +63,29 @@
                                     <input type="hidden" name="question[]" value="{{ $question->id }}">
                                     <input type="hidden" name="type[]" value="{{ $question->question_type }}">
 
-                                    <!-- Options -->
-                                    @for ($i = 1; $i <= 5; $i++)
-                                        @if (!empty($q->{'option' . $i}))
-                                            <div class="option-container d-flex align-items-center"
-                                                data-option="option{{ $i }}"
-                                                onclick="selectOption{{ $index }}({{ $i }})">
-                                                <input type="radio" id="option{{ $i }}_{{ $index }}"
-                                                    name="question{{ $index }}" value="option{{ $i }}">
-                                                <label for="option{{ $i }}_{{ $index }}">
-                                                    {{ $q->{'option' . $i} }}
-                                                </label>
-                                            </div>
-                                        @endif
-                                    @endfor
-
+                                    @if ($isLocked)
+                                        <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
+                                            class="btn btn-warning w-100 fw-bold mt-3">
+                                            <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
+                                        </a>
+                                    @else
+                                        <!-- Options -->
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            @if (!empty($q->{'option' . $i}))
+                                                <div class="option-container d-flex align-items-center"
+                                                    data-option="option{{ $i }}"
+                                                    onclick="selectOption{{ $index }}({{ $i }})">
+                                                    <input type="radio"
+                                                        id="option{{ $i }}_{{ $index }}"
+                                                        name="question{{ $index }}"
+                                                        value="option{{ $i }}">
+                                                    <label for="option{{ $i }}_{{ $index }}">
+                                                        {{ $q->{'option' . $i} }}
+                                                    </label>
+                                                </div>
+                                            @endif
+                                        @endfor
+                                    @endif
                                     <!-- Buttons -->
                                     <div class="button-group">
                                         @if ($index > 0)
@@ -132,37 +140,47 @@
                                     <input type="hidden" name="question[]" value="{{ $question->id }}">
                                     <input type="hidden" name="type[]" value="{{ $question->question_type }}">
 
-                                    <!-- MCQ Options -->
-                                    @for ($i = 1; $i <= 5; $i++)
-                                        @if (!empty($q->{'option' . $i}))
-                                            <div class="mcq-option-row">
-                                                <div class="mcq-option-text">
-                                                    {{ $q->{'option' . $i} }}
-                                                </div>
-                                                <div class="mcq-radio-group">
-                                                    <div class="mcq-radio-item" data-option="option{{ $i }}">
-                                                        <input type="radio"
-                                                            id="option{{ $index }}{{ $i }}_true"
-                                                            name="question{{ $index }}[option{{ $i }}]"
-                                                            value="true">
-                                                        <label for="option{{ $index }}{{ $i }}_true">
-                                                            <i class="fas fa-check"></i> True
-                                                        </label>
+                                    @if ($isLocked)
+                                        <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
+                                            class="btn btn-warning w-100 fw-bold mt-3">
+                                            <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
+                                        </a>
+                                    @else
+                                        <!-- MCQ Options -->
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            @if (!empty($q->{'option' . $i}))
+                                                <div class="mcq-option-row">
+                                                    <div class="mcq-option-text">
+                                                        {{ $q->{'option' . $i} }}
                                                     </div>
-                                                    <div class="mcq-radio-item" data-option="option{{ $i }}">
-                                                        <input type="radio"
-                                                            id="option{{ $index }}{{ $i }}_false"
-                                                            name="question{{ $index }}[option{{ $i }}]"
-                                                            value="false">
-                                                        <label for="option{{ $index }}{{ $i }}_false">
-                                                            <i class="fas fa-times"></i> False
-                                                        </label>
+                                                    <div class="mcq-radio-group">
+                                                        <div class="mcq-radio-item"
+                                                            data-option="option{{ $i }}">
+                                                            <input type="radio"
+                                                                id="option{{ $index }}{{ $i }}_true"
+                                                                name="question{{ $index }}[option{{ $i }}]"
+                                                                value="true">
+                                                            <label
+                                                                for="option{{ $index }}{{ $i }}_true">
+                                                                <i class="fas fa-check"></i> True
+                                                            </label>
+                                                        </div>
+                                                        <div class="mcq-radio-item"
+                                                            data-option="option{{ $i }}">
+                                                            <input type="radio"
+                                                                id="option{{ $index }}{{ $i }}_false"
+                                                                name="question{{ $index }}[option{{ $i }}]"
+                                                                value="false">
+                                                            <label
+                                                                for="option{{ $index }}{{ $i }}_false">
+                                                                <i class="fas fa-times"></i> False
+                                                            </label>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        @endif
-                                    @endfor
-
+                                            @endif
+                                        @endfor
+                                    @endif
                                     <!-- Buttons -->
                                     <div class="button-group">
                                         @if ($index > 0)
@@ -216,14 +234,16 @@
             </div>
         </div>
     </div>{{-- Submit Confirmation Modal --}}
-    <div class="modal fade" id="submitConfirmModal" tabindex="-1" aria-labelledby="submitConfirmModalLabel" aria-hidden="true">
+    <div class="modal fade" id="submitConfirmModal" tabindex="-1" aria-labelledby="submitConfirmModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="submitConfirmModalLabel">
                         <i class="fas fa-paper-plane"></i> Submit Assessment
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="text-center mb-3">
@@ -245,7 +265,8 @@
                         </div>
                     </div>
                     <p class="text-muted text-center mb-0">
-                        <small><i class="fas fa-info-circle"></i> After submitting, you will not be able to make any changes</small>
+                        <small><i class="fas fa-info-circle"></i> After submitting, you will not be able to make any
+                            changes</small>
                     </p>
                 </div>
                 <div class="modal-footer">
@@ -260,18 +281,18 @@
         </div>
     </div>
 
-@push('scripts')
-    <script>
-        // Assessment configuration
-        const assessmentConfig = {
-            assessmentId: '{{ $assessment->id }}',
-            courseId: '{{ $course->id }}',
-            questions: {!! json_encode($questions) !!},
-            time: parseInt('{{ $assessment->time }}'),
-            csrfToken: '{{ csrf_token() }}',
-            submitRoute: '{{ route('assessments.submit') }}'
-        };
-    </script>
-    <script src="{{ asset('frontend/js/assessment_test.js') }}"></script>
-@endpush
+    @push('scripts')
+        <script>
+            // Assessment configuration
+            const assessmentConfig = {
+                assessmentId: '{{ $assessment->id }}',
+                courseId: '{{ $course->id }}',
+                questions: {!! json_encode($questions) !!},
+                time: parseInt('{{ $assessment->time }}'),
+                csrfToken: '{{ csrf_token() }}',
+                submitRoute: '{{ route('assessments.submit') }}'
+            };
+        </script>
+        <script src="{{ asset('frontend/js/assessment_test.js') }}"></script>
+    @endpush
 @endsection

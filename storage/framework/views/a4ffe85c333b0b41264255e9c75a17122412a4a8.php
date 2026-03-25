@@ -108,55 +108,62 @@
                         ?>
 
                         <div class="row g-3 sba-options-container">
-                            <?php for($i = 1; $i <= 5; $i++): ?>
-                                <?php
-                                    $optionKey = 'option' . $i;
-                                    $optionValue = $question['options'][$optionKey] ?? null;
+                            <?php if($isLocked): ?>
+                                <a href="<?php echo e(route('courses.checkout', ['course' => $course->slug])); ?>"
+                                    class="btn btn-warning w-100 fw-bold mt-3">
+                                    <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
+                                </a>
+                            <?php else: ?>
+                                <?php for($i = 1; $i <= 5; $i++): ?>
+                                    <?php
+                                        $optionKey = 'option' . $i;
+                                        $optionValue = $question['options'][$optionKey] ?? null;
 
-                                    $class = '';
-                                    $indicator = '';
-                                    $statusBadge = '';
+                                        $class = '';
+                                        $indicator = '';
+                                        $statusBadge = '';
 
-                                    if ($userAnswer === $optionKey && $userAnswer === $correctOption) {
-                                        $class = 'correct';
-                                        $indicator = '✓';
-                                        $statusBadge = '<span class="badge bg-success ms-2">Your Answer</span>';
-                                    } elseif ($userAnswer === $optionKey && $userAnswer != $correctOption) {
-                                        $class = 'incorrect';
-                                        $indicator = '✗';
-                                        $statusBadge = '<span class="badge bg-danger ms-2">Your Answer</span>';
-                                    } elseif ($correctOption === $optionKey) {
-                                        $class = 'correct';
-                                        $indicator = '✓';
-                                        $statusBadge =
-                                            '<span class="badge bg-success-subtle text-success ms-2">Correct</span>';
-                                    }
-                                ?>
+                                        if ($userAnswer === $optionKey && $userAnswer === $correctOption) {
+                                            $class = 'correct';
+                                            $indicator = '✓';
+                                            $statusBadge = '<span class="badge bg-success ms-2">Your Answer</span>';
+                                        } elseif ($userAnswer === $optionKey && $userAnswer != $correctOption) {
+                                            $class = 'incorrect';
+                                            $indicator = '✗';
+                                            $statusBadge = '<span class="badge bg-danger ms-2">Your Answer</span>';
+                                        } elseif ($correctOption === $optionKey) {
+                                            $class = 'correct';
+                                            $indicator = '✓';
+                                            $statusBadge =
+                                                '<span class="badge bg-success-subtle text-success ms-2">Correct</span>';
+                                        }
+                                    ?>
 
-                                <?php if($optionValue): ?>
-                                    <div class="col-12 col-sm-6 col-lg-4">
-                                        <div
-                                            class="option-box <?php echo e($class); ?> h-100 d-flex align-items-center justify-content-between">
-                                            <div class="option-content">
-                                                <strong class="option-label"><?php echo e($optionLabels[$i - 1]); ?>.</strong>
-                                                <span class="option-text"><?php echo e($optionValue); ?></span>
-                                            </div>
-                                            <div class="option-status d-flex align-items-center gap-2">
-                                                <?php if($indicator): ?>
-                                                    <span class="indicator" style="font-size: 20px; font-weight: bold;">
-                                                        <?php echo e($indicator); ?>
+                                    <?php if($optionValue): ?>
+                                        <div class="col-12 col-sm-6 col-lg-4">
+                                            <div
+                                                class="option-box <?php echo e($class); ?> h-100 d-flex align-items-center justify-content-between">
+                                                <div class="option-content">
+                                                    <strong class="option-label"><?php echo e($optionLabels[$i - 1]); ?>.</strong>
+                                                    <span class="option-text"><?php echo e($optionValue); ?></span>
+                                                </div>
+                                                <div class="option-status d-flex align-items-center gap-2">
+                                                    <?php if($indicator): ?>
+                                                        <span class="indicator" style="font-size: 20px; font-weight: bold;">
+                                                            <?php echo e($indicator); ?>
 
-                                                    </span>
-                                                <?php endif; ?>
-                                                <?php if($statusBadge): ?>
-                                                    <?php echo $statusBadge; ?>
+                                                        </span>
+                                                    <?php endif; ?>
+                                                    <?php if($statusBadge): ?>
+                                                        <?php echo $statusBadge; ?>
 
-                                                <?php endif; ?>
+                                                    <?php endif; ?>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                <?php endif; ?>
-                            <?php endfor; ?>
+                                    <?php endif; ?>
+                                <?php endfor; ?>
+                            <?php endif; ?>
                         </div>
                     <?php elseif($question['question_type'] == 'mcq'): ?>
                         <?php
@@ -164,34 +171,41 @@
                         ?>
 
                         <div class="row g-3 mcq-options-container">
-                            <?php for($i = 1; $i <= 5; $i++): ?>
-                                <?php
-                                    $optionKey = 'option' . $i;
-                                    $userOptionKey = 'user_option' . $i;
-                                    $answerOption = 'answers' . $i;
-                                    $optionValue = $question['options'][$optionKey] ?? null;
-                                    $userOptionValue = $question['options'][$userOptionKey] ?? null;
-                                    $answerOptionValue = $question['options'][$answerOption] ?? null;
+                            <?php if($isLocked): ?>
+                                <a href="<?php echo e(route('courses.checkout', ['course' => $course->slug])); ?>"
+                                    class="btn btn-warning w-100 fw-bold mt-3">
+                                    <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
+                                </a>
+                            <?php else: ?>
+                                <?php for($i = 1; $i <= 5; $i++): ?>
+                                    <?php
+                                        $optionKey = 'option' . $i;
+                                        $userOptionKey = 'user_option' . $i;
+                                        $answerOption = 'answers' . $i;
+                                        $optionValue = $question['options'][$optionKey] ?? null;
+                                        $userOptionValue = $question['options'][$userOptionKey] ?? null;
+                                        $answerOptionValue = $question['options'][$answerOption] ?? null;
 
-                                    $class = '';
-                                    $badgeClass = '';
-                                    $borderClass = '';
-                                    $bgClass = '';
-                                    $indicator = '';
-                                    $userText = '';
-                                    $correctText = '';
+                                        $class = '';
+                                        $badgeClass = '';
+                                        $borderClass = '';
+                                        $bgClass = '';
+                                        $indicator = '';
+                                        $userText = '';
+                                        $correctText = '';
 
-                                    // Determine correct answer
-                                    if ($answerOptionValue == 1) {
-                                        $correctText = 'Correct: True';
-                                    } elseif ($answerOptionValue == 0) {
-                                        $correctText = 'Correct: False';
-                                    }
+                                        // Determine correct answer
+                                        if ($answerOptionValue == 1) {
+                                            $correctText = 'Correct: True';
+                                        } elseif ($answerOptionValue == 0) {
+                                            $correctText = 'Correct: False';
+                                        }
 
-                                    // Check user's answer
+                                        // Check user's answer
 if ($userOptionValue !== null && $answerOptionValue !== null) {
     $userOptionValue = $userOptionValue == 'false' ? 0 : 1;
-    $userText = $userOptionValue == 1 ? 'Your Answer: True' : 'Your Answer: False';
+    $userText =
+        $userOptionValue == 1 ? 'Your Answer: True' : 'Your Answer: False';
 
     if ($userOptionValue == $answerOptionValue) {
         $class = 'correct';
@@ -215,76 +229,79 @@ if ($userOptionValue !== null && $answerOptionValue !== null) {
 } else {
     $borderClass = 'border-secondary';
     $bgClass = 'bg-light';
-                                    }
-                                ?>
+                                        }
+                                    ?>
 
-                                <?php if($optionValue): ?>
-                                    <div class="col-12 col-sm-6 col-lg-4">
-                                        <div class="card h-100 <?php echo e($borderClass); ?> <?php echo e($bgClass); ?>"
-                                            style="border-width: 2px;">
-                                            <div class="card-body d-flex flex-column p-3">
-                                                
-                                                <div class="mb-auto">
-                                                    <div class="d-flex align-items-start gap-2">
-                                                        <span class="badge bg-secondary rounded-circle"
-                                                            style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
-                                                            <?php echo e($optionLabels[$i - 1]); ?>
-
-                                                        </span>
-                                                        <div class="flex-grow-1">
-                                                            <p class="mb-0 fw-normal"
-                                                                style="font-size: 14px; line-height: 1.6;">
-                                                                <?php echo e($optionValue); ?>
-
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                
-                                                <div class="border-top">
-                                                    <?php if($userText): ?>
-                                                        <span
-                                                            class="badge <?php echo e($badgeClass); ?> text-white d-inline-flex align-items-center gap-1"
-                                                            style="font-size: 11px;">
-                                                            <?php if($class == 'correct'): ?>
-                                                                <i class="fas fa-check-circle"></i>
-                                                            <?php elseif($class == 'incorrect'): ?>
-                                                                <i class="fas fa-times-circle"></i>
-                                                            <?php else: ?>
-                                                                <i class="fas fa-minus-circle"></i>
-                                                            <?php endif; ?>
-                                                            <?php echo e($userText); ?><?php echo e($indicator); ?>
-
-                                                        </span>
-                                                    <?php endif; ?>
-
-                                                    <?php if($correctText && $class == 'incorrect'): ?>
-                                                        <div>
-                                                            <span
-                                                                class="badge bg-success-subtle text-success border border-success d-inline-flex align-items-center gap-1"
-                                                                style="font-size: 11px;">
-                                                                <i class="fas fa-lightbulb"></i>
-                                                                <?php echo e($correctText); ?>
+                                    <?php if($optionValue): ?>
+                                        <div class="col-12 col-sm-6 col-lg-4">
+                                            <div class="card h-100 <?php echo e($borderClass); ?> <?php echo e($bgClass); ?>"
+                                                style="border-width: 2px;">
+                                                <div class="card-body d-flex flex-column p-3">
+                                                    
+                                                    <div class="mb-auto">
+                                                        <div class="d-flex align-items-start gap-2">
+                                                            <span class="badge bg-secondary rounded-circle"
+                                                                style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                                                                <?php echo e($optionLabels[$i - 1]); ?>
 
                                                             </span>
+                                                            <div class="flex-grow-1">
+                                                                <p class="mb-0 fw-normal"
+                                                                    style="font-size: 14px; line-height: 1.6;">
+                                                                    <?php echo e($optionValue); ?>
+
+                                                                </p>
+                                                            </div>
                                                         </div>
-                                                    <?php endif; ?>
+                                                    </div>
+
+                                                    
+                                                    <div class="border-top">
+                                                        <?php if($userText): ?>
+                                                            <span
+                                                                class="badge <?php echo e($badgeClass); ?> text-white d-inline-flex align-items-center gap-1"
+                                                                style="font-size: 11px;">
+                                                                <?php if($class == 'correct'): ?>
+                                                                    <i class="fas fa-check-circle"></i>
+                                                                <?php elseif($class == 'incorrect'): ?>
+                                                                    <i class="fas fa-times-circle"></i>
+                                                                <?php else: ?>
+                                                                    <i class="fas fa-minus-circle"></i>
+                                                                <?php endif; ?>
+                                                                <?php echo e($userText); ?><?php echo e($indicator); ?>
+
+                                                            </span>
+                                                        <?php endif; ?>
+
+                                                        <?php if($correctText && $class == 'incorrect'): ?>
+                                                            <div>
+                                                                <span
+                                                                    class="badge bg-success-subtle text-success border border-success d-inline-flex align-items-center gap-1"
+                                                                    style="font-size: 11px;">
+                                                                    <i class="fas fa-lightbulb"></i>
+                                                                    <?php echo e($correctText); ?>
+
+                                                                </span>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                <?php endif; ?>
-                            <?php endfor; ?>
+                                    <?php endif; ?>
+                                <?php endfor; ?>
+                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
+                    <?php if($isLocked): ?>
+                    <?php else: ?>
+                        <?php if(!empty($question['explanation'])): ?>
+                            <div class="explanation-section">
+                                <h3><u>Explanation</u></h3>
+                                <?php echo $question['explanation']; ?>
 
-                    <?php if(!empty($question['explanation'])): ?>
-                        <div class="explanation-section">
-                            <h3><u>Explanation</u></h3>
-                            <?php echo $question['explanation']; ?>
-
-                        </div>
+                            </div>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
