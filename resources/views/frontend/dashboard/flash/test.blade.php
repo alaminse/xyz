@@ -65,7 +65,8 @@
                             {{-- Answer Section --}}
                             <div class="answer-section" style="display:none">
 
-                                @if($isLocked)
+                                @if($isPaid && $isLocked)
+                                    {{-- 🔒 Free trial or unenrolled on a paid flashcard --}}
                                     <div class="text-center py-4 px-3"
                                         style="background:#fff8e1; border:2px dashed #ffc107; border-radius:12px;">
                                         <i class="bi bi-lock-fill text-warning" style="font-size:3rem;"></i>
@@ -74,12 +75,12 @@
                                             This is a Premium content. Please upgrade your plan to see the answer.
                                         </p>
                                         <a href="{{ route('courses.checkout', ['course' => $courseSlug]) }}"
-                                        class="btn btn-warning fw-bold">
+                                            class="btn btn-warning fw-bold">
                                             <i class="bi bi-unlock-fill"></i> Upgrade to Premium
                                         </a>
                                     </div>
                                 @else
-                                    {{-- PAID USER: SHOW ANSWER --}}
+                                    {{-- ✅ Free flashcard OR fully enrolled --}}
                                     <h6>Answer:</h6>
                                     <div class="answer-content">{!! $question->answer !!}</div>
 
@@ -147,7 +148,7 @@
     @push('scripts')
         <script>
             $(function() {
-                let isLocked = {{ $isLocked ? 'true' : 'false' }};
+                let isLocked = {{ ($isPaid && $isLocked) ? 'true' : 'false' }};
                 let quizId = {{ $quiz->id }};
                 let totalOriginal = {{ $totalOriginalQuestions }};
                 let current = 0;
@@ -295,7 +296,11 @@
 
                     currentForm.find('.answer-section').hide();
                     currentForm.find('.revealBtn').prop('disabled', false);
-                    currentForm.find('.rateBtn').prop('disabled', false);
+
+                    // ✅ Only enable rate buttons if not locked
+                    if (!isLocked) {
+                        currentForm.find('.rateBtn').prop('disabled', false);
+                    }
 
                     $('#currentQ').text(index + 1);
                     $('#queueInfo').text(queueItem.isRepeat ? '(Reviewing)' : '');

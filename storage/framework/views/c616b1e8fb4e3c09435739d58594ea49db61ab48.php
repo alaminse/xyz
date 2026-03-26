@@ -64,7 +64,8 @@
                             
                             <div class="answer-section" style="display:none">
 
-                                <?php if($isLocked): ?>
+                                <?php if($isPaid && $isLocked): ?>
+                                    
                                     <div class="text-center py-4 px-3"
                                         style="background:#fff8e1; border:2px dashed #ffc107; border-radius:12px;">
                                         <i class="bi bi-lock-fill text-warning" style="font-size:3rem;"></i>
@@ -73,7 +74,7 @@
                                             This is a Premium content. Please upgrade your plan to see the answer.
                                         </p>
                                         <a href="<?php echo e(route('courses.checkout', ['course' => $courseSlug])); ?>"
-                                        class="btn btn-warning fw-bold">
+                                            class="btn btn-warning fw-bold">
                                             <i class="bi bi-unlock-fill"></i> Upgrade to Premium
                                         </a>
                                     </div>
@@ -146,7 +147,7 @@
     <?php $__env->startPush('scripts'); ?>
         <script>
             $(function() {
-                let isLocked = <?php echo e($isLocked ? 'true' : 'false'); ?>;
+                let isLocked = <?php echo e(($isPaid && $isLocked) ? 'true' : 'false'); ?>;
                 let quizId = <?php echo e($quiz->id); ?>;
                 let totalOriginal = <?php echo e($totalOriginalQuestions); ?>;
                 let current = 0;
@@ -294,7 +295,11 @@
 
                     currentForm.find('.answer-section').hide();
                     currentForm.find('.revealBtn').prop('disabled', false);
-                    currentForm.find('.rateBtn').prop('disabled', false);
+
+                    // ✅ Only enable rate buttons if not locked
+                    if (!isLocked) {
+                        currentForm.find('.rateBtn').prop('disabled', false);
+                    }
 
                     $('#currentQ').text(index + 1);
                     $('#queueInfo').text(queueItem.isRepeat ? '(Reviewing)' : '');

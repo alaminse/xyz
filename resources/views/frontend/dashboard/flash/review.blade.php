@@ -53,7 +53,8 @@
                             </nav>
                         </div>
                         <div class="flex-shrink-0">
-                            <a href="{{ route('flashs.index', ['course' => $quiz->course?->slug]) }}" class="btn btn-secondary btn-sm">
+                            <a href="{{ route('flashs.index', ['course' => $quiz->course?->slug]) }}"
+                                class="btn btn-secondary btn-sm">
                                 <i class="bi bi-arrow-left"></i> Back to Flash Cards
                             </a>
                         </div>
@@ -84,7 +85,22 @@
 
                                 <div class="answer-box mb-3">
                                     <h6 class="text-muted mb-2">Answer:</h6>
-                                    <div>{!! $answer['answer'] !!}</div>
+                                    @if ($isPaid && $isLocked)
+                                        <div class="text-center py-4 px-3"
+                                            style="background:#fff8e1; border:2px dashed #ffc107; border-radius:12px;">
+                                            <i class="bi bi-lock-fill text-warning" style="font-size:2.5rem;"></i>
+                                            <h5 class="mt-3 mb-2">Answer is locked</h5>
+                                            <p class="text-muted mb-3">
+                                                This is a Premium content. Please upgrade your plan to see the answer.
+                                            </p>
+                                            <a href="{{ route('courses.checkout', ['course' => $quiz->course?->slug]) }}"
+                                                class="btn btn-warning fw-bold">
+                                                <i class="bi bi-unlock-fill"></i> Upgrade to Premium
+                                            </a>
+                                        </div>
+                                    @else
+                                        <div>{!! $answer['answer'] !!}</div>
+                                    @endif
                                 </div>
 
                                 <div class="mb-3">

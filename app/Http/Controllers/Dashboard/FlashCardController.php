@@ -82,7 +82,7 @@ class FlashCardController extends Controller
             return redirect()->back()->with('error', 'You are not enrolled in this course.');
         }
 
-        // ✅ FREETRIAL হলে answer locked, কিন্তু সব question দেখাবে
+        // ✅ Locked if FREETRIAL
         $isLocked = $enrolled->status === Status::FREETRIAL()->value;
 
         /* =====================
@@ -97,11 +97,15 @@ class FlashCardController extends Controller
             $flashCardQuery->where('lesson_id', $lesson->id);
         }
 
-        $flashCard = $flashCardQuery->first();
+        // ✅ Select isPaid column
+        $flashCard = $flashCardQuery->select('id', 'chapter_id', 'lesson_id', 'isPaid', 'status')->first();
 
         if (! $flashCard) {
             return redirect()->back()->with('error', 'No flash card available.');
         }
+
+        // ✅ isPaid from flashcard
+        $isPaid = (bool) $flashCard->isPaid;
 
         /* =====================
         QUESTIONS
@@ -197,7 +201,8 @@ class FlashCardController extends Controller
             'remainingQuestionIds',
             'repeatQueueIds',
             'totalOriginalQuestions',
-            'isLocked'
+            'isLocked',
+            'isPaid'    // 👈 added
         ));
     }
 
@@ -296,11 +301,41 @@ class FlashCardController extends Controller
 
     public function review(string $slug)
     {
+        /* =====================
+        QUIZ DATA
+        ====================== */
+
         $quiz = UserFlashProgress::where('slug', $slug)
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
         abort_if(! $quiz->answers, 404, 'No answers found');
+
+        /* =====================
+        ENROLL CHECK
+        ====================== */
+
+        $enrolled = EnrollUser::where('user_id', Auth::id())
+            ->where('course_id', $quiz->course_id)
+            ->first();
+
+        // ✅ Locked if not enrolled OR FREETRIAL
+        $isLocked = ! $enrolled || $enrolled->status === Status::FREETRIAL()->value;
+
+        /* =====================
+        FLASHCARD isPaid
+        ====================== */
+
+        $flashCard = FlashCard::select('id', 'chapter_id', 'lesson_id', 'isPaid', 'status')
+            ->where('chapter_id', $quiz->chapter_id)
+            ->where('lesson_id', $quiz->lesson_id)
+            ->first();
+
+        $isPaid = (bool) $flashCard?->isPaid;
+
+        /* =====================
+        ANSWERS
+        ====================== */
 
         $answers = json_decode($quiz->answers, true);
 
@@ -313,17 +348,22 @@ class FlashCardController extends Controller
             ->keyBy('id');
 
         // 🔹 Merge question data into answers
-        $answers = collect($answers)->map(function ($item) use ($questions) {
+        $answers = collect($answers)->map(function ($item) use ($questions, $isPaid, $isLocked) {
             $question = $questions->get($item['question_id']);
 
             return [
                 'question_id' => $item['question_id'],
                 'question' => $question?->question ?? 'Question not found',
-                'answer' => $question?->answer ?? '',
+                // ✅ Hide answer if isPaid && isLocked
+                'answer' => ($isPaid && $isLocked) ? null : ($question?->answer ?? ''),
                 'rating' => $item['rating'],
                 'answered_at' => $item['answered_at'],
             ];
         })->values();
+
+        /* =====================
+        SUMMARY DATA
+        ====================== */
 
         $data = [
             'total' => $quiz->total,
@@ -331,10 +371,16 @@ class FlashCardController extends Controller
             'wrong' => $quiz->wrong,
         ];
 
+        /* =====================
+        VIEW
+        ====================== */
+
         return view('frontend.dashboard.flash.review', compact(
             'answers',
             'data',
-            'quiz'
+            'quiz',
+            'isLocked', // 👈 added
+            'isPaid'    // 👈 added
         ));
     }
 }

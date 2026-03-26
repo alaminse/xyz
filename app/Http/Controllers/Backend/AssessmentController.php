@@ -189,7 +189,7 @@ class AssessmentController extends Controller
             'start_date_time' => $this->formatDateTime($validated['start_date_time'] ?? null),
             'end_date_time' => $this->formatDateTime($validated['end_date_time'] ?? null),
             'time' => $validated['time'],
-            'isPaid' => $validated['isPaid'],
+            'isPaid' => $validated['isPaid'] ?? 0,
             'status' => $validated['status'],
         ]);
 
@@ -211,7 +211,7 @@ class AssessmentController extends Controller
             'start_date_time' => $this->formatDateTime($validated['start_date_time'] ?? null),
             'end_date_time' => $this->formatDateTime($validated['end_date_time'] ?? null),
             'time' => $validated['time'],
-            'isPaid' => $validated['isPaid'],
+            'isPaid' => $validated['isPaid'] ?? 0,
             'status' => $validated['status'],
         ]);
 
