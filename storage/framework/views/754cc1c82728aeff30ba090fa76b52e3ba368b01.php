@@ -84,7 +84,8 @@
                                                 </div>
                                             <?php endif; ?>
                                         <?php endfor; ?>
-                                        <?php if($isLocked): ?>
+                                        
+                                        <?php if($isPaid && $isLocked): ?>
                                             <a href="<?php echo e(route('courses.checkout', ['course' => $course->slug])); ?>"
                                                 class="btn btn-warning w-100 fw-bold mt-3">
                                                 <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
@@ -153,10 +154,12 @@
                         <i class="bi bi-list-check me-2"></i>Question Status
                     </h6>
                     <ul class="list-group status-list" id="statusList"></ul>
-
-                    <a href="<?php echo e(route('mcqs.index', $course->slug)); ?>" class="btn end-btn">
-                        <i class="bi bi-x-circle me-2"></i>End Session
-                    </a>
+                    <?php if($isPaid && $isLocked): ?>
+                    <?php else: ?>
+                        <a href="<?php echo e(route('mcqs.index', $course->slug)); ?>" class="btn end-btn">
+                            <i class="bi bi-x-circle me-2"></i>End Session
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -166,7 +169,8 @@
 <?php $__env->startPush('scripts'); ?>
     <script>
         $(document).ready(function() {
-            let isLocked = <?php echo e($isLocked ? 'true' : 'false'); ?>;
+            // ✅ Only truly locked if isPaid AND isLocked
+            let isLocked = <?php echo e($isPaid && $isLocked ? 'true' : 'false'); ?>;
             let total = $('.mcq-question').length;
             let current = 0;
             let correct = 0;

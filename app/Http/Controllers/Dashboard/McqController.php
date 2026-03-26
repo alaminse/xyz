@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Models\Mcq;
 use App\Enums\Status;
-use App\Models\Course;
-use App\Models\Lesson;
-use App\Models\Chapter;
-use App\Models\McqAnswer;
-use App\Models\EnrollUser;
-use App\Models\McqQuestion;
-use Illuminate\Http\Request;
-use App\Models\UserMcqProgress;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\Chapter;
+use App\Models\Course;
+use App\Models\EnrollUser;
+use App\Models\Lesson;
+use App\Models\Mcq;
+use App\Models\McqQuestion;
+use App\Models\UserMcqProgress;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class McqController extends Controller
@@ -54,133 +53,18 @@ class McqController extends Controller
         return view('frontend.dashboard.mcq.index', compact('course', 'chapters', 'progress'));
     }
 
-    public function getTest($course_slug, $chapter, $lesson = null)
-    {
-        $course = Course::where('slug', $course_slug)->firstOrFail();
-        $chapter = Chapter::where('slug', $chapter)->firstOrFail();
-        $lesson = Lesson::where('slug', $lesson)->firstOrFail();
-
-        $enrolled = EnrollUser::where('user_id', $this->user->id)
-            ->where('course_id', $course->id)
-            ->first();
-
-        if (! $enrolled) {
-            return redirect()->back()->with('error', 'You are not enrolled in this course.');
-        }
-
-        // ✅ FREETRIAL হলে answer locked
-        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
-
-        $mcqQuery = Mcq::query()
-            ->where('chapter_id', $chapter->id)
-            ->where('status', Status::ACTIVE())
-            ->whereHas('courses', fn ($q) => $q->where('courses.id', $course->id));
-
-        if ($lesson) {
-            $mcqQuery->where('lesson_id', $lesson->id);
-        }
-
-        $mcq = $mcqQuery->first();
-        if (! $mcq || $mcq->questions->isEmpty()) {
-            return redirect()->back()->with('error', 'No flash card or questions available for this topic.');
-        }
-
-        $mcqQuestions = McqQuestion::with('note')
-            ->where('mcq_id', $mcq->id)
-            ->get();
-
-        if ($mcqQuestions->isEmpty()) {
-            return redirect()->back()->with('error', 'No questions available.');
-        }
-
-        $questionIds = $mcqQuestions->pluck('id')->toArray();
-
-        $quiz = UserMcqProgress::firstOrNew([
-            'user_id'    => $this->user->id,
-            'course_id'  => $course->id,
-            'chapter_id' => $chapter->id,
-            'lesson_id'  => $lesson->id,
-        ]);
-
-        if ($quiz->exists) {
-            $existingIds = json_decode($quiz->mcq_ids, true) ?? [];
-            $newQuestions = array_diff($questionIds, $existingIds);
-
-            if (! empty($newQuestions)) {
-                $remainingIds = json_decode($quiz->remaining_mcq, true) ?? [];
-                $quiz->remaining_mcq = json_encode(array_unique(array_merge($remainingIds, $newQuestions)));
-                $quiz->mcq_ids = json_encode(array_unique(array_merge($existingIds, $newQuestions)));
-                $quiz->total = count(json_decode($quiz->mcq_ids, true));
-            }
-        } else {
-            $quiz->fill([
-                'slug'                   => checkSlug('user_mcq_progress'),
-                'total'                  => count($questionIds),
-                'current_question_index' => 0,
-                'mcq_ids'                => json_encode($questionIds),
-                'remaining_mcq'          => json_encode($questionIds),
-                'answered_mcq'           => json_encode([]),
-                'progress'               => 0,
-                'progress_cut'           => 0,
-                'answers'                => json_encode([]),
-                'correct'                => 0,
-                'wrong'                  => 0,
-            ]);
-        }
-
-        $quiz->save();
-
-        $remainingQuestionIds = json_decode($quiz->remaining_mcq, true) ?? [];
-
-        if (empty($remainingQuestionIds)) {
-            $quiz->update([
-                'total'                  => count($questionIds),
-                'current_question_index' => 0,
-                'remaining_mcq'          => json_encode($questionIds),
-                'answered_mcq'           => json_encode([]),
-                'progress'               => 0,
-                'progress_cut'           => 0,
-                'answers'                => json_encode([]),
-                'correct'                => 0,
-                'wrong'                  => 0,
-            ]);
-
-            $remainingQuestionIds = $questionIds;
-        }
-
-        // ✅ isPaid filter নেই — সব question দেখাবে, শুধু answer locked
-        $mcqQuestionsFiltered = McqQuestion::with('note')
-            ->whereIn('id', $remainingQuestionIds)
-            ->inRandomOrder()
-            ->get();
-
-        if ($mcqQuestionsFiltered->isEmpty()) {
-            return redirect()->back()->with('error', 'No questions available.');
-        }
-
-        return view('frontend.dashboard.mcq.test', compact(
-            'mcqQuestionsFiltered',
-            'quiz',
-            'chapter',
-            'lesson',
-            'course',
-            'mcq',
-            'isLocked'  // ✅ যোগ করুন
-        ));
-    }
-
     public function updateProgress(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'quiz_id'           => 'required|exists:user_mcq_progress,id',
-            'mcq_id'            => 'required|exists:mcqs,id',
-            'question_id'       => 'required|exists:mcq_questions,id',
-            'answers'           => 'required|array',
-            'answers.option1'   => 'nullable|in:0,1',
-            'answers.option2'   => 'nullable|in:0,1',
-            'answers.option3'   => 'nullable|in:0,1',
-            'answers.option4'   => 'nullable|in:0,1',
-            'answers.option5'   => 'nullable|in:0,1',
+            'quiz_id' => 'required|exists:user_mcq_progress,id',
+            'mcq_id' => 'required|exists:mcqs,id',
+            'question_id' => 'required|exists:mcq_questions,id',
+            'answers' => 'required|array',
+            'answers.option1' => 'nullable|in:0,1',
+            'answers.option2' => 'nullable|in:0,1',
+            'answers.option3' => 'nullable|in:0,1',
+            'answers.option4' => 'nullable|in:0,1',
+            'answers.option5' => 'nullable|in:0,1',
         ]);
 
         if ($validator->fails()) {
@@ -213,28 +97,28 @@ class McqController extends Controller
                 $answerKey = str_replace('option', 'answer', $optionKey);
                 $correctAnswer = $question->$answerKey;
 
-                if ((int)$selectedValue === (int)$correctAnswer) {
+                if ((int) $selectedValue === (int) $correctAnswer) {
                     $correctCount++;
                     $answerResults[$optionKey] = [
-                        'option_text'   => $question->$optionKey,
-                        'selected'      => (int)$selectedValue,
-                        'correct'       => (int)$correctAnswer,
-                        'is_correct'    => true
+                        'option_text' => $question->$optionKey,
+                        'selected' => (int) $selectedValue,
+                        'correct' => (int) $correctAnswer,
+                        'is_correct' => true,
                     ];
                 } else {
                     $answerResults[$optionKey] = [
-                        'option_text'   => $question->$optionKey,
-                        'selected'      => (int)$selectedValue,
-                        'correct'       => (int)$correctAnswer,
-                        'is_correct'    => false
+                        'option_text' => $question->$optionKey,
+                        'selected' => (int) $selectedValue,
+                        'correct' => (int) $correctAnswer,
+                        'is_correct' => false,
                     ];
                 }
             }
 
             // Progress data বের করা
-            $remainingMcq   = json_decode($quiz->remaining_mcq, true) ?? [];
-            $answeredMcq    = json_decode($quiz->answered_mcq, true) ?? [];
-            $allAnswers     = json_decode($quiz->answers, true) ?? [];
+            $remainingMcq = json_decode($quiz->remaining_mcq, true) ?? [];
+            $answeredMcq = json_decode($quiz->answered_mcq, true) ?? [];
+            $allAnswers = json_decode($quiz->answers, true) ?? [];
 
             // Answer key তৈরি করা
             $answerKey = $validated['question_id'];
@@ -242,7 +126,7 @@ class McqController extends Controller
             // Check if already answered
             if (in_array($answerKey, $answeredMcq)) {
                 return response()->json([
-                    'error' => 'You have already answered this question.'
+                    'error' => 'You have already answered this question.',
                 ], 422);
             }
 
@@ -254,16 +138,16 @@ class McqController extends Controller
 
             // Complete answer data store করা
             $allAnswers[] = [
-                'mcq_id'            => $mcq->id,
-                'question_id'       => $question->id,
-                'question'          => $question->question,
-                'answers'           => $answerResults,
-                'correct_count'     => $correctCount,
-                'total_options'     => $totalOptions,
-                'note_title'        => $question->note?->title,
-                'note_description'  => $question->note?->description,
-                'explain'           => $question->explain,
-                'answered_at'       => now()->toDateTimeString(),
+                'mcq_id' => $mcq->id,
+                'question_id' => $question->id,
+                'question' => $question->question,
+                'answers' => $answerResults,
+                'correct_count' => $correctCount,
+                'total_options' => $totalOptions,
+                'note_title' => $question->note?->title,
+                'note_description' => $question->note?->description,
+                'explain' => $question->explain,
+                'answered_at' => now()->toDateTimeString(),
             ];
 
             // Quiz stats আপডেট করা
@@ -285,38 +169,158 @@ class McqController extends Controller
             // Data save করা
             $quiz->remaining_mcq = json_encode($remainingMcq);
             $quiz->answered_mcq = json_encode($answeredMcq);
-            $quiz->answers      = json_encode($allAnswers);
+            $quiz->answers = json_encode($allAnswers);
             $quiz->save();
 
             return response()->json([
-                'status'            => 'success',
-                'correct_count'     => $correctCount,
-                'total_options'     => $totalOptions,
-                'answer_results'    => $answerResults,
-                'quiz'              => [
-                    'progress'          => $quiz->progress,
-                    'progress_cut'      => $quiz->progress_cut,
-                    'correct'           => $quiz->correct,
-                    'wrong'             => $quiz->wrong,
-                    'remaining'         => count($remainingMcq),
-                    'answered'          => count($answeredMcq),
+                'status' => 'success',
+                'correct_count' => $correctCount,
+                'total_options' => $totalOptions,
+                'answer_results' => $answerResults,
+                'quiz' => [
+                    'progress' => $quiz->progress,
+                    'progress_cut' => $quiz->progress_cut,
+                    'correct' => $quiz->correct,
+                    'wrong' => $quiz->wrong,
+                    'remaining' => count($remainingMcq),
+                    'answered' => count($answeredMcq),
                 ],
-                'question'          => [
-                    'id'                => $question->id,
-                    'question'          => $question->question,
-                    'explain'           => $question->explain,
-                    'note'              => $question->note,
+                'question' => [
+                    'id' => $question->id,
+                    'question' => $question->question,
+                    'explain' => $question->explain,
+                    'note' => $question->note,
                 ],
             ]);
 
         } catch (\Exception $e) {
-            Log::error('MCQ Progress Update Error: ' . $e->getMessage());
+            Log::error('MCQ Progress Update Error: '.$e->getMessage());
             Log::error($e->getTraceAsString());
 
             return response()->json([
-                'error' => 'Failed to update progress. Please try again.'
+                'error' => 'Failed to update progress. Please try again.',
             ], 500);
         }
+    }
+
+    public function getTest($course_slug, $chapter, $lesson = null)
+    {
+        $course = Course::where('slug', $course_slug)->firstOrFail();
+        $chapter = Chapter::where('slug', $chapter)->firstOrFail();
+        $lesson = Lesson::where('slug', $lesson)->firstOrFail();
+
+        $enrolled = EnrollUser::where('user_id', $this->user->id)
+            ->where('course_id', $course->id)
+            ->first();
+
+        if (! $enrolled) {
+            return redirect()->back()->with('error', 'You are not enrolled in this course.');
+        }
+
+        // ✅ Locked if FREETRIAL
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
+
+        $mcqQuery = Mcq::query()
+            ->where('chapter_id', $chapter->id)
+            ->where('status', Status::ACTIVE())
+            ->whereHas('courses', fn ($q) => $q->where('courses.id', $course->id));
+
+        if ($lesson) {
+            $mcqQuery->where('lesson_id', $lesson->id);
+        }
+
+        // ✅ Select isPaid
+        $mcq = $mcqQuery->select('id', 'chapter_id', 'lesson_id', 'isPaid', 'status')->first();
+
+        if (! $mcq || $mcq->questions->isEmpty()) {
+            return redirect()->back()->with('error', 'No flash card or questions available for this topic.');
+        }
+
+        // ✅ isPaid from mcq
+        $isPaid = (bool) $mcq->isPaid;
+
+        $mcqQuestions = McqQuestion::with('note')
+            ->where('mcq_id', $mcq->id)
+            ->get();
+
+        if ($mcqQuestions->isEmpty()) {
+            return redirect()->back()->with('error', 'No questions available.');
+        }
+
+        $questionIds = $mcqQuestions->pluck('id')->toArray();
+
+        $quiz = UserMcqProgress::firstOrNew([
+            'user_id' => $this->user->id,
+            'course_id' => $course->id,
+            'chapter_id' => $chapter->id,
+            'lesson_id' => $lesson->id,
+        ]);
+
+        if ($quiz->exists) {
+            $existingIds = json_decode($quiz->mcq_ids, true) ?? [];
+            $newQuestions = array_diff($questionIds, $existingIds);
+
+            if (! empty($newQuestions)) {
+                $remainingIds = json_decode($quiz->remaining_mcq, true) ?? [];
+                $quiz->remaining_mcq = json_encode(array_unique(array_merge($remainingIds, $newQuestions)));
+                $quiz->mcq_ids = json_encode(array_unique(array_merge($existingIds, $newQuestions)));
+                $quiz->total = count(json_decode($quiz->mcq_ids, true));
+            }
+        } else {
+            $quiz->fill([
+                'slug' => checkSlug('user_mcq_progress'),
+                'total' => count($questionIds),
+                'current_question_index' => 0,
+                'mcq_ids' => json_encode($questionIds),
+                'remaining_mcq' => json_encode($questionIds),
+                'answered_mcq' => json_encode([]),
+                'progress' => 0,
+                'progress_cut' => 0,
+                'answers' => json_encode([]),
+                'correct' => 0,
+                'wrong' => 0,
+            ]);
+        }
+
+        $quiz->save();
+
+        $remainingQuestionIds = json_decode($quiz->remaining_mcq, true) ?? [];
+
+        if (empty($remainingQuestionIds)) {
+            $quiz->update([
+                'total' => count($questionIds),
+                'current_question_index' => 0,
+                'remaining_mcq' => json_encode($questionIds),
+                'answered_mcq' => json_encode([]),
+                'progress' => 0,
+                'progress_cut' => 0,
+                'answers' => json_encode([]),
+                'correct' => 0,
+                'wrong' => 0,
+            ]);
+
+            $remainingQuestionIds = $questionIds;
+        }
+
+        $mcqQuestionsFiltered = McqQuestion::with('note')
+            ->whereIn('id', $remainingQuestionIds)
+            ->inRandomOrder()
+            ->get();
+
+        if ($mcqQuestionsFiltered->isEmpty()) {
+            return redirect()->back()->with('error', 'No questions available.');
+        }
+
+        return view('frontend.dashboard.mcq.test', compact(
+            'mcqQuestionsFiltered',
+            'quiz',
+            'chapter',
+            'lesson',
+            'course',
+            'mcq',
+            'isLocked',
+            'isPaid'    // 👈 added
+        ));
     }
 
     public function review($slug)
@@ -325,15 +329,48 @@ class McqController extends Controller
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
-        if ($quiz) {
-            $questions = json_decode($quiz->answers);
-            $data['total'] = $quiz->progress_cut;
-            $data['correct'] = $quiz->correct;
-
-            return view('frontend.dashboard.mcq.review', compact('questions', 'data', 'quiz'));
+        if ($quiz->answers == null) {
+            return redirect()->back()->with('error', 'Something went wrong!! Try Again');
         }
 
-        return redirect()->back()->with('error', 'Something went wrong!! Try Again');
+        /* =====================
+        ENROLL CHECK
+        ====================== */
+
+        $enrolled = EnrollUser::where('user_id', Auth::id())
+            ->where('course_id', $quiz->course_id)
+            ->first();
+
+        // ✅ Locked if not enrolled OR FREETRIAL
+        $isLocked = ! $enrolled || $enrolled->status === Status::FREETRIAL()->value;
+
+        /* =====================
+        MCQ isPaid
+        ====================== */
+
+        $mcq = Mcq::select('id', 'chapter_id', 'lesson_id', 'isPaid')
+            ->where('chapter_id', $quiz->chapter_id)
+            ->where('lesson_id', $quiz->lesson_id)
+            ->first();
+
+        $isPaid = (bool) $mcq?->isPaid;
+
+        /* =====================
+        ANSWERS
+        ====================== */
+
+        $questions = json_decode($quiz->answers);
+
+        $data['total'] = $quiz->progress_cut;
+        $data['correct'] = $quiz->correct;
+
+        return view('frontend.dashboard.mcq.review', compact(
+            'questions',
+            'data',
+            'quiz',
+            'isLocked', // 👈 added
+            'isPaid'    // 👈 added
+        ));
     }
 
     public function finishQuiz(Request $request)

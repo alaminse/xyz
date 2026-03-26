@@ -84,7 +84,8 @@
                                                 </div>
                                             @endif
                                         @endfor
-                                        @if ($isLocked)
+                                        {{-- Submit or Lock Button --}}
+                                        @if ($isPaid && $isLocked)
                                             <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
                                                 class="btn btn-warning w-100 fw-bold mt-3">
                                                 <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
@@ -152,10 +153,12 @@
                         <i class="bi bi-list-check me-2"></i>Question Status
                     </h6>
                     <ul class="list-group status-list" id="statusList"></ul>
-
-                    <a href="{{ route('mcqs.index', $course->slug) }}" class="btn end-btn">
-                        <i class="bi bi-x-circle me-2"></i>End Session
-                    </a>
+                    @if ($isPaid && $isLocked)
+                    @else
+                        <a href="{{ route('mcqs.index', $course->slug) }}" class="btn end-btn">
+                            <i class="bi bi-x-circle me-2"></i>End Session
+                        </a>
+                    @endif
                 </div>
             </div>
         </div>
@@ -165,7 +168,8 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            let isLocked = {{ $isLocked ? 'true' : 'false' }};
+            // ✅ Only truly locked if isPaid AND isLocked
+            let isLocked = {{ $isPaid && $isLocked ? 'true' : 'false' }};
             let total = $('.mcq-question').length;
             let current = 0;
             let correct = 0;
