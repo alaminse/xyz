@@ -62,30 +62,21 @@
 
                                     <input type="hidden" name="question[]" value="{{ $question->id }}">
                                     <input type="hidden" name="type[]" value="{{ $question->question_type }}">
+                                    <!-- Options -->
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        @if (!empty($q->{'option' . $i}))
+                                            <div class="option-container d-flex align-items-center"
+                                                data-option="option{{ $i }}"
+                                                onclick="selectOption{{ $index }}({{ $i }})">
+                                                <input type="radio" id="option{{ $i }}_{{ $index }}"
+                                                    name="question{{ $index }}" value="option{{ $i }}">
+                                                <label for="option{{ $i }}_{{ $index }}">
+                                                    {{ $q->{'option' . $i} }}
+                                                </label>
+                                            </div>
+                                        @endif
+                                    @endfor
 
-                                    @if ($isLocked)
-                                        <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
-                                            class="btn btn-warning w-100 fw-bold mt-3">
-                                            <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
-                                        </a>
-                                    @else
-                                        <!-- Options -->
-                                        @for ($i = 1; $i <= 5; $i++)
-                                            @if (!empty($q->{'option' . $i}))
-                                                <div class="option-container d-flex align-items-center"
-                                                    data-option="option{{ $i }}"
-                                                    onclick="selectOption{{ $index }}({{ $i }})">
-                                                    <input type="radio"
-                                                        id="option{{ $i }}_{{ $index }}"
-                                                        name="question{{ $index }}"
-                                                        value="option{{ $i }}">
-                                                    <label for="option{{ $i }}_{{ $index }}">
-                                                        {{ $q->{'option' . $i} }}
-                                                    </label>
-                                                </div>
-                                            @endif
-                                        @endfor
-                                    @endif
                                     <!-- Buttons -->
                                     <div class="button-group">
                                         @if ($index > 0)
@@ -99,9 +90,16 @@
                                                 Next <i class="fas fa-arrow-right"></i>
                                             </button>
                                         @else
-                                            <button type="button" class="btn btn-assessment btn-submit submit">
-                                                <i class="fas fa-check-circle"></i> Submit Assessment
-                                            </button>
+                                            @if ($isLocked)
+                                                <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
+                                                    class="btn btn-warning w-100 fw-bold mt-3">
+                                                    <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
+                                                </a>
+                                            @else
+                                                <button type="button" class="btn btn-assessment btn-submit submit">
+                                                    <i class="fas fa-check-circle"></i> Submit Assessment
+                                                </button>
+                                            @endif
                                         @endif
                                     </div>
                                 </div>
@@ -139,48 +137,36 @@
 
                                     <input type="hidden" name="question[]" value="{{ $question->id }}">
                                     <input type="hidden" name="type[]" value="{{ $question->question_type }}">
-
-                                    @if ($isLocked)
-                                        <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
-                                            class="btn btn-warning w-100 fw-bold mt-3">
-                                            <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
-                                        </a>
-                                    @else
-                                        <!-- MCQ Options -->
-                                        @for ($i = 1; $i <= 5; $i++)
-                                            @if (!empty($q->{'option' . $i}))
-                                                <div class="mcq-option-row">
-                                                    <div class="mcq-option-text">
-                                                        {{ $q->{'option' . $i} }}
+                                    <!-- MCQ Options -->
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        @if (!empty($q->{'option' . $i}))
+                                            <div class="mcq-option-row">
+                                                <div class="mcq-option-text">
+                                                    {{ $q->{'option' . $i} }}
+                                                </div>
+                                                <div class="mcq-radio-group">
+                                                    <div class="mcq-radio-item" data-option="option{{ $i }}">
+                                                        <input type="radio"
+                                                            id="option{{ $index }}{{ $i }}_true"
+                                                            name="question{{ $index }}[option{{ $i }}]"
+                                                            value="true">
+                                                        <label for="option{{ $index }}{{ $i }}_true">
+                                                            <i class="fas fa-check"></i> True
+                                                        </label>
                                                     </div>
-                                                    <div class="mcq-radio-group">
-                                                        <div class="mcq-radio-item"
-                                                            data-option="option{{ $i }}">
-                                                            <input type="radio"
-                                                                id="option{{ $index }}{{ $i }}_true"
-                                                                name="question{{ $index }}[option{{ $i }}]"
-                                                                value="true">
-                                                            <label
-                                                                for="option{{ $index }}{{ $i }}_true">
-                                                                <i class="fas fa-check"></i> True
-                                                            </label>
-                                                        </div>
-                                                        <div class="mcq-radio-item"
-                                                            data-option="option{{ $i }}">
-                                                            <input type="radio"
-                                                                id="option{{ $index }}{{ $i }}_false"
-                                                                name="question{{ $index }}[option{{ $i }}]"
-                                                                value="false">
-                                                            <label
-                                                                for="option{{ $index }}{{ $i }}_false">
-                                                                <i class="fas fa-times"></i> False
-                                                            </label>
-                                                        </div>
+                                                    <div class="mcq-radio-item" data-option="option{{ $i }}">
+                                                        <input type="radio"
+                                                            id="option{{ $index }}{{ $i }}_false"
+                                                            name="question{{ $index }}[option{{ $i }}]"
+                                                            value="false">
+                                                        <label for="option{{ $index }}{{ $i }}_false">
+                                                            <i class="fas fa-times"></i> False
+                                                        </label>
                                                     </div>
                                                 </div>
-                                            @endif
-                                        @endfor
-                                    @endif
+                                            </div>
+                                        @endif
+                                    @endfor
                                     <!-- Buttons -->
                                     <div class="button-group">
                                         @if ($index > 0)
@@ -194,9 +180,16 @@
                                                 Next <i class="fas fa-arrow-right"></i>
                                             </button>
                                         @else
-                                            <button type="button" class="btn btn-assessment btn-submit submit">
-                                                <i class="fas fa-check-circle"></i> Submit Assessment
-                                            </button>
+                                            @if ($isLocked)
+                                                <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
+                                                    class="btn btn-warning w-100 fw-bold mt-3">
+                                                    <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
+                                                </a>
+                                            @else
+                                                <button type="button" class="btn btn-assessment btn-submit submit">
+                                                    <i class="fas fa-check-circle"></i> Submit Assessment
+                                                </button>
+                                            @endif
                                         @endif
                                     </div>
                                 </div>

@@ -362,12 +362,6 @@
                         @endphp
 
                         <div class="options-grid">
-                            @if ($isLocked)
-                                <div
-                                    style="padding:10px; background:#fff3cd; border:1px solid #ffeeba; font-weight:bold;">
-                                    [LOCKED] Answers are locked. Upgrade to Premium.
-                                </div>
-                            @else
                                 @for ($i = 1; $i <= 5; $i++)
                                     @php
                                         $optionKey = 'option' . $i;
@@ -390,7 +384,6 @@
                                         </div>
                                     @endif
                                 @endfor
-                            @endif
                         </div>
                     @elseif ($question['question_type'] == 'mcq')
                         @php
@@ -398,12 +391,6 @@
                         @endphp
 
                         <div class="options-grid">
-                            @if ($isLocked)
-                                <div
-                                    style="padding:10px; background:#fff3cd; border:1px solid #ffeeba; font-weight:bold;">
-                                    [LOCKED] Answers are locked. Upgrade to Premium.
-                                </div>
-                            @else
                                 @for ($i = 1; $i <= 5; $i++)
                                     @php
                                         $optionKey = 'option' . $i;
@@ -435,7 +422,6 @@
                                         </div>
                                     @endif
                                 @endfor
-                            @endif
                         </div>
                     @endif
 

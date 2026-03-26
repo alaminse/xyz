@@ -107,12 +107,7 @@
                         @endphp
 
                         <div class="row g-3 sba-options-container">
-                            @if ($isLocked)
-                                <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
-                                    class="btn btn-warning w-100 fw-bold mt-3">
-                                    <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
-                                </a>
-                            @else
+
                                 @for ($i = 1; $i <= 5; $i++)
                                     @php
                                         $optionKey = 'option' . $i;
@@ -160,7 +155,7 @@
                                         </div>
                                     @endif
                                 @endfor
-                            @endif
+
                         </div>
                     @elseif ($question['question_type'] == 'mcq')
                         @php
@@ -168,12 +163,7 @@
                         @endphp
 
                         <div class="row g-3 mcq-options-container">
-                            @if ($isLocked)
-                                <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
-                                    class="btn btn-warning w-100 fw-bold mt-3">
-                                    <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
-                                </a>
-                            @else
+
                                 @for ($i = 1; $i <= 5; $i++)
                                     @php
                                         $optionKey = 'option' . $i;
@@ -199,33 +189,33 @@
                                         }
 
                                         // Check user's answer
-if ($userOptionValue !== null && $answerOptionValue !== null) {
-    $userOptionValue = $userOptionValue == 'false' ? 0 : 1;
-    $userText =
-        $userOptionValue == 1 ? 'Your Answer: True' : 'Your Answer: False';
+                                        if ($userOptionValue !== null && $answerOptionValue !== null) {
+                                            $userOptionValue = $userOptionValue == 'false' ? 0 : 1;
+                                            $userText =
+                                                $userOptionValue == 1 ? 'Your Answer: True' : 'Your Answer: False';
 
-    if ($userOptionValue == $answerOptionValue) {
-        $class = 'correct';
-        $borderClass = 'border-success';
-        $bgClass = 'bg-success-subtle';
-        $badgeClass = 'bg-success';
-        $indicator = ' ✓';
-    } else {
-        $class = 'incorrect';
-        $borderClass = 'border-danger';
-        $bgClass = 'bg-danger-subtle';
-        $badgeClass = 'bg-danger';
-        $indicator = ' ✗';
-    }
-} elseif ($answerOptionValue !== null) {
-    $class = 'neutral';
-    $borderClass = 'border-warning';
-    $bgClass = 'bg-warning-subtle';
-    $badgeClass = 'bg-secondary';
-    $userText = 'Not Answered';
-} else {
-    $borderClass = 'border-secondary';
-    $bgClass = 'bg-light';
+                                            if ($userOptionValue == $answerOptionValue) {
+                                                $class = 'correct';
+                                                $borderClass = 'border-success';
+                                                $bgClass = 'bg-success-subtle';
+                                                $badgeClass = 'bg-success';
+                                                $indicator = ' ✓';
+                                            } else {
+                                                $class = 'incorrect';
+                                                $borderClass = 'border-danger';
+                                                $bgClass = 'bg-danger-subtle';
+                                                $badgeClass = 'bg-danger';
+                                                $indicator = ' ✗';
+                                            }
+                                        } elseif ($answerOptionValue !== null) {
+                                            $class = 'neutral';
+                                            $borderClass = 'border-warning';
+                                            $bgClass = 'bg-warning-subtle';
+                                            $badgeClass = 'bg-secondary';
+                                            $userText = 'Not Answered';
+                                        } else {
+                                            $borderClass = 'border-secondary';
+                                            $bgClass = 'bg-light';
                                         }
                                     @endphp
 
@@ -283,7 +273,6 @@ if ($userOptionValue !== null && $answerOptionValue !== null) {
                                         </div>
                                     @endif
                                 @endfor
-                            @endif
                         </div>
                     @endif
                     @if ($isLocked)

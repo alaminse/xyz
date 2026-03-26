@@ -162,7 +162,8 @@
                             <div class="upload-section">
                                 <label class="form-label">Upload New Video File</label>
                                 <input type="file" id="bunnyVideoFile" class="form-control" accept="video/*">
-                                <input type="hidden" name="uploaded_link" id="bunnyVideoId" value="">
+                                <input class="mt-2 form-control" type="input" name="uploaded_link" id="bunnyVideoId"
+                                value="<?php echo e(old('uploaded_link')); ?>" placeholder="Bunny video ID">
                                 <small class="text-muted d-block mt-2">
                                     <i class="fa fa-warning"></i> This will replace the current video<br>
                                     <i class="fa fa-info-circle"></i> Max: 5GB | Formats: MP4, MOV, AVI, MKV

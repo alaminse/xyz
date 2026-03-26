@@ -51,7 +51,7 @@
                             Question
                         </div>
                         <div class="p-3 bg-light border rounded">
-                            <?php echo e($written->question); ?>
+                            <?php echo $written->question; ?>
 
                         </div>
                     </div>

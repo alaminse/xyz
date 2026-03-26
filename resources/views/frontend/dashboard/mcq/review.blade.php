@@ -129,8 +129,6 @@
                         </div>
                     @endforeach
                 </div>
-
-
             </div>
         </div>
 
@@ -138,15 +136,16 @@
             <div class="status-card">
                 <div class="score-display">
                     @php
-                        $percentage = $totalAnsweredAnswers > 0
-                            ? ($correctAnswers / $totalAnsweredAnswers) * 100
-                            : 0;
+                        $percentage = $totalAnsweredAnswers > 0 ? ($correctAnswers / $totalAnsweredAnswers) * 100 : 0;
 
                         $progressClass =
-                            $percentage >= 75 ? 'bg-success'
-                            : ($percentage >= 50 ? 'bg-warning'
-                            : ($percentage >= 25 ? 'bg-info'
-                            : 'bg-danger'));
+                            $percentage >= 75
+                                ? 'bg-success'
+                                : ($percentage >= 50
+                                    ? 'bg-warning'
+                                    : ($percentage >= 25
+                                        ? 'bg-info'
+                                        : 'bg-danger'));
                     @endphp
 
                     <h3>{{ number_format($percentage, 2) }}%</h3>

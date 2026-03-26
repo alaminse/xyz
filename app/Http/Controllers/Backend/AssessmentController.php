@@ -139,7 +139,7 @@ class AssessmentController extends Controller
             'status' => 'required|integer',
             'start_date_time' => 'nullable|date',
             'end_date_time' => 'nullable|date',
-            'isPaid' => 'required|boolean',
+            'isPaid' => 'nullable|boolean',
         ]);
     }
 

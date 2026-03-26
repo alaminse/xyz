@@ -504,30 +504,4 @@ class AssessmentController extends Controller
             return back()->with('error', 'Failed to generate PDF.');
         }
     }
-    // public function print($slug)
-    // {
-    //     // Increase execution time and memory limit
-    //     ini_set('max_execution_time', 300); // 5 minutes
-    //     ini_set('memory_limit', '512M');
-
-    //     $data = $this->getDetails($slug);
-    //     $user = Auth::user();
-    //     $name = $user->name.'-'.$user->id;
-
-    //     try {
-    //         // Load the view and generate the PDF
-    //         $pdf = Pdf::loadView('frontend.dashboard.assessment.print', compact('data'));
-
-    //         $pdf->setPaper('A4', 'portrait');
-    //         $pdf->set_option('isHtml5ParserEnabled', true);
-    //         $pdf->set_option('isRemoteEnabled', true);
-
-    //         return $pdf->stream('watermarked_pdf.pdf');
-
-    //     } catch (\Exception $e) {
-    //         Log::error('PDF Generation Error: '.$e->getMessage());
-
-    //         return back()->with('error', 'Failed to generate PDF. Please try again.');
-    //     }
-    // }
 }

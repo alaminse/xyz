@@ -2,87 +2,99 @@
 @section('title', 'SBA Review')
 @section('css')
 
-<link rel="stylesheet" href="{{ asset('frontend/css/sba.css') }}">
-<style>
-    .review-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 15px;
-        padding: 5px;
-    }
-    .review-card {
-        background: white;
-        border-radius: 12px;
-        padding: 5px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    .option-correct {
-        background: #d4edda !important;
-        border-color: #28a745 !important;
-        font-weight: 600;
-    }
-    .option-wrong {
-        background: #f8d7da !important;
-        border-color: #dc3545 !important;
-    }
-    .option-item {
-        border: 2px solid #e0e0e0;
-        margin-bottom: 10px;
-        border-radius: 8px;
-        padding: 12px;
-    }
-    .explanation-box {
-        background: #e7f3ff;
-        border-left: 4px solid #2196f3;
-        padding: 15px;
-        border-radius: 8px;
-        margin-top: 15px;
-    }
-    .note-box {
-        background: #fff3cd;
-        border-left: 4px solid #ffc107;
-        padding: 15px;
-        border-radius: 8px;
-        margin-top: 15px;
-    }
-    .sidebar-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 12px;
-        padding: 5px;
-        position: sticky;
-        top: 20px;
-    }
-    .question-link {
-        background: rgba(255,255,255,0.1);
-        padding: 10px;
-        border-radius: 8px;
-        margin-bottom: 8px;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        border: 2px solid transparent;
-    }
-    .question-link:hover {
-        background: rgba(255,255,255,0.2);
-        border-color: rgba(255,255,255,0.5);
-        transform: translateX(5px);
-    }
-    .question-link.active {
-        background: rgba(255,255,255,0.3);
-        border-color: white;
-    }
-    .score-badge {
-        background: rgba(255,255,255,0.2);
-        padding: 15px;
-        border-radius: 10px;
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    .score-badge h4 {
-        color: white;
-        font-weight: bold;
-        font-size: 2rem;
-        margin: 0;
-    }
-</style>
+    <link rel="stylesheet" href="{{ asset('frontend/css/sba.css') }}">
+    <style>
+        .review-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 5px;
+        }
+
+        .review-card {
+            background: white;
+            border-radius: 12px;
+            padding: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .option-correct {
+            background: #d4edda !important;
+            border-color: #28a745 !important;
+            font-weight: 600;
+        }
+
+        .option-wrong {
+            background: #f8d7da !important;
+            border-color: #dc3545 !important;
+        }
+
+        .option-item {
+            border: 2px solid #e0e0e0;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .explanation-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .note-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .sidebar-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 5px;
+            position: sticky;
+            top: 20px;
+        }
+
+        .question-link {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .question-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateX(5px);
+        }
+
+        .question-link.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: white;
+        }
+
+        .score-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .score-badge h4 {
+            color: white;
+            font-weight: bold;
+            font-size: 2rem;
+            margin: 0;
+        }
+    </style>
 @endsection
 @section('content')
     {{-- Header Section --}}
@@ -115,7 +127,7 @@
     <div class="row">
         <div class="col-sm-12 col-md-8">
             <div class="review-container">
-                @if(empty($answers))
+                @if (empty($answers))
                     <div class="review-card text-center py-5">
                         <i class="bi bi-exclamation-circle text-warning" style="font-size: 4rem;"></i>
                         <h4 class="mt-3">No Answers Found</h4>
@@ -137,18 +149,20 @@
 
                     <div id="sba-container">
                         @foreach ($answers as $index => $answer)
-                            <div class="sba-question" data-index="{{ $index }}" style="{{ $index == 0 ? '' : 'display:none;' }}">
+                            <div class="sba-question" data-index="{{ $index }}"
+                                style="{{ $index == 0 ? '' : 'display:none;' }}">
                                 <div class="review-card">
                                     <div class="d-flex justify-content-between align-items-start mb-3">
                                         <h5 class="mb-0">
-                                            @if(isset($answer['question']))
+                                            @if (isset($answer['question']))
                                                 {!! $answer['question'] !!}
                                             @else
                                                 Question not available
                                             @endif
                                         </h5>
-                                        <span class="badge {{ isset($answer['is_correct']) && $answer['is_correct'] ? 'bg-success' : 'bg-danger' }}">
-                                            @if(isset($answer['is_correct']) && $answer['is_correct'])
+                                        <span
+                                            class="badge {{ isset($answer['is_correct']) && $answer['is_correct'] ? 'bg-success' : 'bg-danger' }}">
+                                            @if (isset($answer['is_correct']) && $answer['is_correct'])
                                                 <i class="bi bi-check-circle me-1"></i>Correct
                                             @else
                                                 <i class="bi bi-x-circle me-1"></i>Wrong
@@ -163,22 +177,31 @@
                                         @endphp
 
                                         @foreach ($options as $option)
-                                            @if(isset($answer[$option]) && !empty($answer[$option]))
+                                            @if (isset($answer[$option]) && !empty($answer[$option]))
                                                 @php
                                                     $hasOptions = true;
-                                                    $isCorrect = isset($answer['correct_option']) && $answer['correct_option'] == $option;
-                                                    $isSelected = isset($answer['selected_option']) && $answer['selected_option'] == $option;
-                                                    $class = $isCorrect ? 'option-correct' : ($isSelected ? 'option-wrong' : '');
+                                                    $isCorrect =
+                                                        isset($answer['correct_option']) &&
+                                                        $answer['correct_option'] == $option;
+                                                    $isSelected =
+                                                        isset($answer['selected_option']) &&
+                                                        $answer['selected_option'] == $option;
+                                                    $class = $isCorrect
+                                                        ? 'option-correct'
+                                                        : ($isSelected
+                                                            ? 'option-wrong'
+                                                            : '');
                                                 @endphp
                                                 <li class="option-item {{ $class }}">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <span>
-                                                            @if($isSelected)
-                                                                <i class="bi bi-hand-index me-2 {{ $isCorrect ? 'text-success' : 'text-danger' }}"></i>
+                                                            @if ($isSelected)
+                                                                <i
+                                                                    class="bi bi-hand-index me-2 {{ $isCorrect ? 'text-success' : 'text-danger' }}"></i>
                                                             @endif
                                                             {{ $answer[$option] }}
                                                         </span>
-                                                        @if($isCorrect)
+                                                        @if ($isCorrect)
                                                             <i class="bi bi-check-circle-fill text-success"></i>
                                                         @elseif($isSelected && !$isCorrect)
                                                             <i class="bi bi-x-circle-fill text-danger"></i>
@@ -188,20 +211,21 @@
                                             @endif
                                         @endforeach
 
-                                        @if(!$hasOptions)
+                                        @if (!$hasOptions)
                                             <li class="option-item">
                                                 <span class="text-muted">Options not available</span>
                                             </li>
                                         @endif
                                     </ul>
 
-                                    @if(isset($answer['explain']) && !empty($answer['explain']))
+                                    @if (isset($answer['explain']) && !empty($answer['explain']))
                                         <div class="explanation-box">
                                             <h6><i class="bi bi-lightbulb text-primary me-2"></i>Explanation</h6>
                                             <p class="mb-0">{!! $answer['explain'] !!}</p>
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <button type="button" class="btn btn-light btn-sm" id="previous-button" disabled>
+                                            <button type="button" class="btn btn-light btn-sm" id="previous-button"
+                                                disabled>
                                                 <i class="bi bi-arrow-left-circle"></i>
                                             </button>
                                             <h6 class="text-white mb-0">
@@ -214,19 +238,20 @@
                                         </div>
                                     @endif
 
-                                    @if(isset($answer['note_description']) && !empty($answer['note_description']))
+                                    @if (isset($answer['note_description']) && !empty($answer['note_description']))
                                         <div class="note-box">
                                             <h6>
                                                 <i class="bi bi-journal-text text-warning me-2"></i>
                                                 Related Note
-                                                @if(isset($answer['note_title']) && !empty($answer['note_title']))
+                                                @if (isset($answer['note_title']) && !empty($answer['note_title']))
                                                     : {{ $answer['note_title'] }}
                                                 @endif
                                             </h6>
                                             <div>{!! $answer['note_description'] !!}</div>
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <button type="button" class="btn btn-light btn-sm" id="previous-button" disabled>
+                                            <button type="button" class="btn btn-light btn-sm" id="previous-button"
+                                                disabled>
                                                 <i class="bi bi-arrow-left-circle"></i>
                                             </button>
                                             <h6 class="text-white mb-0">
@@ -251,15 +276,13 @@
                 <div class="score-badge">
                     <h6 class="text-white mb-2">Final Score</h6>
                     <h4>
-                        {{ count($answers) > 0
-                            ? number_format(($quiz->correct / count($answers)) * 100, 2)
-                            : '0.00'
-                        }} %
+                        {{ count($answers) > 0 ? number_format(($quiz->correct / count($answers)) * 100, 2) : '0.00' }}
+                        %
                     </h4>
                     <small class="text-white">{{ $quiz->correct ?? 0 }} Correct | {{ count($answers) }} Total</small>
                 </div>
 
-                @if(!empty($answers))
+                @if (!empty($answers))
                     <h6 class="text-white mb-3">
                         <i class="bi bi-list-check me-2"></i>All Questions
                     </h6>
@@ -270,14 +293,14 @@
                                     <span class="text-white">
                                         <span class="d-inline-block text-truncate" style="max-width: 150px;">
                                             <strong>Q{{ $index + 1 }}.</strong>
-                                            @if(isset($answer['question']))
+                                            @if (isset($answer['question']))
                                                 {!! strip_tags($answer['question']) !!}
                                             @else
                                                 Question {{ $index + 1 }}
                                             @endif
                                         </span>
                                     </span>
-                                    @if(isset($answer['is_correct']) && $answer['is_correct'])
+                                    @if (isset($answer['is_correct']) && $answer['is_correct'])
                                         <i class="bi bi-check-circle-fill text-success"></i>
                                     @else
                                         <i class="bi bi-x-circle-fill text-danger"></i>
@@ -299,7 +322,7 @@
 
     @push('scripts')
         <script>
-            $(document).ready(function () {
+            $(document).ready(function() {
                 const totalQuestions = $('.sba-question').length;
                 let currentQuestionIndex = 0;
 
@@ -343,7 +366,7 @@
                     }
                 });
 
-                $('.question-link').click(function () {
+                $('.question-link').click(function() {
                     const index = $(this).data('index');
                     showQuestion(index);
                 });

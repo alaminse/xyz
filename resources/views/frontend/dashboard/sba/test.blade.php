@@ -46,13 +46,6 @@
                                 <input type="hidden" name="sba_id" value="{{ $question->sba_id }}" required>
                                 <input type="hidden" name="question_id" value="{{ $question->id }}" required>
 
-                                {{-- Submit or Lock Button --}}
-                                @if($isLocked)
-                                    <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
-                                       class="btn btn-warning w-100 fw-bold mt-3">
-                                        <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
-                                    </a>
-                                @else
                                 <ul class="list-group">
                                     @foreach (['option1', 'option2', 'option3', 'option4', 'option5'] as $option)
                                         @if ($question->{$option})
@@ -67,7 +60,13 @@
                                         @endif
                                     @endforeach
                                 </ul>
-
+                                {{-- Submit or Lock Button --}}
+                                @if($isLocked)
+                                    <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
+                                       class="btn btn-warning w-100 fw-bold mt-3">
+                                        <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
+                                    </a>
+                                @else
                                     <button type="submit" class="btn btn-primary w-100 mt-3">
                                         <i class="bi bi-check-circle me-2"></i>Submit Answer
                                     </button>

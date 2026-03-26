@@ -76,9 +76,10 @@ class NoteController extends Controller
             ->where('course_id', $course->id)
             ->first();
 
-        $isLocked = $enrolled && $enrolled->status === Status::FREETRIAL()->value;
+        // 🔒 Locked if: not enrolled at all, OR enrolled with FREETRIAL status
+        $isLocked = !$enrolled || $enrolled->status === Status::FREETRIAL()->value;
 
-        $notesQuery = Note::select('id', 'chapter_id', 'lesson_id', 'title', 'slug')
+        $notesQuery = Note::select('id', 'chapter_id', 'lesson_id', 'title', 'slug', 'isPaid') // 👈 isPaid
             ->where('chapter_id', $chapter->id)
             ->where('status', 1)
             ->whereHas('courses', function ($q) use ($course) {
@@ -99,7 +100,7 @@ class NoteController extends Controller
             'notes',
             'course_slug',
             'isLocked'
-        ));
+        ))->with('query', request('query'));
     }
 
     public function single_details($slug, $query = null)

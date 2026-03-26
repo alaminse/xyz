@@ -48,52 +48,52 @@
                                         data-question-id="{{ $question->id }}">
                                         <input type="hidden" name="quiz_id" value="{{ $quiz->id }}">
                                         {{-- Submit or Lock Button --}}
+
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            @if ($question->{"option{$i}"})
+                                                <div class="option-item" data-option="{{ $i }}"
+                                                    data-correct="{{ $question->{"answer{$i}"} }}">
+                                                    <div class="row align-items-center">
+                                                        <div class="col-12 col-md-6 mb-2 mb-md-0">
+                                                            <span class="option-text">
+                                                                {{ $question->{"option{$i}"} }}
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="col-12 col-md-6 text-md-end">
+                                                            <div
+                                                                class="option-controls d-flex flex-wrap justify-content-md-end gap-2">
+                                                                <span class="correct-label d-none">
+                                                                    <i class="bi bi-check-circle-fill"></i> Correct
+                                                                </span>
+                                                                <span class="chosen-label d-none"></span>
+
+                                                                @if (!$isLocked)
+                                                                    <label class="mb-0">
+                                                                        <input type="radio"
+                                                                            name="option{{ $i }}"
+                                                                            value="1">
+                                                                        <span class="badge bg-success">True</span>
+                                                                    </label>
+                                                                    <label class="mb-0">
+                                                                        <input type="radio"
+                                                                            name="option{{ $i }}"
+                                                                            value="0">
+                                                                        <span class="badge bg-danger">False</span>
+                                                                    </label>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        @endfor
                                         @if ($isLocked)
                                             <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
                                                 class="btn btn-warning w-100 fw-bold mt-3">
                                                 <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
                                             </a>
                                         @else
-                                            @for ($i = 1; $i <= 5; $i++)
-                                                @if ($question->{"option{$i}"})
-                                                    <div class="option-item" data-option="{{ $i }}"
-                                                        data-correct="{{ $question->{"answer{$i}"} }}">
-                                                        <div class="row align-items-center">
-                                                            <div class="col-12 col-md-6 mb-2 mb-md-0">
-                                                                <span class="option-text">
-                                                                    {{ $question->{"option{$i}"} }}
-                                                                </span>
-                                                            </div>
-
-                                                            <div class="col-12 col-md-6 text-md-end">
-                                                                <div
-                                                                    class="option-controls d-flex flex-wrap justify-content-md-end gap-2">
-                                                                    <span class="correct-label d-none">
-                                                                        <i class="bi bi-check-circle-fill"></i> Correct
-                                                                    </span>
-                                                                    <span class="chosen-label d-none"></span>
-
-                                                                    @if (!$isLocked)
-                                                                        <label class="mb-0">
-                                                                            <input type="radio"
-                                                                                name="option{{ $i }}"
-                                                                                value="1">
-                                                                            <span class="badge bg-success">True</span>
-                                                                        </label>
-                                                                        <label class="mb-0">
-                                                                            <input type="radio"
-                                                                                name="option{{ $i }}"
-                                                                                value="0">
-                                                                            <span class="badge bg-danger">False</span>
-                                                                        </label>
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                @endif
-                                            @endfor
-
                                             <button type="submit" class="btn submit-btn">
                                                 <i class="bi bi-check-circle me-2"></i>Submit Answer
                                             </button>
@@ -265,7 +265,7 @@
                             form.find('.option-item').each(function() {
                                 let optNum = $(this).data('option');
                                 let selected = options.hasOwnProperty(
-                                    `option${optNum}`) ?
+                                        `option${optNum}`) ?
                                     options[`option${optNum}`] : null;
 
                                 if (selected === null) return;
@@ -277,7 +277,7 @@
                                 let chosenText = parseInt(selected) == 1 ? 'True' :
                                     'False';
                                 let correctText = result.correct == 1 ? 'True' :
-                                'False';
+                                    'False';
 
                                 if (isCorrect) {
                                     $(this).removeClass('wrong').addClass('correct')
@@ -287,7 +287,7 @@
                                             'border-color': '#28a745'
                                         });
                                     $(this).find('.correct-label').removeClass(
-                                    'd-none');
+                                        'd-none');
                                     $(this).find('.chosen-label').addClass('d-none')
                                         .html('');
                                     correctCount++;
@@ -371,7 +371,7 @@
             $('.note-card table, .explanation-card table').each(function() {
                 $(this).wrap(
                     '<div style="overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%;"></div>'
-                    );
+                );
             });
 
             $(document).on('DOMNodeInserted', '.explanation-section', function() {
@@ -379,7 +379,7 @@
                     if (!$(this).parent().hasClass('table-scroll')) {
                         $(this).wrap(
                             '<div class="table-scroll" style="overflow-x:auto; width:100%;"></div>'
-                            );
+                        );
                     }
                 });
             });
