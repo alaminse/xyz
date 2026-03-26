@@ -1,7 +1,7 @@
 @extends('frontend.dashboard.app')
 @section('title', 'SBA Test')
 @section('css')
-<link rel="stylesheet" href="{{ asset('frontend/css/sba.css') }}">
+    <link rel="stylesheet" href="{{ asset('frontend/css/sba.css') }}">
 @endsection
 @section('content')
     <div class="card mb-2 topic-card">
@@ -53,7 +53,7 @@
                                                 <label class="w-100">
                                                     <input type="radio" name="selected_option"
                                                         value="{{ $option }}" required class="me-2"
-                                                        {{ $isLocked ? 'disabled' : '' }}>
+                                                        {{ $isPaid && $isLocked ? 'disabled' : '' }}>
                                                     {{ $question->{$option} }}
                                                 </label>
                                             </li>
@@ -61,9 +61,9 @@
                                     @endforeach
                                 </ul>
                                 {{-- Submit or Lock Button --}}
-                                @if($isLocked)
+                                @if ($isPaid && $isLocked)
                                     <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
-                                       class="btn btn-warning w-100 fw-bold mt-3">
+                                        class="btn btn-warning w-100 fw-bold mt-3">
                                         <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
                                     </a>
                                 @else
@@ -83,8 +83,10 @@
                                             <div class="mb-3">{!! $question->note?->description !!}</div>
                                         </div>
                                         <div class="d-flex justify-content-between mt-3">
-                                            <button type="button" class="btn btn-outline-secondary btn-sm prev-btn">←</button>
-                                            <button type="button" class="btn btn-outline-primary btn-sm next-btn">→</button>
+                                            <button type="button"
+                                                class="btn btn-outline-secondary btn-sm prev-btn">←</button>
+                                            <button type="button"
+                                                class="btn btn-outline-primary btn-sm next-btn">→</button>
                                         </div>
                                     @endif
                                 </div>
@@ -98,10 +100,17 @@
 
         <div class="col-sm-12 col-md-4 mb-2">
             <div class="status-card">
-                <a class="btn btn-light btn-sm mb-3 w-100" href="{{ route('sbas.index', $course->slug) }}">
-                    <i class="bi bi-x-circle"></i> End Session
-                </a>
 
+                @if ($isPaid && $isLocked)
+                <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
+                    class="btn btn-warning w-100 fw-bold mt-3">
+                    <i class="bi bi-lock-fill me-2"></i> Unlock End Session
+                </a>
+                @else
+                    <a class="btn btn-light btn-sm mb-3 w-100" href="{{ route('sbas.index', $course->slug) }}">
+                        <i class="bi bi-x-circle"></i> End Session
+                    </a>
+                @endif
                 <div class="score-display">
                     <h6 class="text-white mb-2">Your Score</h6>
                     <small class="text-white">
@@ -120,7 +129,7 @@
     @push('scripts')
         <script>
             $(document).ready(function() {
-                let isLocked = {{ $isLocked ? 'true' : 'false' }};
+                let isLocked = {{ $isPaid && $isLocked ? 'true' : 'false' }};
                 let totalQuestions = $('.sba-question').length;
                 let currentQuestionIndex = 0;
 
@@ -221,7 +230,8 @@
 
                             updateScoreDisplay(response.quiz);
 
-                            if (!$(`#question-status li[data-index="${currentQuestionIndex}"]`).length) {
+                            if (!$(`#question-status li[data-index="${currentQuestionIndex}"]`)
+                                .length) {
                                 $('#question-status').append(`
                                     <li class="list-group-item question-status-item d-flex justify-content-between"
                                         data-index="${currentQuestionIndex}">

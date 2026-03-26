@@ -167,6 +167,10 @@ class SbaController extends Controller
             return redirect()->back()->with('error', 'No questions available.');
         }
 
+
+        // After $sba is fetched, add:
+        $isPaid = (bool) $sba?->isPaid;
+        // Pass to view:
         return view('frontend.dashboard.sba.test', compact(
             'sbaQuestionsFiltered',
             'quiz',
@@ -174,7 +178,8 @@ class SbaController extends Controller
             'lesson',
             'course',
             'sba',
-            'isLocked'
+            'isLocked',
+            'isPaid'    // 👈 added
         ));
     }
 
@@ -300,20 +305,51 @@ class SbaController extends Controller
         // }
     }
 
-    public function review($slug)
-    {
-        $quiz = UserSbaProgress::where('slug', $slug)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+public function review($slug)
+{
+    $quiz = UserSbaProgress::where('slug', $slug)
+        ->where('user_id', Auth::id())
+        ->firstOrFail();
 
-        if (!$quiz || $quiz->answers == null) {
-            return redirect()->back()->with('error', 'You have not provided any answers yet.');
-        }
-
-        $answers = json_decode($quiz->answers, true);
-
-        return view('frontend.dashboard.sba.review', compact('answers', 'quiz'));
+    if (!$quiz || $quiz->answers == null) {
+        return redirect()->back()->with('error', 'You have not provided any answers yet.');
     }
+
+    /* =====================
+    ENROLL CHECK
+    ====================== */
+
+    $enrolled = EnrollUser::where('user_id', Auth::id())
+        ->where('course_id', $quiz->course_id)
+        ->first();
+
+    // ✅ Locked if not enrolled OR FREETRIAL
+    $isLocked = !$enrolled || $enrolled->status === Status::FREETRIAL()->value;
+
+    /* =====================
+    SBA isPaid
+    ====================== */
+
+    $sba = Sba::select('id', 'chapter_id', 'lesson_id', 'isPaid')
+        ->where('chapter_id', $quiz->chapter_id)
+        ->where('lesson_id', $quiz->lesson_id)
+        ->first();
+
+    $isPaid = (bool) $sba?->isPaid;
+
+    /* =====================
+    ANSWERS
+    ====================== */
+
+    $answers = json_decode($quiz->answers, true);
+
+    return view('frontend.dashboard.sba.review', compact(
+        'answers',
+        'quiz',
+        'isLocked', // 👈 added
+        'isPaid'    // 👈 added
+    ));
+}
 
     public function finishQuiz(Request $request)
     {

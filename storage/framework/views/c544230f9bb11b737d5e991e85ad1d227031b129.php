@@ -1,87 +1,99 @@
 <?php $__env->startSection('title', 'SBA Review'); ?>
 <?php $__env->startSection('css'); ?>
 
-<link rel="stylesheet" href="<?php echo e(asset('frontend/css/sba.css')); ?>">
-<style>
-    .review-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 15px;
-        padding: 5px;
-    }
-    .review-card {
-        background: white;
-        border-radius: 12px;
-        padding: 5px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    .option-correct {
-        background: #d4edda !important;
-        border-color: #28a745 !important;
-        font-weight: 600;
-    }
-    .option-wrong {
-        background: #f8d7da !important;
-        border-color: #dc3545 !important;
-    }
-    .option-item {
-        border: 2px solid #e0e0e0;
-        margin-bottom: 10px;
-        border-radius: 8px;
-        padding: 12px;
-    }
-    .explanation-box {
-        background: #e7f3ff;
-        border-left: 4px solid #2196f3;
-        padding: 15px;
-        border-radius: 8px;
-        margin-top: 15px;
-    }
-    .note-box {
-        background: #fff3cd;
-        border-left: 4px solid #ffc107;
-        padding: 15px;
-        border-radius: 8px;
-        margin-top: 15px;
-    }
-    .sidebar-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 12px;
-        padding: 5px;
-        position: sticky;
-        top: 20px;
-    }
-    .question-link {
-        background: rgba(255,255,255,0.1);
-        padding: 10px;
-        border-radius: 8px;
-        margin-bottom: 8px;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        border: 2px solid transparent;
-    }
-    .question-link:hover {
-        background: rgba(255,255,255,0.2);
-        border-color: rgba(255,255,255,0.5);
-        transform: translateX(5px);
-    }
-    .question-link.active {
-        background: rgba(255,255,255,0.3);
-        border-color: white;
-    }
-    .score-badge {
-        background: rgba(255,255,255,0.2);
-        padding: 15px;
-        border-radius: 10px;
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    .score-badge h4 {
-        color: white;
-        font-weight: bold;
-        font-size: 2rem;
-        margin: 0;
-    }
-</style>
+    <link rel="stylesheet" href="<?php echo e(asset('frontend/css/sba.css')); ?>">
+    <style>
+        .review-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 5px;
+        }
+
+        .review-card {
+            background: white;
+            border-radius: 12px;
+            padding: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .option-correct {
+            background: #d4edda !important;
+            border-color: #28a745 !important;
+            font-weight: 600;
+        }
+
+        .option-wrong {
+            background: #f8d7da !important;
+            border-color: #dc3545 !important;
+        }
+
+        .option-item {
+            border: 2px solid #e0e0e0;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .explanation-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .note-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .sidebar-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 5px;
+            position: sticky;
+            top: 20px;
+        }
+
+        .question-link {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .question-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateX(5px);
+        }
+
+        .question-link.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: white;
+        }
+
+        .score-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .score-badge h4 {
+            color: white;
+            font-weight: bold;
+            font-size: 2rem;
+            margin: 0;
+        }
+    </style>
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('content'); ?>
     
@@ -137,7 +149,8 @@
 
                     <div id="sba-container">
                         <?php $__currentLoopData = $answers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $answer): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <div class="sba-question" data-index="<?php echo e($index); ?>" style="<?php echo e($index == 0 ? '' : 'display:none;'); ?>">
+                            <div class="sba-question" data-index="<?php echo e($index); ?>"
+                                style="<?php echo e($index == 0 ? '' : 'display:none;'); ?>">
                                 <div class="review-card">
                                     <div class="d-flex justify-content-between align-items-start mb-3">
                                         <h5 class="mb-0">
@@ -148,7 +161,8 @@
                                                 Question not available
                                             <?php endif; ?>
                                         </h5>
-                                        <span class="badge <?php echo e(isset($answer['is_correct']) && $answer['is_correct'] ? 'bg-success' : 'bg-danger'); ?>">
+                                        <span
+                                            class="badge <?php echo e(isset($answer['is_correct']) && $answer['is_correct'] ? 'bg-success' : 'bg-danger'); ?>">
                                             <?php if(isset($answer['is_correct']) && $answer['is_correct']): ?>
                                                 <i class="bi bi-check-circle me-1"></i>Correct
                                             <?php else: ?>
@@ -166,81 +180,82 @@
                                         <?php $__currentLoopData = $options; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <?php if(isset($answer[$option]) && !empty($answer[$option])): ?>
                                                 <?php
-                                                    $hasOptions = true;
-                                                    $isCorrect = isset($answer['correct_option']) && $answer['correct_option'] == $option;
-                                                    $isSelected = isset($answer['selected_option']) && $answer['selected_option'] == $option;
-                                                    $class = $isCorrect ? 'option-correct' : ($isSelected ? 'option-wrong' : '');
+                                                    $isCorrect =
+                                                        isset($answer['correct_option']) &&
+                                                        $answer['correct_option'] == $option;
+                                                    $isSelected =
+                                                        isset($answer['selected_option']) &&
+                                                        $answer['selected_option'] == $option;
+                                                    $class = $isCorrect
+                                                        ? 'option-correct'
+                                                        : ($isSelected
+                                                            ? 'option-wrong'
+                                                            : '');
                                                 ?>
+
                                                 <li class="option-item <?php echo e($class); ?>">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <span>
                                                             <?php if($isSelected): ?>
-                                                                <i class="bi bi-hand-index me-2 <?php echo e($isCorrect ? 'text-success' : 'text-danger'); ?>"></i>
+                                                                <i
+                                                                    class="bi bi-hand-index me-2 <?php echo e($isCorrect ? 'text-success' : 'text-danger'); ?>"></i>
                                                             <?php endif; ?>
                                                             <?php echo e($answer[$option]); ?>
 
                                                         </span>
-                                                        <?php if($isCorrect): ?>
-                                                            <i class="bi bi-check-circle-fill text-success"></i>
-                                                        <?php elseif($isSelected && !$isCorrect): ?>
-                                                            <i class="bi bi-x-circle-fill text-danger"></i>
+
+                                                        
+                                                        <?php if(!$isPaid || !$isLocked): ?>
+                                                            <?php if($isCorrect): ?>
+                                                                <i class="bi bi-check-circle-fill text-success"></i>
+                                                            <?php elseif($isSelected && !$isCorrect): ?>
+                                                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                                            <?php endif; ?>
                                                         <?php endif; ?>
                                                     </div>
                                                 </li>
                                             <?php endif; ?>
                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-                                        <?php if(!$hasOptions): ?>
-                                            <li class="option-item">
-                                                <span class="text-muted">Options not available</span>
-                                            </li>
+                                        
+                                        <?php if($isPaid && $isLocked): ?>
+                                            <div class="text-center py-4 px-3 mt-3"
+                                                style="background:#fff8e1; border:2px dashed #ffc107; border-radius:12px;">
+                                                <i class="bi bi-lock-fill text-warning" style="font-size:2.5rem;"></i>
+                                                <h5 class="mt-3 mb-2">Answer is locked</h5>
+                                                <p class="text-muted mb-3">
+                                                    This is Premium content. Please upgrade your plan to see the answer.
+                                                </p>
+                                                <a href="<?php echo e(route('courses.checkout', ['course' => $quiz->course?->slug])); ?>"
+                                                    class="btn btn-warning fw-bold">
+                                                    <i class="bi bi-unlock-fill"></i> Upgrade to Premium
+                                                </a>
+                                            </div>
+                                        <?php else: ?>
+                                            
+                                            <?php if(isset($answer['explain']) && !empty($answer['explain'])): ?>
+                                                <div class="explanation-box">
+                                                    <h6><i class="bi bi-lightbulb text-primary me-2"></i>Explanation</h6>
+                                                    <p class="mb-0"><?php echo $answer['explain']; ?></p>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            
+                                            <?php if(isset($answer['note_description']) && !empty($answer['note_description'])): ?>
+                                                <div class="note-box">
+                                                    <h6>
+                                                        <i class="bi bi-journal-text text-warning me-2"></i>
+                                                        Related Note
+                                                        <?php if(isset($answer['note_title']) && !empty($answer['note_title'])): ?>
+                                                            : <?php echo e($answer['note_title']); ?>
+
+                                                        <?php endif; ?>
+                                                    </h6>
+                                                    <div><?php echo $answer['note_description']; ?></div>
+                                                </div>
+                                            <?php endif; ?>
                                         <?php endif; ?>
                                     </ul>
-
-                                    <?php if(isset($answer['explain']) && !empty($answer['explain'])): ?>
-                                        <div class="explanation-box">
-                                            <h6><i class="bi bi-lightbulb text-primary me-2"></i>Explanation</h6>
-                                            <p class="mb-0"><?php echo $answer['explain']; ?></p>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <button type="button" class="btn btn-light btn-sm" id="previous-button" disabled>
-                                                <i class="bi bi-arrow-left-circle"></i>
-                                            </button>
-                                            <h6 class="text-white mb-0">
-                                                Question <span id="current-question-number">1</span> of
-                                                <span id="total-question-number"><?php echo e(count($answers)); ?></span>
-                                            </h6>
-                                            <button type="button" class="btn btn-light btn-sm" id="next-button">
-                                                <i class="bi bi-arrow-right-circle"></i>
-                                            </button>
-                                        </div>
-                                    <?php endif; ?>
-
-                                    <?php if(isset($answer['note_description']) && !empty($answer['note_description'])): ?>
-                                        <div class="note-box">
-                                            <h6>
-                                                <i class="bi bi-journal-text text-warning me-2"></i>
-                                                Related Note
-                                                <?php if(isset($answer['note_title']) && !empty($answer['note_title'])): ?>
-                                                    : <?php echo e($answer['note_title']); ?>
-
-                                                <?php endif; ?>
-                                            </h6>
-                                            <div><?php echo $answer['note_description']; ?></div>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <button type="button" class="btn btn-light btn-sm" id="previous-button" disabled>
-                                                <i class="bi bi-arrow-left-circle"></i>
-                                            </button>
-                                            <h6 class="text-white mb-0">
-                                                Question <span id="current-question-number">1</span> of
-                                                <span id="total-question-number"><?php echo e(count($answers)); ?></span>
-                                            </h6>
-                                            <button type="button" class="btn btn-light btn-sm" id="next-button">
-                                                <i class="bi bi-arrow-right-circle"></i>
-                                            </button>
-                                        </div>
-                                    <?php endif; ?>
                                 </div>
                             </div>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -254,9 +269,9 @@
                 <div class="score-badge">
                     <h6 class="text-white mb-2">Final Score</h6>
                     <h4>
-                        <?php echo e(count($answers) > 0
-                            ? number_format(($quiz->correct / count($answers)) * 100, 2)
-                            : '0.00'); ?> %
+                        <?php echo e(count($answers) > 0 ? number_format(($quiz->correct / count($answers)) * 100, 2) : '0.00'); ?>
+
+                        %
                     </h4>
                     <small class="text-white"><?php echo e($quiz->correct ?? 0); ?> Correct | <?php echo e(count($answers)); ?> Total</small>
                 </div>
@@ -303,7 +318,7 @@
 
     <?php $__env->startPush('scripts'); ?>
         <script>
-            $(document).ready(function () {
+            $(document).ready(function() {
                 const totalQuestions = $('.sba-question').length;
                 let currentQuestionIndex = 0;
 
@@ -347,7 +362,7 @@
                     }
                 });
 
-                $('.question-link').click(function () {
+                $('.question-link').click(function() {
                     const index = $(this).data('index');
                     showQuestion(index);
                 });

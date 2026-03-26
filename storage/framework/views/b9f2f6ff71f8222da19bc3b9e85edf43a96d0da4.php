@@ -1,6 +1,6 @@
 <?php $__env->startSection('title', 'SBA Test'); ?>
 <?php $__env->startSection('css'); ?>
-<link rel="stylesheet" href="<?php echo e(asset('frontend/css/sba.css')); ?>">
+    <link rel="stylesheet" href="<?php echo e(asset('frontend/css/sba.css')); ?>">
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('content'); ?>
     <div class="card mb-2 topic-card">
@@ -45,13 +45,6 @@
                                 <input type="hidden" name="sba_id" value="<?php echo e($question->sba_id); ?>" required>
                                 <input type="hidden" name="question_id" value="<?php echo e($question->id); ?>" required>
 
-                                
-                                <?php if($isLocked): ?>
-                                    <a href="<?php echo e(route('courses.checkout', ['course' => $course->slug])); ?>"
-                                       class="btn btn-warning w-100 fw-bold mt-3">
-                                        <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
-                                    </a>
-                                <?php else: ?>
                                 <ul class="list-group">
                                     <?php $__currentLoopData = ['option1', 'option2', 'option3', 'option4', 'option5']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <?php if($question->{$option}): ?>
@@ -59,7 +52,7 @@
                                                 <label class="w-100">
                                                     <input type="radio" name="selected_option"
                                                         value="<?php echo e($option); ?>" required class="me-2"
-                                                        <?php echo e($isLocked ? 'disabled' : ''); ?>>
+                                                        <?php echo e($isPaid && $isLocked ? 'disabled' : ''); ?>>
                                                     <?php echo e($question->{$option}); ?>
 
                                                 </label>
@@ -67,7 +60,13 @@
                                         <?php endif; ?>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </ul>
-
+                                
+                                <?php if($isPaid && $isLocked): ?>
+                                    <a href="<?php echo e(route('courses.checkout', ['course' => $course->slug])); ?>"
+                                        class="btn btn-warning w-100 fw-bold mt-3">
+                                        <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
+                                    </a>
+                                <?php else: ?>
                                     <button type="submit" class="btn btn-primary w-100 mt-3">
                                         <i class="bi bi-check-circle me-2"></i>Submit Answer
                                     </button>
@@ -84,8 +83,10 @@
                                             <div class="mb-3"><?php echo $question->note?->description; ?></div>
                                         </div>
                                         <div class="d-flex justify-content-between mt-3">
-                                            <button type="button" class="btn btn-outline-secondary btn-sm prev-btn">←</button>
-                                            <button type="button" class="btn btn-outline-primary btn-sm next-btn">→</button>
+                                            <button type="button"
+                                                class="btn btn-outline-secondary btn-sm prev-btn">←</button>
+                                            <button type="button"
+                                                class="btn btn-outline-primary btn-sm next-btn">→</button>
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -99,10 +100,17 @@
 
         <div class="col-sm-12 col-md-4 mb-2">
             <div class="status-card">
-                <a class="btn btn-light btn-sm mb-3 w-100" href="<?php echo e(route('sbas.index', $course->slug)); ?>">
-                    <i class="bi bi-x-circle"></i> End Session
-                </a>
 
+                <?php if($isPaid && $isLocked): ?>
+                <a href="<?php echo e(route('courses.checkout', ['course' => $course->slug])); ?>"
+                    class="btn btn-warning w-100 fw-bold mt-3">
+                    <i class="bi bi-lock-fill me-2"></i> Unlock End Session
+                </a>
+                <?php else: ?>
+                    <a class="btn btn-light btn-sm mb-3 w-100" href="<?php echo e(route('sbas.index', $course->slug)); ?>">
+                        <i class="bi bi-x-circle"></i> End Session
+                    </a>
+                <?php endif; ?>
                 <div class="score-display">
                     <h6 class="text-white mb-2">Your Score</h6>
                     <small class="text-white">
@@ -121,7 +129,7 @@
     <?php $__env->startPush('scripts'); ?>
         <script>
             $(document).ready(function() {
-                let isLocked = <?php echo e($isLocked ? 'true' : 'false'); ?>;
+                let isLocked = <?php echo e($isPaid && $isLocked ? 'true' : 'false'); ?>;
                 let totalQuestions = $('.sba-question').length;
                 let currentQuestionIndex = 0;
 
@@ -222,7 +230,8 @@
 
                             updateScoreDisplay(response.quiz);
 
-                            if (!$(`#question-status li[data-index="${currentQuestionIndex}"]`).length) {
+                            if (!$(`#question-status li[data-index="${currentQuestionIndex}"]`)
+                                .length) {
                                 $('#question-status').append(`
                                     <li class="list-group-item question-status-item d-flex justify-content-between"
                                         data-index="${currentQuestionIndex}">

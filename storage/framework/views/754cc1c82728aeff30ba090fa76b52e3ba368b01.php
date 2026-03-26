@@ -47,12 +47,7 @@
                                         data-question-id="<?php echo e($question->id); ?>">
                                         <input type="hidden" name="quiz_id" value="<?php echo e($quiz->id); ?>">
                                         
-                                        <?php if($isLocked): ?>
-                                            <a href="<?php echo e(route('courses.checkout', ['course' => $course->slug])); ?>"
-                                               class="btn btn-warning w-100 fw-bold mt-3">
-                                                <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
-                                            </a>
-                                        <?php else: ?>
+
                                         <?php for($i = 1; $i <= 5; $i++): ?>
                                             <?php if($question->{"option{$i}"}): ?>
                                                 <div class="option-item" data-option="<?php echo e($i); ?>"
@@ -66,29 +61,35 @@
                                                         </div>
 
                                                         <div class="col-12 col-md-6 text-md-end">
-                                                            <div class="option-controls d-flex flex-wrap justify-content-md-end gap-2">
+                                                            <div
+                                                                class="option-controls d-flex flex-wrap justify-content-md-end gap-2">
                                                                 <span class="correct-label d-none">
                                                                     <i class="bi bi-check-circle-fill"></i> Correct
                                                                 </span>
                                                                 <span class="chosen-label d-none"></span>
 
-                                                                <?php if(!$isLocked): ?>
-                                                                    <label class="mb-0">
-                                                                        <input type="radio" name="option<?php echo e($i); ?>" value="1">
-                                                                        <span class="badge bg-success">True</span>
-                                                                    </label>
-                                                                    <label class="mb-0">
-                                                                        <input type="radio" name="option<?php echo e($i); ?>" value="0">
-                                                                        <span class="badge bg-danger">False</span>
-                                                                    </label>
-                                                                <?php endif; ?>
+                                                                <label class="mb-0">
+                                                                    <input type="radio" name="option<?php echo e($i); ?>"
+                                                                        value="1">
+                                                                    <span class="badge bg-success">True</span>
+                                                                </label>
+                                                                <label class="mb-0">
+                                                                    <input type="radio" name="option<?php echo e($i); ?>"
+                                                                        value="0">
+                                                                    <span class="badge bg-danger">False</span>
+                                                                </label>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             <?php endif; ?>
                                         <?php endfor; ?>
-
+                                        <?php if($isLocked): ?>
+                                            <a href="<?php echo e(route('courses.checkout', ['course' => $course->slug])); ?>"
+                                                class="btn btn-warning w-100 fw-bold mt-3">
+                                                <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
+                                            </a>
+                                        <?php else: ?>
                                             <button type="submit" class="btn submit-btn">
                                                 <i class="bi bi-check-circle me-2"></i>Submit Answer
                                             </button>
@@ -116,7 +117,9 @@
 
                                         <?php if($question->note): ?>
                                             <div class="note-card">
-                                                <h6><i class="bi bi-journal-text me-2"></i><?php echo e($question->note?->title); ?></h6>
+                                                <h6><i class="bi bi-journal-text me-2"></i><?php echo e($question->note?->title); ?>
+
+                                                </h6>
                                                 <div><?php echo $question->note?->description; ?></div>
                                             </div>
                                             <div class="explanation-nav">
@@ -258,7 +261,8 @@
 
                             form.find('.option-item').each(function() {
                                 let optNum = $(this).data('option');
-                                let selected = options.hasOwnProperty(`option${optNum}`) ?
+                                let selected = options.hasOwnProperty(
+                                        `option${optNum}`) ?
                                     options[`option${optNum}`] : null;
 
                                 if (selected === null) return;
@@ -267,26 +271,33 @@
                                 if (!result) return;
 
                                 let isCorrect = result.is_correct;
-                                let chosenText = parseInt(selected) == 1 ? 'True' : 'False';
-                                let correctText = result.correct == 1 ? 'True' : 'False';
+                                let chosenText = parseInt(selected) == 1 ? 'True' :
+                                    'False';
+                                let correctText = result.correct == 1 ? 'True' :
+                                    'False';
 
                                 if (isCorrect) {
-                                    $(this).removeClass('wrong').addClass('correct').css({
-                                        'background': '#f0fff4',
-                                        'border-left': '4px solid #28a745',
-                                        'border-color': '#28a745'
-                                    });
-                                    $(this).find('.correct-label').removeClass('d-none');
-                                    $(this).find('.chosen-label').addClass('d-none').html('');
+                                    $(this).removeClass('wrong').addClass('correct')
+                                        .css({
+                                            'background': '#f0fff4',
+                                            'border-left': '4px solid #28a745',
+                                            'border-color': '#28a745'
+                                        });
+                                    $(this).find('.correct-label').removeClass(
+                                        'd-none');
+                                    $(this).find('.chosen-label').addClass('d-none')
+                                        .html('');
                                     correctCount++;
                                 } else {
-                                    $(this).removeClass('correct').addClass('wrong').css({
-                                        'background': '#fff5f5',
-                                        'border-left': '4px solid #dc3545',
-                                        'border-color': '#dc3545'
-                                    });
+                                    $(this).removeClass('correct').addClass('wrong')
+                                        .css({
+                                            'background': '#fff5f5',
+                                            'border-left': '4px solid #dc3545',
+                                            'border-color': '#dc3545'
+                                        });
                                     $(this).find('.correct-label').addClass('d-none');
-                                    $(this).find('.chosen-label').removeClass('d-none').html(`
+                                    $(this).find('.chosen-label').removeClass('d-none')
+                                        .html(`
                                         <span class="text-danger">
                                             You chose: <strong>${chosenText}</strong><br>
                                             Correct: <strong>${correctText}</strong>
@@ -298,7 +309,8 @@
                             correct += correctCount;
                             totalAnswered += Object.keys(options).length;
 
-                            let percent = totalAnswered > 0 ? Math.round((correct / totalAnswered) * 100) : 0;
+                            let percent = totalAnswered > 0 ? Math.round((correct /
+                                totalAnswered) * 100) : 0;
                             $('#scorePercent').text(percent);
 
                             let statusBadge = correctCount === Object.keys(options).length ?
@@ -306,7 +318,8 @@
                                 `<span>${correctCount}/${Object.keys(options).length}</span>`;
 
                             let iconClass = correctCount === Object.keys(options).length ?
-                                'check-circle-fill' : correctCount === 0 ? 'x-circle' : 'dash-circle';
+                                'check-circle-fill' : correctCount === 0 ? 'x-circle' :
+                                'dash-circle';
 
                             $('#statusList').append(`
                                 <li class="list-group-item status-item d-flex justify-content-between align-items-center">
@@ -315,10 +328,13 @@
                                 </li>
                             `);
 
-                            $('.status-list').animate({ scrollTop: $('.status-list')[0].scrollHeight }, 300);
+                            $('.status-list').animate({
+                                scrollTop: $('.status-list')[0].scrollHeight
+                            }, 300);
 
                             form.find('.submit-btn').hide();
-                            form.closest('.question-card').find('.explanation-section').slideDown();
+                            form.closest('.question-card').find('.explanation-section')
+                                .slideDown();
 
                         } else {
                             alert('Something went wrong! Please try again.');
@@ -329,7 +345,8 @@
                     error: function(xhr) {
                         let errorMsg = 'Failed to submit! Please try again.';
                         if (xhr.responseJSON) {
-                            errorMsg = xhr.responseJSON.error || xhr.responseJSON.message || errorMsg;
+                            errorMsg = xhr.responseJSON.error || xhr.responseJSON.message ||
+                                errorMsg;
                         }
                         alert(errorMsg);
                         form.find('.submit-btn').prop('disabled', false).html(
@@ -349,13 +366,17 @@
 
         $(document).ready(function() {
             $('.note-card table, .explanation-card table').each(function() {
-                $(this).wrap('<div style="overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%;"></div>');
+                $(this).wrap(
+                    '<div style="overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%;"></div>'
+                );
             });
 
             $(document).on('DOMNodeInserted', '.explanation-section', function() {
                 $(this).find('table').each(function() {
                     if (!$(this).parent().hasClass('table-scroll')) {
-                        $(this).wrap('<div class="table-scroll" style="overflow-x:auto; width:100%;"></div>');
+                        $(this).wrap(
+                            '<div class="table-scroll" style="overflow-x:auto; width:100%;"></div>'
+                        );
                     }
                 });
             });

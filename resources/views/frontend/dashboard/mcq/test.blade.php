@@ -68,20 +68,16 @@
                                                                 </span>
                                                                 <span class="chosen-label d-none"></span>
 
-                                                                @if (!$isLocked)
-                                                                    <label class="mb-0">
-                                                                        <input type="radio"
-                                                                            name="option{{ $i }}"
-                                                                            value="1">
-                                                                        <span class="badge bg-success">True</span>
-                                                                    </label>
-                                                                    <label class="mb-0">
-                                                                        <input type="radio"
-                                                                            name="option{{ $i }}"
-                                                                            value="0">
-                                                                        <span class="badge bg-danger">False</span>
-                                                                    </label>
-                                                                @endif
+                                                                <label class="mb-0">
+                                                                    <input type="radio" name="option{{ $i }}"
+                                                                        value="1">
+                                                                    <span class="badge bg-success">True</span>
+                                                                </label>
+                                                                <label class="mb-0">
+                                                                    <input type="radio" name="option{{ $i }}"
+                                                                        value="0">
+                                                                    <span class="badge bg-danger">False</span>
+                                                                </label>
                                                             </div>
                                                         </div>
                                                     </div>

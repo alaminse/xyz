@@ -179,7 +179,6 @@
                                         @foreach ($options as $option)
                                             @if (isset($answer[$option]) && !empty($answer[$option]))
                                                 @php
-                                                    $hasOptions = true;
                                                     $isCorrect =
                                                         isset($answer['correct_option']) &&
                                                         $answer['correct_option'] == $option;
@@ -192,6 +191,7 @@
                                                             ? 'option-wrong'
                                                             : '');
                                                 @endphp
+
                                                 <li class="option-item {{ $class }}">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <span>
@@ -201,68 +201,58 @@
                                                             @endif
                                                             {{ $answer[$option] }}
                                                         </span>
-                                                        @if ($isCorrect)
-                                                            <i class="bi bi-check-circle-fill text-success"></i>
-                                                        @elseif($isSelected && !$isCorrect)
-                                                            <i class="bi bi-x-circle-fill text-danger"></i>
+
+                                                        {{-- 🔒 Hide correct/wrong icons if locked --}}
+                                                        @if (!$isPaid || !$isLocked)
+                                                            @if ($isCorrect)
+                                                                <i class="bi bi-check-circle-fill text-success"></i>
+                                                            @elseif($isSelected && !$isCorrect)
+                                                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                                            @endif
                                                         @endif
                                                     </div>
                                                 </li>
                                             @endif
                                         @endforeach
 
-                                        @if (!$hasOptions)
-                                            <li class="option-item">
-                                                <span class="text-muted">Options not available</span>
-                                            </li>
+                                        {{-- 🔒 Lock banner over explanation if isPaid && isLocked --}}
+                                        @if ($isPaid && $isLocked)
+                                            <div class="text-center py-4 px-3 mt-3"
+                                                style="background:#fff8e1; border:2px dashed #ffc107; border-radius:12px;">
+                                                <i class="bi bi-lock-fill text-warning" style="font-size:2.5rem;"></i>
+                                                <h5 class="mt-3 mb-2">Answer is locked</h5>
+                                                <p class="text-muted mb-3">
+                                                    This is Premium content. Please upgrade your plan to see the answer.
+                                                </p>
+                                                <a href="{{ route('courses.checkout', ['course' => $quiz->course?->slug]) }}"
+                                                    class="btn btn-warning fw-bold">
+                                                    <i class="bi bi-unlock-fill"></i> Upgrade to Premium
+                                                </a>
+                                            </div>
+                                        @else
+                                            {{-- Explanation --}}
+                                            @if (isset($answer['explain']) && !empty($answer['explain']))
+                                                <div class="explanation-box">
+                                                    <h6><i class="bi bi-lightbulb text-primary me-2"></i>Explanation</h6>
+                                                    <p class="mb-0">{!! $answer['explain'] !!}</p>
+                                                </div>
+                                            @endif
+
+                                            {{-- Note --}}
+                                            @if (isset($answer['note_description']) && !empty($answer['note_description']))
+                                                <div class="note-box">
+                                                    <h6>
+                                                        <i class="bi bi-journal-text text-warning me-2"></i>
+                                                        Related Note
+                                                        @if (isset($answer['note_title']) && !empty($answer['note_title']))
+                                                            : {{ $answer['note_title'] }}
+                                                        @endif
+                                                    </h6>
+                                                    <div>{!! $answer['note_description'] !!}</div>
+                                                </div>
+                                            @endif
                                         @endif
                                     </ul>
-
-                                    @if (isset($answer['explain']) && !empty($answer['explain']))
-                                        <div class="explanation-box">
-                                            <h6><i class="bi bi-lightbulb text-primary me-2"></i>Explanation</h6>
-                                            <p class="mb-0">{!! $answer['explain'] !!}</p>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <button type="button" class="btn btn-light btn-sm" id="previous-button"
-                                                disabled>
-                                                <i class="bi bi-arrow-left-circle"></i>
-                                            </button>
-                                            <h6 class="text-white mb-0">
-                                                Question <span id="current-question-number">1</span> of
-                                                <span id="total-question-number">{{ count($answers) }}</span>
-                                            </h6>
-                                            <button type="button" class="btn btn-light btn-sm" id="next-button">
-                                                <i class="bi bi-arrow-right-circle"></i>
-                                            </button>
-                                        </div>
-                                    @endif
-
-                                    @if (isset($answer['note_description']) && !empty($answer['note_description']))
-                                        <div class="note-box">
-                                            <h6>
-                                                <i class="bi bi-journal-text text-warning me-2"></i>
-                                                Related Note
-                                                @if (isset($answer['note_title']) && !empty($answer['note_title']))
-                                                    : {{ $answer['note_title'] }}
-                                                @endif
-                                            </h6>
-                                            <div>{!! $answer['note_description'] !!}</div>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <button type="button" class="btn btn-light btn-sm" id="previous-button"
-                                                disabled>
-                                                <i class="bi bi-arrow-left-circle"></i>
-                                            </button>
-                                            <h6 class="text-white mb-0">
-                                                Question <span id="current-question-number">1</span> of
-                                                <span id="total-question-number">{{ count($answers) }}</span>
-                                            </h6>
-                                            <button type="button" class="btn btn-light btn-sm" id="next-button">
-                                                <i class="bi bi-arrow-right-circle"></i>
-                                            </button>
-                                        </div>
-                                    @endif
                                 </div>
                             </div>
                         @endforeach
