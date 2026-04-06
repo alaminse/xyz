@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Medi Maniac')</title>
+    <title><?php echo $__env->yieldContent('title', 'Medi Maniac'); ?></title>
 
-    <link href="{{ asset('frontend/bootstrap-5.3.3/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="<?php echo e(asset('frontend/bootstrap-5.3.3/css/bootstrap.min.css')); ?>" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
@@ -267,10 +267,11 @@
     </nav>
 
     <div class="mm-page">
-        @yield('content')
+        <?php echo $__env->yieldContent('content'); ?>
     </div>
 
-    <script src="{{ asset('frontend/bootstrap-5.3.3/js/jquery-3.7.1.min.js') }}"></script>
-    <script src="{{ asset('frontend/bootstrap-5.3.3/js/bootstrap.min.js') }}"></script>
+    <script src="<?php echo e(asset('frontend/bootstrap-5.3.3/js/jquery-3.7.1.min.js')); ?>"></script>
+    <script src="<?php echo e(asset('frontend/bootstrap-5.3.3/js/bootstrap.min.js')); ?>"></script>
 </body>
 </html>
+<?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/medimaniac/resources/views/layouts/app.blade.php ENDPATH**/ ?>

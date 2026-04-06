@@ -1,64 +1,58 @@
-@extends('layouts.frontend')
-@section('title', 'Reset Password')
+@extends('layouts.app')
+@section('title', 'Reset Password — Medi Maniac')
+
 @section('content')
-@php
-    $page_title = "Reset Password";
-@endphp
+<div class="mm-card">
+    <div class="mm-card-accent"></div>
+    <div class="mm-card-body">
 
-@include('frontend.includes.bradcaump')
-<section class="htc__login__container text-center ptb--80 bg__white">
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <div class="login__area__wrap">
-                    <div class="login__inner">
-                        <form method="POST" action="{{ route('password.email') }}">
-                            @csrf
-                            <h2>Reset Password</h2>
-
-                            @if (session('status'))
-                                <div class="alert alert-success" role="alert">
-                                    {{ session('status') }}
-                                </div>
-                            @endif
-                            <div class="login__form__box">
-                                <div class="login__form">
-                                    <input id="email" type="email" class="@error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
-
-                                    @error('email')
-                                        <span class="invalid-feedback" role="alert">
-                                            <strong>{{ $message }}</strong>
-                                        </span>
-                                    @enderror
-                                </div>
-                        {{-- <div class="row mb-3">
-                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
-
-                                @error('email')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div> --}}
-
-
-                        <div class="login__btn">
-                            <button type="submit" class="htc__btn btn--theme">
-                                {{ __('Send Password Reset Link') }}
-                            </button>
-                        </div>
-                </div>
-            </form>
+        <div class="mm-icon-badge">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12.065 2C6.505 2 2 6.486 2 12s4.505 10 10.065 10C17.585 22 22 17.514 22 12S17.585 2 12.065 2zM13 17h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
         </div>
+
+        <h1 class="mm-title">Forgot password?</h1>
+        <p class="mm-subtitle">No worries — we'll email you a reset link right away.</p>
+
+        @if (session('status'))
+            <div class="mm-alert mm-alert-success">
+                <span class="mm-alert-icon">✓</span>
+                <span>{{ session('status') }}</span>
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('password.email') }}">
+            @csrf
+
+            <div class="mm-field">
+                <label for="email" class="mm-label">Email Address</label>
+                <input
+                    id="email"
+                    type="email"
+                    class="mm-input @error('email') is-invalid @enderror"
+                    name="email"
+                    value="{{ old('email') }}"
+                    required
+                    autocomplete="email"
+                    autofocus
+                    placeholder="you@example.com"
+                >
+                @error('email')
+                    <p class="mm-invalid-msg">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <button type="submit" class="mm-btn">
+                Send Reset Link
+            </button>
+
+        </form>
+
+        <p class="mm-footer-text">
+            Remember it? <a href="{{ route('login') }}" class="mm-link">Back to sign in</a>
+        </p>
+
     </div>
 </div>
-</div>
-</div>
-</section>
-
 @endsection
-

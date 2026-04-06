@@ -1,4 +1,3 @@
-
 <?php $__env->startSection('title', 'Log In'); ?>
 <?php $__env->startSection('content'); ?>
 <div class="d-flex justify-content-center">
@@ -68,12 +67,7 @@ unset($__errorArgs, $__bag); ?>
                 </div>
             </div>
         </div>
-        <div class="mb-3">
-            <a href="#" class="btn btn-outline-info login-with">Login With Facebook</a>
-        </div>
-        <div class="mb-3">
-            <a href="#" class="btn btn-outline-danger login-with">Login With Google</a>
-        </div>
+        
     </div>
 </div>
 

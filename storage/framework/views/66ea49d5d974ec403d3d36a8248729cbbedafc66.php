@@ -1,7 +1,6 @@
-@extends('layouts.app')
-@section('title', 'Verify Email — Medi Maniac')
+<?php $__env->startSection('title', 'Verify Email — Medi Maniac'); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="mm-card">
     <div class="mm-card-accent"></div>
     <div class="mm-card-body">
@@ -15,32 +14,35 @@
         <h1 class="mm-title">Check your inbox</h1>
         <p class="mm-subtitle">We sent a verification link to your email address.</p>
 
-        @if (session('resent'))
+        <?php if(session('resent')): ?>
             <div class="mm-alert mm-alert-success">
                 <span class="mm-alert-icon">✓</span>
-                <span>{{ __('A fresh verification link has been sent to your email address.') }}</span>
+                <span><?php echo e(__('A fresh verification link has been sent to your email address.')); ?></span>
             </div>
-        @endif
+        <?php endif; ?>
 
         <p style="font-size:0.92rem; color:#4a5568; line-height:1.6; margin-bottom:1.75rem;">
-            {{ __('Before proceeding, please check your email for a verification link.') }}
+            <?php echo e(__('Before proceeding, please check your email for a verification link.')); ?>
+
         </p>
 
         <div class="mm-divider">didn't receive it?</div>
 
-        <form method="POST" action="{{ route('verification.resend') }}">
-            @csrf
+        <form method="POST" action="<?php echo e(route('verification.resend')); ?>">
+            <?php echo csrf_field(); ?>
             <button type="submit" class="mm-btn">
                 Resend Verification Email
             </button>
         </form>
 
         <p class="mm-footer-text">
-            Wrong account? <a href="{{ route('logout') }}" class="mm-link"
+            Wrong account? <a href="<?php echo e(route('logout')); ?>" class="mm-link"
                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Sign out</a>
         </p>
-        <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display:none;">@csrf</form>
+        <form id="logout-form" method="POST" action="<?php echo e(route('logout')); ?>" style="display:none;"><?php echo csrf_field(); ?></form>
 
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/medimaniac/resources/views/auth/verify.blade.php ENDPATH**/ ?>

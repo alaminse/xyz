@@ -18,10 +18,9 @@ use App\Http\Controllers\Dashboard\VideoStreamController;
 use App\Http\Controllers\Dashboard\LectureVideoController;
 use App\Http\Controllers\Dashboard\WrittenAssessmentController;
 
+Auth::routes(['verify' => true]);
 
-Auth::routes();
-
-Route::group(['middleware' => ['auth', 'role:user']], function () {
+Route::group(['middleware' => ['auth', 'verified', 'role:user']], function () {
     Route::get('/profile', [UserController::class, 'profile'])->name('profile');
     Route::get('/profile/reset/{course}', [UserController::class, 'profile_reset'])->name('profile.reset');
     Route::post('/update/profile/{id}', [UserController::class, 'update_profile'])->name('update.profile');
@@ -33,7 +32,7 @@ Route::group(['middleware' => ['auth', 'role:user']], function () {
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::middleware(['auth', 'role:user'])
+Route::middleware(['auth', 'verified', 'role:user'])
     ->group(function () {
 
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
@@ -160,7 +159,7 @@ Route::controller(CourseController::class)
         Route::get('/', 'index')->name('index');
         Route::get('details/{course}', 'details')->name('details');
         Route::get('/{slug}',  'getCourse');
-        Route::get('/checkout/{course}/{isTrial?}',  'checkout')->name('checkout');
-        Route::post('/checkout/store/{course}',  'checkout_store')->name('checkout.store');
-        Route::get('/invoice/{slug}', 'invoice')->name('invoice');
+        Route::get('/checkout/{course}/{isTrial?}',  'checkout')->middleware('verified')->name('checkout');
+        Route::post('/checkout/store/{course}',  'checkout_store')->middleware('verified')->name('checkout.store');
+        Route::get('/invoice/{slug}', 'invoice')->middleware('verified')->name('invoice');
     });
