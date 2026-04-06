@@ -275,16 +275,6 @@
                                         <i class="fa fa-edit"></i> Edit Video
                                     </a>
 
-                                    <form action="<?php echo e(route('admin.lecturevideos.status', $video->id)); ?>"
-                                          method="POST" class="w-100">
-                                        <?php echo csrf_field(); ?>
-                                        <button type="submit" class="btn btn-secondary btn-block">
-                                            <i class="fa fa-toggle-on"></i>
-                                            <?php echo e($video->status == 1 ? 'Deactivate' : 'Activate'); ?>
-
-                                        </button>
-                                    </form>
-
                                     <form action="<?php echo e(route('admin.lecturevideos.destroy', $video->id)); ?>"
                                           method="POST"
                                           onsubmit="return confirm('Are you sure? This action cannot be undone!');"

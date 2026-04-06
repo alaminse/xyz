@@ -139,15 +139,24 @@
                                     <div class="video-icon">
                                         <i class="bi bi-play-circle-fill text-primary fs-4"></i>
                                     </div>
-                                    <h6 class="flex-grow-1 mb-0 text-dark"><?php echo e($item->title); ?></h6>
-                                    <?php if($isLocked): ?>
+                                    <h6 class="flex-grow-1 mb-0 text-dark">
+                                        <?php echo e($item->title); ?>
+
+                                        <?php if($item->isPaid): ?>
+                                            <span class="badge bg-warning text-dark ms-1" style="font-size:10px;">
+                                                <i class="bi bi-lock-fill"></i> Premium
+                                            </span>
+                                        <?php endif; ?>
+                                    </h6>
+
+                                    <?php if($item->isPaid && $isLocked): ?>
                                         <a href="<?php echo e(route('courses.checkout', ['course' => $course->slug])); ?>"
-                                        class="btn btn-sm btn-warning fw-bold flex-shrink-0">
+                                            class="btn btn-sm btn-warning fw-bold flex-shrink-0">
                                             <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
                                         </a>
                                     <?php else: ?>
                                         <a href="<?php echo e(route('videos.single.details', ['slug' => $item->slug, 'course' => $course->slug])); ?>"
-                                        class="btn btn-sm button-yellow flex-shrink-0 text-nowrap">
+                                            class="btn btn-sm button-yellow flex-shrink-0 text-nowrap">
                                             <i class="bi bi-eye me-1"></i>Details
                                         </a>
                                     <?php endif; ?>

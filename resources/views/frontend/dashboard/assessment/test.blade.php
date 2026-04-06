@@ -90,16 +90,9 @@
                                                 Next <i class="fas fa-arrow-right"></i>
                                             </button>
                                         @else
-                                            @if ($isLocked)
-                                                <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
-                                                    class="btn btn-warning w-100 fw-bold mt-3">
-                                                    <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
-                                                </a>
-                                            @else
                                                 <button type="button" class="btn btn-assessment btn-submit submit">
                                                     <i class="fas fa-check-circle"></i> Submit Assessment
                                                 </button>
-                                            @endif
                                         @endif
                                     </div>
                                 </div>
@@ -180,16 +173,9 @@
                                                 Next <i class="fas fa-arrow-right"></i>
                                             </button>
                                         @else
-                                            @if ($isLocked)
-                                                <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
-                                                    class="btn btn-warning w-100 fw-bold mt-3">
-                                                    <i class="bi bi-lock-fill me-2"></i> Unlock Answer — Upgrade to Premium
-                                                </a>
-                                            @else
                                                 <button type="button" class="btn btn-assessment btn-submit submit">
                                                     <i class="fas fa-check-circle"></i> Submit Assessment
                                                 </button>
-                                            @endif
                                         @endif
                                     </div>
                                 </div>
@@ -276,14 +262,15 @@
 
     @push('scripts')
         <script>
-            // Assessment configuration
             const assessmentConfig = {
                 assessmentId: '{{ $assessment->id }}',
                 courseId: '{{ $course->id }}',
                 questions: {!! json_encode($questions) !!},
                 time: parseInt('{{ $assessment->time }}'),
                 csrfToken: '{{ csrf_token() }}',
-                submitRoute: '{{ route('assessments.submit') }}'
+                submitRoute: '{{ route('assessments.submit') }}',
+                isPaid: {{ $isPaid ? 'true' : 'false' }},       // 👈 added
+                isLocked: {{ $isLocked ? 'true' : 'false' }},   // 👈 added
             };
         </script>
         <script src="{{ asset('frontend/js/assessment_test.js') }}"></script>

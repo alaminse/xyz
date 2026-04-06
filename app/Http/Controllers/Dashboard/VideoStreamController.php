@@ -18,10 +18,25 @@ class VideoStreamController extends Controller
     {
         $video = LectureVideo::findOrFail($id);
 
-        // Security Check 1: Authentication
+        // 🔒 Must be logged in
         abort_unless(Auth::check(), 403, 'Login required');
 
-        // Security Check 2: Enrollment & Payment Status
+        // 🔒 Block direct URL access (IDM, wget, curl) — must come from our site
+        $referer = $request->header('Referer');
+        $allowedOrigin = config('app.url');
+        if (! $referer || ! str_starts_with($referer, $allowedOrigin)) {
+            abort(403, 'Direct access not allowed');
+        }
+
+        // 🔒 Block non-browser user agents (IDM, wget, curl)
+        $userAgent = strtolower($request->header('User-Agent', ''));
+        $blockedAgents = ['idm', 'wget', 'curl', 'python', 'libwww', 'java', 'go-http'];
+        foreach ($blockedAgents as $agent) {
+            if (str_contains($userAgent, $agent)) {
+                abort(403, 'Download tools are not allowed');
+            }
+        }
+
         if ($video->isPaid) {
             $enrolled = EnrollUser::where('user_id', Auth::id())
                 ->where('course_id', $video->course_id)
@@ -30,27 +45,32 @@ class VideoStreamController extends Controller
 
             abort_unless($enrolled, 403, 'You need to enroll in this course');
 
-            // If paid video but user is on free trial
             if ($enrolled->status == Status::FREETRIAL()->value) {
                 abort(403, 'This is a paid video. Please upgrade your enrollment.');
             }
         }
 
-        // Get video file path
         $relativePath = str_replace('storage/', '', $video->uploaded_link);
-
-        // Try private folder first
         $path = storage_path('app/private/videos/' . basename($relativePath));
 
-        // Fallback to public folder
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             $path = storage_path('app/public/' . $relativePath);
         }
 
         abort_unless(file_exists($path), 404, 'Video file not found');
 
-        // Stream with range support (for seeking)
-        return $this->streamFileWithRange($path, $request);
+        // 🔒 Add headers that prevent caching/downloading
+        return response()->stream(function() use ($path, $request) {
+            $this->streamFileWithRange($path, $request);
+        }, 200, [
+            'Content-Type'              => 'video/mp4',
+            'Accept-Ranges'             => 'bytes',
+            'Cache-Control'             => 'no-store, no-cache, must-revalidate, private',
+            'Pragma'                    => 'no-cache',
+            'X-Content-Type-Options'    => 'nosniff',
+            'Content-Disposition'       => 'inline', // 🔒 inline = no download prompt
+            'X-Frame-Options'           => 'SAMEORIGIN',
+        ]);
     }
 
     /**

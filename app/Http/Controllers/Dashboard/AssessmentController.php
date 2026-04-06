@@ -52,7 +52,6 @@ class AssessmentController extends Controller
     {
         $user_assessment = UserAssessmentProgress::where('slug', $slug)->firstOrFail();
 
-
         $enrolled = EnrollUser::where('user_id', $this->user->id)
             ->where('course_id', $user_assessment->course_id)
             ->first();
@@ -60,20 +59,137 @@ class AssessmentController extends Controller
         if (! $enrolled) {
             return redirect()->back()->with('error', 'You are not enrolled in this course.');
         }
-        // ✅ FREETRIAL হলে answer locked
+
+        // ✅ Locked if FREETRIAL
         $isLocked = $enrolled->status === Status::FREETRIAL()->value;
 
         $data = $this->getDetails($user_assessment->slug);
 
-        // Add this line
         $assessment = Assessment::find($user_assessment->assessment_id);
 
-        $user = Auth::user();
-        $name = $user->name.'-'.$user->id;
+        // ✅ isPaid from assessment
+        $isPaid = (bool) $assessment?->isPaid;
+
         $course = Course::select('id', 'name', 'slug')->first($user_assessment->course_id);
 
-        // Update compact to include assessment
-        return view('frontend.dashboard.assessment.show', compact('data', 'assessment', 'course', 'isLocked'));
+        return view('frontend.dashboard.assessment.show', compact(
+            'data',
+            'assessment',
+            'course',
+            'isLocked',
+            'isPaid'    // 👈 added
+        ));
+    }
+
+    public function exam($assessment, $course = null)
+    {
+        $course = Course::select('id', 'name', 'slug')->where('slug', $course)->first();
+
+        if (! $course) {
+            return redirect()->back()->with('error', 'Course not found for this assessment!!');
+        }
+
+        $dateToMatch = Carbon::now()->toDateTimeString();
+
+        $enrolled = EnrollUser::where('user_id', $this->user->id)
+            ->where('course_id', $course->id)
+            ->first();
+
+        if (! $enrolled) {
+            return redirect()->back()->with('error', 'You are not enrolled in this course.');
+        }
+
+        // ✅ Locked if FREETRIAL
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
+
+        $assessment = Assessment::where('start_date_time', '<=', $dateToMatch)
+            ->where('end_date_time', '>=', $dateToMatch)
+            ->where('status', Status::ACTIVE())
+            ->where('slug', $assessment)
+            ->first();
+
+        if (! $assessment) {
+            return redirect()->back()->with('error', 'Exam not available!! Try Again!!');
+        }
+
+        if ($assessment->end_date_time && $assessment->end_date_time < $dateToMatch) {
+            return redirect()->back()->with('error', 'This exam has already ended!!');
+        }
+
+        // ✅ isPaid from assessment
+        $isPaid = (bool) $assessment->isPaid;
+
+        $questionIds = $assessment->question_ids;
+
+        if (empty($questionIds)) {
+            return redirect()->back()->with('error', 'No questions found for this assessment.');
+        }
+
+        $decodedIds = is_string($questionIds) ? json_decode($questionIds, true) : $questionIds;
+
+        if (empty($decodedIds)) {
+            return redirect()->back()->with('error', 'Invalid question data.');
+        }
+
+        $questions = AssessmentQuestion::whereIn('id', $decodedIds)
+            ->inRandomOrder()
+            ->get();
+
+        if ($questions->isEmpty()) {
+            return redirect()->back()->with('error', 'No questions available for this assessment.');
+        }
+
+        return view('frontend.dashboard.assessment.test', compact(
+            'course',
+            'assessment',
+            'questions',
+            'isLocked',
+            'isPaid'    // 👈 added
+        ));
+    }
+
+    public function print($slug)
+    {
+        ini_set('max_execution_time', 300);
+        ini_set('memory_limit', '512M');
+
+        $data = $this->getDetails($slug);
+        $user = Auth::user();
+
+        $course = \App\Models\Course::where('slug', $data['course'])->first();
+
+        $enrolled = EnrollUser::where('user_id', $user->id)
+            ->where('course_id', $course?->id)
+            ->first();
+
+        if (! $enrolled) {
+            return redirect()->back()->with('error', 'You are not enrolled in this course.');
+        }
+
+        // ✅ Locked if FREETRIAL
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
+
+        // ✅ isPaid from assessment
+        $assessment = Assessment::find($data['assessment']->id ?? null);
+        $isPaid = (bool) $assessment?->isPaid;
+
+        try {
+            $pdf = Pdf::loadView(
+                'frontend.dashboard.assessment.print',
+                compact('data', 'isLocked', 'isPaid') // 👈 added isPaid
+            );
+
+            $pdf->setPaper('A4', 'portrait');
+            $pdf->set_option('isHtml5ParserEnabled', true);
+            $pdf->set_option('isRemoteEnabled', true);
+
+            return $pdf->stream('assessment-'.$user->id.'.pdf');
+
+        } catch (\Exception $e) {
+            Log::error('PDF Generation Error: '.$e->getMessage());
+
+            return back()->with('error', 'Failed to generate PDF.');
+        }
     }
 
     // Alternative: Accessor ব্যবহার করে rank পেতে - FIXED VERSION
@@ -197,67 +313,6 @@ class AssessmentController extends Controller
             ->get();
 
         return view('frontend.dashboard.assessment.see_all', compact('assessments', 'cour', 'chap', 'less', 'progress'));
-    }
-
-    public function exam($assessment, $course = null)
-    {
-        $course = Course::select('id', 'name', 'slug')->where('slug', $course)->first();
-
-        if (! $course) {
-            return redirect()->back()->with('error', 'Course not found for this assessment!!');
-        }
-
-        $dateToMatch = Carbon::now()->toDateTimeString();
-
-        $enrolled = EnrollUser::where('user_id', $this->user->id)
-            ->where('course_id', $course->id)
-            ->first();
-
-        if (! $enrolled) {
-            return redirect()->back()->with('error', 'You are not enrolled in this course.');
-        }
-        // ✅ FREETRIAL হলে answer locked
-        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
-        // Find assessment with start_date_time check
-        $assessment = Assessment::where('start_date_time', '<=', $dateToMatch)
-            ->where('end_date_time', '>=', $dateToMatch)
-            ->where('status', Status::ACTIVE())
-            ->where('slug', $assessment)
-            ->first();
-
-        if (! $assessment) {
-            return redirect()->back()->with('error', 'Exam not available!! Try Again!!');
-        }
-
-        // Check if assessment has ended
-        if ($assessment->end_date_time && $assessment->end_date_time < $dateToMatch) {
-            return redirect()->back()->with('error', 'This exam has already ended!!');
-        }
-
-        // Get question IDs
-        $questionIds = $assessment->question_ids;
-
-        if (empty($questionIds)) {
-            return redirect()->back()->with('error', 'No questions found for this assessment.');
-        }
-
-        // Decode question IDs (if stored as JSON)
-        $decodedIds = is_string($questionIds) ? json_decode($questionIds, true) : $questionIds;
-
-        if (empty($decodedIds)) {
-            return redirect()->back()->with('error', 'Invalid question data.');
-        }
-
-        // Get questions in random order
-        $questions = AssessmentQuestion::whereIn('id', $decodedIds)
-            ->inRandomOrder()
-            ->get();
-
-        if ($questions->isEmpty()) {
-            return redirect()->back()->with('error', 'No questions available for this assessment.');
-        }
-
-        return view('frontend.dashboard.assessment.test', compact('course', 'assessment', 'questions', 'isLocked'));
     }
 
     public function submit(Request $request)
@@ -403,21 +458,21 @@ class AssessmentController extends Controller
 
         $user_assessment = UserAssessmentProgress::updateOrCreate(
             [
-                'course_id'     => $validated['course_id'],
-                'user_id'       => $this->user->id,
+                'course_id' => $validated['course_id'],
+                'user_id' => $this->user->id,
                 'assessment_id' => $assessment->id,
             ],
             [
-                'slug'                  => checkSlug('user_assessment_progress'),
-                'total_marks'           => $assessment->total_marks,
-                'achive_marks'          => $achieved_marks,
-                'percentage'            => $percentage,
-                'question_ids'          => $assessment->question_ids,
-                'remaining_question'    => json_encode([]),
-                'answered_question'     => json_encode($answeredQuestionIds),
-                'selectedOptions'       => json_encode($selectedOptions),
-                'details'               => json_encode($questionDetails),
-                'current_index'         => count($selectedOptions) - 1,
+                'slug' => checkSlug('user_assessment_progress'),
+                'total_marks' => $assessment->total_marks,
+                'achive_marks' => $achieved_marks,
+                'percentage' => $percentage,
+                'question_ids' => $assessment->question_ids,
+                'remaining_question' => json_encode([]),
+                'answered_question' => json_encode($answeredQuestionIds),
+                'selectedOptions' => json_encode($selectedOptions),
+                'details' => json_encode($questionDetails),
+                'current_index' => count($selectedOptions) - 1,
             ]
         );
 
@@ -462,46 +517,5 @@ class AssessmentController extends Controller
             'details' => $user_answer,
             'assessment' => $assessment, // Add this
         ];
-    }
-
-    public function print($slug)
-    {
-        ini_set('max_execution_time', 300);
-        ini_set('memory_limit', '512M');
-
-        $data = $this->getDetails($slug);
-        $user = Auth::user();
-
-        // ✅ Get course properly
-        $course = \App\Models\Course::where('slug', $data['course'])->first();
-
-        // ✅ Enrollment check FIXED
-        $enrolled = EnrollUser::where('user_id', $user->id)
-            ->where('course_id', $course?->id)
-            ->first();
-
-        if (!$enrolled) {
-            return redirect()->back()->with('error', 'You are not enrolled in this course.');
-        }
-
-        // ✅ Lock logic
-        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
-
-        try {
-            $pdf = Pdf::loadView(
-                'frontend.dashboard.assessment.print',
-                compact('data', 'isLocked') // ✅ PASS THIS
-            );
-
-            $pdf->setPaper('A4', 'portrait');
-            $pdf->set_option('isHtml5ParserEnabled', true);
-            $pdf->set_option('isRemoteEnabled', true);
-
-            return $pdf->stream('assessment-'.$user->id.'.pdf');
-
-        } catch (\Exception $e) {
-            Log::error('PDF Generation Error: '.$e->getMessage());
-            return back()->with('error', 'Failed to generate PDF.');
-        }
     }
 }

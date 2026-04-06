@@ -82,14 +82,17 @@
                             <div class="card-body">
                                 <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2">
                                     <h5 class="flex-grow-1 mb-0"><?php echo $item->question; ?></h5>
-                                    <?php if($isLocked): ?>
+
+                                    <?php if($item->isPaid && $isLocked): ?>
+                                        
                                         <a href="<?php echo e(route('courses.checkout', ['course' => $course->slug])); ?>"
-                                        class="btn btn-sm btn-warning fw-bold flex-shrink-0">
+                                            class="btn btn-sm btn-warning fw-bold flex-shrink-0">
                                             <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
                                         </a>
                                     <?php else: ?>
+                                        
                                         <a href="<?php echo e(route('writtens.single.details', $item->slug)); ?>"
-                                        class="btn btn-sm button-yellow flex-shrink-0">Details</a>
+                                            class="btn btn-sm button-yellow flex-shrink-0">Details</a>
                                     <?php endif; ?>
                                 </div>
                             </div>

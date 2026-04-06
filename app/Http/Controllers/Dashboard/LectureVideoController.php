@@ -23,16 +23,11 @@ class LectureVideoController extends Controller
         });
     }
 
-    private function isPaid($course)
+    private function getEnrollment($courseId)
     {
-        $enrolled = EnrollUser::where('user_id', Auth::user()->id)
-            ->where('course_id', $course)
+        return EnrollUser::where('user_id', Auth::id())
+            ->where('course_id', $courseId)
             ->first();
-
-        return $enrolled->status == Status::ACTIVE()->value
-            ? 1
-            : ($enrolled->status == Status::FREETRIAL()->value ? 0 : 9);
-
     }
 
     public function index($course)
@@ -41,101 +36,112 @@ class LectureVideoController extends Controller
             ->where('slug', $course)
             ->firstOrFail();
 
-        if (! $course) {
-            abort(404, 'Course not found');
-        }
-
-        $chapters = course_chapters($course, 'videos');
-
-        $isPaid = $this->isPaid(course: $course->id);
-        if ($isPaid == 9) return redirect()->back()->with('error', 'Something is Wrong!!');
-
-        $isLocked = $isPaid == 0; // ✅
-
-        $latest = LectureVideo::select('id', 'slug', 'title', 'status')
-            ->whereHas('courses', fn($q) => $q->where('course_id', $course->id));
-
-        if ($isPaid == 0) {
-            $latest = $latest->where('isPaid', $isPaid);
-        }
-
-        $latest = $latest->orderBy('id', 'desc')->where('status', Status::ACTIVE())->take(5)->get();
-
-        return view('frontend.dashboard.lecture-video.index', compact(
-            'chapters',
-            'latest',
-            'course',
-            'isLocked' // ✅
-        ));
-    }
-
-    public function details($course_slug, $chapter, $lesson = null)
-    {
-        $course = Course::select('id', 'name', 'slug')->where('slug', $course_slug)->firstOrFail();
-        $chapter = Chapter::select('id')->where('slug', $chapter)->firstOrFail();
-        $lesson = $lesson ? Lesson::select('id')->where('slug', $lesson)->firstOrFail() : null;
-
-        $enrolled = EnrollUser::where('user_id', $this->user->id)
-            ->where('course_id', $course->id)
-            ->first();
+        $enrolled = $this->getEnrollment($course->id);
 
         if (! $enrolled) {
             return redirect()->back()->with('error', 'You are not enrolled in this course.');
         }
 
-        $isLocked = $enrolled->status === Status::FREETRIAL()->value; // ✅
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
 
-        $data = LectureVideo::whereHas('courses', fn($q) => $q->where('course_id', $course->id))
-            ->where('chapter_id', $chapter->id);
+        $chapters = course_chapters($course, 'videos');
 
-        if ($lesson) {
-            $data->where('lesson_id', $lesson->id);
+        $latestQuery = LectureVideo::select('id', 'slug', 'title', 'isPaid', 'status')
+            ->whereHas('courses', fn($q) => $q->where('course_id', $course->id))
+            ->where('status', Status::ACTIVE());
+
+        // ✅ Free trial users only see free videos in recent list
+        if ($isLocked) {
+            $latestQuery->where('isPaid', 0);
         }
 
-        $data->where('status', Status::ACTIVE());
-        $videos = $data->latest()->get();
+        $latest = $latestQuery->orderBy('id', 'desc')->take(5)->get();
 
-        if ($videos->isEmpty()) return redirect()->back()->with('error', 'This lesson is Empty!');
+        return view('frontend.dashboard.lecture-video.index', compact(
+            'chapters',
+            'latest',
+            'course',
+            'isLocked'
+        ));
+    }
+
+    public function details($course_slug, $chapter, $lesson = null)
+    {
+        $course  = Course::select('id', 'name', 'slug')->where('slug', $course_slug)->firstOrFail();
+        $chapter = Chapter::select('id')->where('slug', $chapter)->firstOrFail();
+        $lesson  = $lesson ? Lesson::select('id')->where('slug', $lesson)->firstOrFail() : null;
+
+        $enrolled = $this->getEnrollment($course->id);
+
+        if (! $enrolled) {
+            return redirect()->back()->with('error', 'You are not enrolled in this course.');
+        }
+
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
+
+        $query = LectureVideo::select('id', 'slug', 'title', 'isPaid', 'status')
+            ->whereHas('courses', fn($q) => $q->where('course_id', $course->id))
+            ->where('chapter_id', $chapter->id)
+            ->where('status', Status::ACTIVE());
+
+        if ($lesson) {
+            $query->where('lesson_id', $lesson->id);
+        }
+
+        $videos = $query->latest()->get();
+
+        if ($videos->isEmpty()) {
+            return redirect()->back()->with('error', 'This lesson is Empty!');
+        }
 
         return view('frontend.dashboard.lecture-video.lists', compact(
             'videos',
             'course',
-            'isLocked' // ✅
+            'isLocked'
         ));
     }
 
     public function single_details($slug, $course_slug = null)
     {
-        if(!$course_slug) return redirect()->back()->with('error', 'Course not found. try again!!');
-        $video = LectureVideo::where('slug', $slug)->firstOrFail();
+        if (! $course_slug) {
+            return redirect()->back()->with('error', 'Course not found. Try again!');
+        }
 
-        // Check authentication
-        // Check if user has access to this video
-        // (Add your enrollment/payment check here)
-        abort_unless(auth()->check(), 403, 'Please login to watch this video');
+        abort_unless(Auth::check(), 403, 'Please login to watch this video');
 
-        // Generate signed URL with expiry
+        $video  = LectureVideo::where('slug', $slug)->firstOrFail();
+        $course = Course::select('id', 'name', 'slug')->where('slug', $course_slug)->firstOrFail();
+
+        $enrolled = $this->getEnrollment($course->id);
+
+        if (! $enrolled) {
+            return redirect()->back()->with('error', 'You are not enrolled in this course.');
+        }
+
+        // ✅ If video is paid and user is on free trial → block
+        if ($video->isPaid && $enrolled->status === Status::FREETRIAL()->value) {
+            return redirect()->route('courses.checkout', ['course' => $course_slug])
+                ->with('error', 'This is premium content. Please upgrade your plan.');
+        }
+
         $signedUrl = $this->generateSignedBunnyUrl($video);
 
         return view('frontend.dashboard.lecture-video.details', [
-            'video' => $video,
+            'video'      => $video,
+            'course'     => $course,
             'course_slug' => $course_slug,
-            'signedUrl' => $signedUrl,
-            'userEmail' => auth()->user()->email
+            'signedUrl'  => $signedUrl,
+            'userEmail'  => Auth::user()->email,
         ]);
     }
 
     private function generateSignedBunnyUrl($video)
     {
         $libraryId = env('BUNNY_VIDEO_LIBRARY_ID');
-        $videoId = $video->uploaded_link;
-        $expires = now()->addHours(2)->timestamp; // 2 ঘণ্টা পর expire হবে
+        $videoId   = $video->uploaded_link;
+        $expires   = now()->addHours(2)->timestamp;
+        $token     = hash('sha256', env('BUNNY_API_KEY') . $videoId . $expires);
 
-        // Security token generate
-        $token = hash('sha256', env('BUNNY_API_KEY') . $videoId . $expires);
-
-        // Signed iframe URL
         return "https://iframe.mediadelivery.net/embed/{$libraryId}/{$videoId}?token={$token}&expires={$expires}";
     }
-
 }

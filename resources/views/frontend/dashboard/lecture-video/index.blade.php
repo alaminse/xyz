@@ -138,15 +138,23 @@
                                     <div class="video-icon">
                                         <i class="bi bi-play-circle-fill text-primary fs-4"></i>
                                     </div>
-                                    <h6 class="flex-grow-1 mb-0 text-dark">{{ $item->title }}</h6>
-                                    @if($isLocked)
+                                    <h6 class="flex-grow-1 mb-0 text-dark">
+                                        {{ $item->title }}
+                                        @if($item->isPaid)
+                                            <span class="badge bg-warning text-dark ms-1" style="font-size:10px;">
+                                                <i class="bi bi-lock-fill"></i> Premium
+                                            </span>
+                                        @endif
+                                    </h6>
+
+                                    @if($item->isPaid && $isLocked)
                                         <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
-                                        class="btn btn-sm btn-warning fw-bold flex-shrink-0">
+                                            class="btn btn-sm btn-warning fw-bold flex-shrink-0">
                                             <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
                                         </a>
                                     @else
                                         <a href="{{ route('videos.single.details', ['slug' => $item->slug, 'course' => $course->slug]) }}"
-                                        class="btn btn-sm button-yellow flex-shrink-0 text-nowrap">
+                                            class="btn btn-sm button-yellow flex-shrink-0 text-nowrap">
                                             <i class="bi bi-eye me-1"></i>Details
                                         </a>
                                     @endif

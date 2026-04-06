@@ -11,7 +11,13 @@ class AssessmentTest {
         this.time = config.time;
         this.csrfToken = config.csrfToken;
         this.submitRoute = config.submitRoute;
-        this.isPremium = config.isPremium ?? true; // ✅ নতুন — default true (safe fallback)
+
+        // ✅ isPaid + isLocked replaces isPremium
+        this.isPaid   = config.isPaid   ?? false;
+        this.isLocked = config.isLocked ?? false;
+
+        // ✅ Truly locked only if isPaid AND isLocked
+        this.contentLocked = this.isPaid && this.isLocked;
 
         this.currentIndex = 0;
         this.selectedOptions = {};
@@ -55,10 +61,14 @@ class AssessmentTest {
         });
 
         $(document).on('click', '.submit', function() {
+            // 🔒 Block submit if content is locked
+            if (self.contentLocked) return;
             self.showSubmitModal();
         });
 
         $(document).on('click', '.submit-from-sidebar', function() {
+            // 🔒 Block submit if content is locked
+            if (self.contentLocked) return;
             self.showSubmitModal();
         });
 
@@ -85,6 +95,13 @@ class AssessmentTest {
         this.timer = setInterval(function() {
             if (self.timeRemaining <= 0) {
                 clearInterval(self.timer);
+
+                // 🔒 Don't auto-submit if content is locked
+                if (self.contentLocked) {
+                    alert("Time's up!");
+                    return;
+                }
+
                 alert("Time's up! Submitting your assessment...");
                 self.submitAnswer();
                 return;
@@ -294,26 +311,34 @@ class AssessmentTest {
             </div>
         `;
 
-        // ✅ Free Trial হলে sidebar submit button এ lock note দেখাবে
-        const lockNote = !this.isPremium
+        // ✅ Show lock note if isPaid && isLocked
+        const lockNote = this.contentLocked
             ? `<small class="d-block mt-2 text-center"
                     style="color:#92400e; font-size:11px; background:#fffbeb;
                            border:1px dashed #f59e0b; border-radius:4px; padding:4px 8px;">
-                   🔒 Answers will be locked after submission
+                   🔒 This is Premium content — Upgrade to unlock answers
                </small>`
             : '';
 
-        const submitButtonHtml = `
-            <div class="submit-section">
-                <button type="button" class="btn btn-success btn-block submit-from-sidebar">
-                    <i class="fas fa-paper-plane"></i> Submit Assessment
-                </button>
-                <small class="text-muted d-block mt-2 text-center">
-                    ${answeredCount} of ${this.questions.length} total questions answered
-                </small>
-                ${lockNote}
-            </div>
-        `;
+        // ✅ Hide submit button in sidebar if locked
+        const submitButtonHtml = this.contentLocked
+            ? `<div class="submit-section">
+                   <div class="text-center py-3 px-2"
+                       style="background:#fff8e1; border:2px dashed #ffc107; border-radius:8px;">
+                       <i class="bi bi-lock-fill text-warning" style="font-size:1.5rem;"></i>
+                       <p class="mb-2 mt-1 fw-semibold" style="font-size:13px;">Premium Content</p>
+                       <small class="text-muted">Upgrade your plan to submit and see answers.</small>
+                   </div>
+               </div>`
+            : `<div class="submit-section">
+                   <button type="button" class="btn btn-success btn-block submit-from-sidebar">
+                       <i class="fas fa-paper-plane"></i> Submit Assessment
+                   </button>
+                   <small class="text-muted d-block mt-2 text-center">
+                       ${answeredCount} of ${this.questions.length} total questions answered
+                   </small>
+                   ${lockNote}
+               </div>`;
 
         $("#progress-count").html(summaryHtml);
         $("#selected-options-count").html(resultHtml);

@@ -425,7 +425,11 @@
                         </div>
                     @endif
 
-                    @if ($isLocked)
+                    @if($isPaid && $isLocked)
+                        {{-- 🔒 No explanation in PDF for locked users --}}
+                        <div style="background:#fff8e1; border:2px dashed #ffc107; border-radius:8px; padding:15px; text-align:center; margin-top:15px;">
+                            <strong>🔒 Explanation locked — Upgrade to Premium to view.</strong>
+                        </div>
                     @else
                         @if (!empty($question['explanation']))
                             <div class="explanation-section">

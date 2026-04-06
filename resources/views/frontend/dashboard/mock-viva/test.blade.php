@@ -43,7 +43,8 @@
                                             {{ $index + 1 }}: {{ $q->question }}
                                         </div>
 
-                                        @if ($isLocked)
+                                        @if($isPaid && $isLocked)
+                                            {{-- 🔒 Paid mock + free trial user --}}
                                             <div class="p-2 rounded text-center"
                                                 style="background-color: #fff8e1; border: 2px dashed #ffc107; border-radius: 8px;">
                                                 <i class="bi bi-lock-fill text-warning fs-5"></i>
@@ -54,6 +55,7 @@
                                                 </a>
                                             </div>
                                         @else
+                                            {{-- ✅ Free mock OR premium enrolled --}}
                                             <div class="answer-text p-2 rounded"
                                                 style="display: none; background-color: #d4edda;">
                                                 {!! $q->answer !!}

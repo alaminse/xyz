@@ -204,15 +204,27 @@
                                 <div class="video-item">
                                     <div class="video-number">{{ $key + 1 }}</div>
                                     <i class="bi bi-play-circle-fill video-icon"></i>
-                                    <h6 class="video-title">{{ $video->title }}</h6>
-                                    @if($isLocked)
+                                    <h6 class="video-title">
+                                        {{ $video->title }}
+                                        @if($video->isPaid)
+                                            <span class="badge bg-warning text-dark ms-1" style="font-size:10px;">
+                                                <i class="bi bi-lock-fill"></i> Premium
+                                            </span>
+                                        @else
+                                            <span class="badge bg-success ms-1" style="font-size:10px;">Free</span>
+                                        @endif
+                                    </h6>
+
+                                    @if($video->isPaid && $isLocked)
+                                        {{-- Paid video + free trial user --}}
                                         <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
-                                        class="btn btn-warning btn-sm fw-bold">
+                                            class="btn btn-warning btn-sm fw-bold">
                                             <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
                                         </a>
                                     @else
+                                        {{-- Free video OR premium enrolled user --}}
                                         <a href="{{ route('videos.single.details', ['slug' => $video->slug, 'course' => $course->slug]) }}"
-                                        class="btn details-btn">
+                                            class="btn details-btn">
                                             <i class="bi bi-eye me-1"></i>Details
                                         </a>
                                     @endif

@@ -16,26 +16,38 @@
                 <section id="info-utile" class="">
                     <h3 class="text-center text-uppercase mb-3 lead-h-text text-white">Topic</h3>
                     @isset($written)
-                    <div id="notes-container">
-                        @foreach ($written as $key => $assessment)
-                            <div class="card mb-2">
-                                <div class="card-body mb-1 p-2 note-item">
-                                    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2">
-                                        <h5 class="flex-grow-1 note-title mb-0">{!! $assessment->question !!}</h5>
-                                        @if($isLocked)
-                                            <a href="{{ route('courses.checkout', ['course' => $course_slug]) }}"
-                                               class="btn btn-sm btn-warning fw-bold flex-shrink-0">
-                                                <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
-                                            </a>
-                                        @else
-                                            <a href="{{ route('writtens.single.details', ['slug' => $assessment->slug, 'query' => $query ?? null]) }}"
-                                               class="btn btn-sm button-yellow flex-shrink-0">Details</a>
-                                        @endif
+                        <div id="notes-container">
+                            @foreach ($written as $key => $assessment)
+                                <div class="card mb-2">
+                                    <div class="card-body mb-1 p-2 note-item">
+                                        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2">
+                                            <h5 class="flex-grow-1 note-title mb-0">
+                                                {!! $assessment->question !!}
+                                                @if($assessment->isPaid)
+                                                    <span class="badge bg-warning text-dark ms-1" style="font-size:10px;">
+                                                        <i class="bi bi-lock-fill"></i> Premium
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-success ms-1" style="font-size:10px;">Free</span>
+                                                @endif
+                                            </h5>
+
+                                            @if($assessment->isPaid && $isLocked)
+                                                {{-- 🔒 Paid item + free trial --}}
+                                                <a href="{{ route('courses.checkout', ['course' => $course_slug]) }}"
+                                                    class="btn btn-sm btn-warning fw-bold flex-shrink-0">
+                                                    <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
+                                                </a>
+                                            @else
+                                                {{-- ✅ Free item OR premium enrolled --}}
+                                                <a href="{{ route('writtens.single.details', ['slug' => $assessment->slug, 'query' => $query ?? null]) }}"
+                                                    class="btn btn-sm button-yellow flex-shrink-0">Details</a>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        @endforeach
-                    </div>
+                            @endforeach
+                        </div>
                     @endisset
                 </section>
             </div>

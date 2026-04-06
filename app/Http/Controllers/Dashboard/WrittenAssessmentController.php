@@ -19,21 +19,15 @@ class WrittenAssessmentController extends Controller
     {
         $this->middleware(function ($request, $next) {
             $this->user = Auth::user();
-
             return $next($request);
         });
     }
 
-    private function isPaid($course)
+    private function getEnrollment($courseId)
     {
-        $enrolled = EnrollUser::where('user_id', Auth::user()->id)
-            ->where('course_id', $course)
+        return EnrollUser::where('user_id', $this->user->id)
+            ->where('course_id', $courseId)
             ->first();
-
-        return $enrolled->status == Status::ACTIVE()->value
-            ? 1
-            : ($enrolled->status == Status::FREETRIAL()->value ? 0 : 9);
-
     }
 
     public function index($course)
@@ -42,59 +36,62 @@ class WrittenAssessmentController extends Controller
             ->where('slug', $course)
             ->firstOrFail();
 
-        if (! $course) {
-            abort(404, 'Course not found');
-        }
-
-        $chapters = course_chapters($course, 'written');
-
-        $isPaid = $this->isPaid(course: $course->id);
-        $isLocked = $isPaid == 0; // ✅
-
-        $latest = WrittenAssessment::select('id', 'slug', 'question', 'status')
-            ->whereHas('courses', fn ($q) => $q->where('course_id', $course->id));
-
-        if ($isPaid == 0) {
-            $latest = $latest->where('isPaid', $isPaid);
-        }
-
-        $latest = $latest->orderBy('id', 'desc')->where('status', Status::ACTIVE())->take(5)->get();
-
-        return view('frontend.dashboard.written-assessment.index', compact(
-            'chapters',
-            'latest',
-            'course',
-            'isLocked' // ✅
-        ));
-    }
-
-    public function details($course_slug, $chapter, $lesson = null)
-    {
-        $course = Course::select('id')->where('slug', $course_slug)->firstOrFail();
-        $chapter = Chapter::select('id')->where('slug', $chapter)->firstOrFail();
-        $lesson = $lesson ? Lesson::select('id')->where('slug', $lesson)->firstOrFail() : null;
-
-        $enrolled = EnrollUser::where('user_id', $this->user->id)
-            ->where('course_id', $course->id)
-            ->first();
+        $enrolled = $this->getEnrollment($course->id);
 
         if (! $enrolled) {
             return redirect()->back()->with('error', 'You are not enrolled in this course.');
         }
 
+        // ✅ Locked if FREETRIAL
         $isLocked = $enrolled->status === Status::FREETRIAL()->value;
 
-        $written = WrittenAssessment::query()
+        $chapters = course_chapters($course, 'written');
+
+        $latestQuery = WrittenAssessment::select('id', 'slug', 'question', 'isPaid', 'status')
+            ->whereHas('courses', fn ($q) => $q->where('course_id', $course->id))
+            ->where('status', Status::ACTIVE());
+
+        // ✅ Free trial users only see free items in recent list
+        if ($isLocked) {
+            $latestQuery->where('isPaid', 0);
+        }
+
+        $latest = $latestQuery->orderBy('id', 'desc')->take(5)->get();
+
+        return view('frontend.dashboard.written-assessment.index', compact(
+            'chapters',
+            'latest',
+            'course',
+            'isLocked'
+        ));
+    }
+
+    public function details($course_slug, $chapter, $lesson = null)
+    {
+        $course  = Course::select('id', 'slug')->where('slug', $course_slug)->firstOrFail();
+        $chapter = Chapter::select('id', 'slug')->where('slug', $chapter)->firstOrFail();
+        $lesson  = $lesson ? Lesson::select('id', 'slug')->where('slug', $lesson)->firstOrFail() : null;
+
+        $enrolled = $this->getEnrollment($course->id);
+
+        if (! $enrolled) {
+            return redirect()->back()->with('error', 'You are not enrolled in this course.');
+        }
+
+        // ✅ Locked if FREETRIAL
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
+
+        $writtenQuery = WrittenAssessment::select('id', 'slug', 'question', 'isPaid', 'status')
             ->where('chapter_id', $chapter->id)
             ->where('status', Status::ACTIVE())
             ->whereHas('courses', fn ($q) => $q->where('courses.id', $course->id));
 
         if ($lesson) {
-            $written->where('lesson_id', $lesson->id);
+            $writtenQuery->where('lesson_id', $lesson->id);
         }
 
-        // ❌ isPaid filter সরিয়ে দিন — সব question দেখাবে, শুধু answer locked
-        $written = $written->latest()->get();
+        // ✅ Show all questions — lock is applied per item in blade
+        $written = $writtenQuery->latest()->get();
 
         if ($written->isEmpty()) {
             return redirect()->back()->with('error', 'This lesson is Empty!');
@@ -109,9 +106,36 @@ class WrittenAssessmentController extends Controller
 
     public function single_details($slug, $query = null)
     {
-        $assessment = WrittenAssessment::where('slug', $slug)->first();
-        $course_slug = $assessment->courses->first()->slug ?? null;
+        $assessment = WrittenAssessment::where('slug', $slug)->firstOrFail();
 
-        return view('frontend.dashboard.written-assessment.details', compact('assessment', 'query', 'course_slug'));
+        $course = $assessment->courses->first();
+        $course_slug = $course?->slug;
+
+        // ✅ Enrollment check
+        $enrolled = $this->getEnrollment($course?->id);
+
+        if (! $enrolled) {
+            return redirect()->back()->with('error', 'You are not enrolled in this course.');
+        }
+
+        // ✅ Locked if FREETRIAL
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
+
+        // ✅ isPaid from written_assessments
+        $isPaid = (bool) $assessment->isPaid;
+
+        // 🔒 Block direct URL access if paid + locked
+        if ($isPaid && $isLocked) {
+            return redirect()->route('courses.checkout', ['course' => $course_slug])
+                ->with('error', 'This is premium content. Please upgrade your plan.');
+        }
+
+        return view('frontend.dashboard.written-assessment.details', compact(
+            'assessment',
+            'query',
+            'course_slug',
+            'isLocked',
+            'isPaid'
+        ));
     }
 }

@@ -76,12 +76,15 @@
                         @foreach ($recentOspeStations as $station)
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span>{{ $station->chapter->name }} - {{ $station->lesson->name }}</span>
-                                @if ($isLocked)
+
+                                @if($station->isPaid && $isLocked)
+                                    {{-- Paid station + free trial user --}}
                                     <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
                                         class="btn btn-warning btn-sm fw-bold flex-shrink-0">
                                         <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
                                     </a>
                                 @else
+                                    {{-- Free station OR premium enrolled --}}
                                     <a href="{{ route('ospes.test', ['course' => $course->slug, 'chapter' => $station->chapter->slug, 'lesson' => $station->lesson->slug]) }}"
                                         class="btn btn-sm button-yellow flex-shrink-0">
                                         Start

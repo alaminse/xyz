@@ -224,15 +224,18 @@
                     @foreach ($questionList as $index => $q)
                         <div class="qa-item">
                             <div class="question-box"
-                                @if (!$isLocked) data-bs-toggle="collapse"
-                                 data-bs-target="#answer-{{ $in }}-{{ $index }}"
-                                 aria-expanded="false"
-                                 aria-controls="answer-{{ $in }}-{{ $index }}" @endif>
+                                @if(!($isPaid && $isLocked))
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#answer-{{ $in }}-{{ $index }}"
+                                    aria-expanded="false"
+                                    aria-controls="answer-{{ $in }}-{{ $index }}"
+                                @endif>
                                 <span class="badge-question">Q{{ $index + 1 }}</span>
                                 {!! $q->question !!}
                             </div>
 
-                            @if ($isLocked)
+                            @if($isPaid && $isLocked)
+                                {{-- 🔒 Paid OSPE + free trial user --}}
                                 <div class="p-2 rounded text-center mt-2"
                                     style="background-color: #fff8e1; border: 2px dashed #ffc107; border-radius: 8px;">
                                     <i class="bi bi-lock-fill text-warning fs-5"></i>
@@ -243,6 +246,7 @@
                                     </a>
                                 </div>
                             @else
+                                {{-- ✅ Free OSPE OR premium enrolled --}}
                                 <div class="answer-box collapse" id="answer-{{ $in }}-{{ $index }}">
                                     <strong><i class="bi bi-check-circle"></i> Answer:</strong>
                                     <div class="mt-2">{!! $q->answer !!}</div>

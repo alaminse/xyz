@@ -20,21 +20,15 @@ class MockVivaController extends Controller
     {
         $this->middleware(function ($request, $next) {
             $this->user = Auth::user();
-
             return $next($request);
         });
     }
 
-    private function isPaid($course)
+    private function getEnrollment($courseId)
     {
-        $enrolled = EnrollUser::where('user_id', Auth::user()->id)
-            ->where('course_id', $course)
+        return EnrollUser::where('user_id', $this->user->id)
+            ->where('course_id', $courseId)
             ->first();
-
-        return $enrolled->status == Status::ACTIVE()->value
-            ? 1
-            : ($enrolled->status == Status::FREETRIAL()->value ? 0 : 9);
-
     }
 
     public function index($course)
@@ -43,16 +37,14 @@ class MockVivaController extends Controller
             ->where('slug', $course)
             ->firstOrFail();
 
-        if (! $course) {
-            abort(404, 'Course not found');
+        $enrolled = $this->getEnrollment($course->id);
+
+        if (! $enrolled) {
+            return redirect()->back()->with('error', 'You are not enrolled in this course.');
         }
 
-        $isPaid = $this->isPaid(course: $course->id);
-        if ($isPaid == 9) {
-            return redirect()->back()->with('error', 'Something is Wrong!!');
-        }
-
-        $isLocked = $isPaid == 0; // ✅
+        // ✅ Locked if FREETRIAL
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
 
         $chapters = course_chapters($course, 'mock_viva');
 
@@ -65,39 +57,44 @@ class MockVivaController extends Controller
             'chapters',
             'course',
             'progress',
-            'isLocked' // ✅
+            'isLocked'
         ));
     }
 
     public function test($course_slug, $chapter, $lesson = null)
     {
-        $course = Course::select('id')->where('slug', $course_slug)->firstOrFail();
-        $chapter = Chapter::select('id')->where('slug', $chapter)->firstOrFail();
-        $lesson = $lesson ? Lesson::select('id')->where('slug', $lesson)->firstOrFail() : null;
+        $course  = Course::select('id', 'slug', 'name')->where('slug', $course_slug)->firstOrFail();
+        $chapter = Chapter::select('id', 'slug', 'name')->where('slug', $chapter)->firstOrFail();
+        $lesson  = $lesson ? Lesson::select('id', 'slug', 'name')->where('slug', $lesson)->firstOrFail() : null;
 
-        $enrolled = EnrollUser::where('user_id', $this->user->id)
-            ->where('course_id', $course->id)
-            ->first();
+        $enrolled = $this->getEnrollment($course->id);
 
         if (! $enrolled) {
             return redirect()->back()->with('error', 'You are not enrolled in this course.');
         }
 
-        $isLocked = $enrolled->status === Status::FREETRIAL()->value; // ✅
+        // ✅ Locked if FREETRIAL
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
 
-        $data = MockViva::whereHas('courses', fn ($q) => $q->where('course_id', $course->id))
-            ->where('chapter_id', $chapter->id);
+        // ✅ Get mock with isPaid
+        $mockQuery = MockViva::select('id', 'chapter_id', 'lesson_id', 'isPaid', 'status')
+            ->whereHas('courses', fn ($q) => $q->where('course_id', $course->id))
+            ->where('chapter_id', $chapter->id)
+            ->where('status', Status::ACTIVE());
 
         if ($lesson) {
-            $data->where('lesson_id', $lesson->id);
+            $mockQuery->where('lesson_id', $lesson->id);
         }
 
-        $data->where('status', Status::ACTIVE());
-        $mock = $data->first();
+        $mock = $mockQuery->first();
 
         if (! $mock) {
             return redirect()->back()->with('error', 'This lesson is Empty!');
         }
+
+        // ✅ isPaid from mock_vivas table
+        $isPaid = (bool) $mock->isPaid;
+
         $questions = $mock->questions;
 
         if ($questions && $questions->count() > 0) {
@@ -107,17 +104,18 @@ class MockVivaController extends Controller
         }
 
         MockVivaProgress::firstOrCreate([
-            'user_id' => $this->user->id,
-            'course_id' => $course->id,
+            'user_id'    => $this->user->id,
+            'course_id'  => $course->id,
             'chapter_id' => $chapter->id,
-            'lesson_id' => $lesson ? $lesson->id : null,
+            'lesson_id'  => $lesson?->id,
         ]);
 
         return view('frontend.dashboard.mock-viva.test', compact(
             'mock',
             'course_slug',
             'questions',
-            'isLocked' // ✅
+            'isLocked',
+            'isPaid'    // 👈 added
         ));
     }
 }

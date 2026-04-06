@@ -113,7 +113,6 @@ Route::middleware(['auth', 'verified', 'role:user'])
                 Route::get('/{course}', 'index')->name('index');
                 Route::get('/test/{course}/{chapter?}/{lesson?}', 'test')->name('test');
             });
-        // ok
 
         Route::controller(SbaController::class)
             ->prefix('sbas')

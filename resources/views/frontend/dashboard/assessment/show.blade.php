@@ -275,7 +275,19 @@
                                 @endfor
                         </div>
                     @endif
-                    @if ($isLocked)
+                    @if($isPaid && $isLocked)
+                        <div class="text-center py-4 px-3 mt-3"
+                            style="background:#fff8e1; border:2px dashed #ffc107; border-radius:12px;">
+                            <i class="bi bi-lock-fill text-warning" style="font-size:2.5rem;"></i>
+                            <h5 class="mt-3 mb-2">Answer is locked</h5>
+                            <p class="text-muted mb-3">
+                                This is Premium content. Please upgrade your plan to see the explanation.
+                            </p>
+                            <a href="{{ route('courses.checkout', ['course' => $data['course']]) }}"
+                                class="btn btn-warning fw-bold">
+                                <i class="bi bi-unlock-fill"></i> Upgrade to Premium
+                            </a>
+                        </div>
                     @else
                         @if (!empty($question['explanation']))
                             <div class="explanation-section">
@@ -292,7 +304,6 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // সমস্ত explanation section এর ভিতরের টেবিলগুলো খুঁজে বের করা
                 const explanationSections = document.querySelectorAll('.explanation-section');
 
                 explanationSections.forEach(section => {
@@ -300,14 +311,9 @@
 
                     tables.forEach(table => {
                         if (!table.parentElement.classList.contains('table-responsive')) {
-                            // নতুন wrapper div তৈরি করা
                             const wrapper = document.createElement('div');
                             wrapper.classList.add('table-responsive');
-
-                            // টেবিলের আগে wrapper ইনসার্ট করা
                             table.parentNode.insertBefore(wrapper, table);
-
-                            // টেবিলকে wrapper এর ভিতরে রাখা
                             wrapper.appendChild(table);
                         }
                     });

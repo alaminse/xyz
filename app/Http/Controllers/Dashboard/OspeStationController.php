@@ -19,21 +19,15 @@ class OspeStationController extends Controller
     {
         $this->middleware(function ($request, $next) {
             $this->user = Auth::user();
-
             return $next($request);
         });
     }
 
-    private function isPaid($course)
+    private function getEnrollment($courseId)
     {
-        $enrolled = EnrollUser::where('user_id', Auth::user()->id)
-            ->where('course_id', $course)
+        return EnrollUser::where('user_id', $this->user->id)
+            ->where('course_id', $courseId)
             ->first();
-
-        return $enrolled->status == Status::ACTIVE()->value
-            ? 1
-            : ($enrolled->status == Status::FREETRIAL()->value ? 0 : 9);
-
     }
 
     public function index($course)
@@ -42,18 +36,19 @@ class OspeStationController extends Controller
             ->where('slug', $course)
             ->firstOrFail();
 
-        if (! $course) {
-            abort(404, 'Course not found');
+        $enrolled = $this->getEnrollment($course->id);
+
+        if (! $enrolled) {
+            return redirect()->back()->with('error', 'You are not enrolled in this course.');
         }
+
+        // ✅ Locked if FREETRIAL
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
 
         $chapters = course_chapters($course, 'ospe');
 
-        $isPaid = $this->isPaid(course: $course->id);
-        $isLocked = $isPaid == 0; // ✅
-
-        $recentOspeStations = OspeStation::whereHas('courses', function ($query) use ($course) {
-            $query->where('course_id', $course->id);
-        })
+        $recentOspeStations = OspeStation::select('id', 'chapter_id', 'lesson_id', 'isPaid', 'status')
+            ->whereHas('courses', fn ($q) => $q->where('course_id', $course->id))
             ->with(['chapter', 'lesson'])
             ->latest()
             ->take(10)
@@ -63,39 +58,44 @@ class OspeStationController extends Controller
             'chapters',
             'course',
             'recentOspeStations',
-            'isLocked' // ✅
+            'isLocked'
         ));
     }
 
     public function test($course_slug, $chapter, $lesson = null)
     {
-        $course = Course::select('id')->where('slug', $course_slug)->firstOrFail();
-        $chapter = Chapter::select('id')->where('slug', $chapter)->firstOrFail();
-        $lesson = $lesson ? Lesson::select('id')->where('slug', $lesson)->firstOrFail() : null;
+        $course  = Course::select('id', 'slug', 'name')->where('slug', $course_slug)->firstOrFail();
+        $chapter = Chapter::select('id', 'slug', 'name')->where('slug', $chapter)->firstOrFail();
+        $lesson  = $lesson ? Lesson::select('id', 'slug', 'name')->where('slug', $lesson)->firstOrFail() : null;
 
-        $enrolled = EnrollUser::where('user_id', $this->user->id)
-            ->where('course_id', $course->id)
-            ->first();
+        $enrolled = $this->getEnrollment($course->id);
 
         if (! $enrolled) {
             return redirect()->back()->with('error', 'You are not enrolled in this course.');
         }
 
-        $isLocked = $enrolled->status === Status::FREETRIAL()->value; // ✅
+        // ✅ Locked if FREETRIAL
+        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
 
-        $data = OspeStation::whereHas('courses', fn ($q) => $q->where('course_id', $course->id))
-            ->where('chapter_id', $chapter->id);
+        // ✅ Select isPaid from ospe_stations
+        $ospeQuery = OspeStation::select('id', 'chapter_id', 'lesson_id', 'isPaid', 'status', 'image')
+            ->whereHas('courses', fn ($q) => $q->where('course_id', $course->id))
+            ->where('chapter_id', $chapter->id)
+            ->where('status', Status::ACTIVE());
 
         if ($lesson) {
-            $data->where('lesson_id', $lesson->id);
+            $ospeQuery->where('lesson_id', $lesson->id);
         }
 
-        $data->where('status', Status::ACTIVE());
-        $ospe = $data->first();
+        $ospe = $ospeQuery->first();
 
         if (! $ospe) {
             return redirect()->back()->with('error', 'This lesson is Empty!');
         }
+
+        // ✅ isPaid from ospe_stations table
+        $isPaid = (bool) $ospe->isPaid;
+
         $questions = $ospe->questions;
 
         if ($questions && $questions->count() > 0) {
@@ -108,7 +108,8 @@ class OspeStationController extends Controller
             'ospe',
             'course_slug',
             'questions',
-            'isLocked' // ✅
+            'isLocked',
+            'isPaid'    // 👈 added
         ));
     }
 }

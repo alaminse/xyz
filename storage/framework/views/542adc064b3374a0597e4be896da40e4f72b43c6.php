@@ -203,15 +203,28 @@
                                 <div class="video-item">
                                     <div class="video-number"><?php echo e($key + 1); ?></div>
                                     <i class="bi bi-play-circle-fill video-icon"></i>
-                                    <h6 class="video-title"><?php echo e($video->title); ?></h6>
-                                    <?php if($isLocked): ?>
+                                    <h6 class="video-title">
+                                        <?php echo e($video->title); ?>
+
+                                        <?php if($video->isPaid): ?>
+                                            <span class="badge bg-warning text-dark ms-1" style="font-size:10px;">
+                                                <i class="bi bi-lock-fill"></i> Premium
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge bg-success ms-1" style="font-size:10px;">Free</span>
+                                        <?php endif; ?>
+                                    </h6>
+
+                                    <?php if($video->isPaid && $isLocked): ?>
+                                        
                                         <a href="<?php echo e(route('courses.checkout', ['course' => $course->slug])); ?>"
-                                        class="btn btn-warning btn-sm fw-bold">
+                                            class="btn btn-warning btn-sm fw-bold">
                                             <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
                                         </a>
                                     <?php else: ?>
+                                        
                                         <a href="<?php echo e(route('videos.single.details', ['slug' => $video->slug, 'course' => $course->slug])); ?>"
-                                        class="btn details-btn">
+                                            class="btn details-btn">
                                             <i class="bi bi-eye me-1"></i>Details
                                         </a>
                                     <?php endif; ?>
