@@ -402,23 +402,21 @@ class AssessmentController extends Controller
 
                 // প্রতিটি option check করুন
                 foreach (range(1, 5) as $optionIndex) {
-                    $optionKey = 'option'.$optionIndex;
-                    $answerKey = 'answers'.$optionIndex;
+                    $optionKey = 'option' . $optionIndex;
+                    $answerKey = 'answers' . $optionIndex;
 
-                    // যদি option exist না করে, skip করুন
                     if (empty($questionData->{$optionKey})) {
                         continue;
                     }
 
                     $totalAvailableOptions++;
 
-                    $userSelection = $value['options']['option'.$optionIndex] ?? null;
-                    $correctAnswer = $questionData->{$answerKey} == '1' ? 'true' : 'false';
+                    $userSelection = $value['options']['option' . $optionIndex] ?? null;
+                    $correctAnswer = ($questionData->{$answerKey} ?? '0') == '1' ? 'true' : 'false'; // ✅ Fixed
 
-                    $questionDetail['options']['user_option'.$optionIndex] = $userSelection;
+                    $questionDetail['options']['user_option' . $optionIndex] = $userSelection;
 
-                    // যদি user উত্তর দিয়ে থাকে
-                    if (isset($userSelection) && ! empty($userSelection)) {
+                    if (isset($userSelection) && !empty($userSelection)) {
                         $totalAnswered++;
 
                         if ($userSelection == $correctAnswer) {
@@ -428,7 +426,6 @@ class AssessmentController extends Controller
                         }
                     }
                 }
-
                 // প্রতিটি option এর জন্য marks calculate
                 $marksPerOption = $question->mark_per_question; // প্রতিটি option এর value
                 $minusMarkPerOption = $question->minus_mark; // প্রতিটি ভুল এর জন্য minus
