@@ -223,7 +223,11 @@
                 <i class="bx bx-file-pdf" style="color:#d9534f;"></i>
                 {{ $pdf->title }}
             </div>
-            <a href="{{ route('secure-pdfs.index', request()->segment(2)) }}"
+            <a href="{{ route('secure-pdfs.details', [
+                    'course'  => $pdf->courses->first()?->slug,
+                    'chapter' => $pdf->chapter?->slug,
+                    'lesson'  => $pdf->lesson?->slug,
+               ]) }}"
                class="btn-ctrl back">&#8592; Back</a>
         </div>
 
