@@ -199,6 +199,7 @@ class ChapterController extends Controller
             'written'           => 'nullable|boolean',
             'mock_viva'         => 'nullable|boolean',
             'self_assessment'   => 'nullable|boolean',
+            'secure_pdf'        => 'nullable|boolean',
         ];
 
         // Add status validation for updates
@@ -216,7 +217,7 @@ class ChapterController extends Controller
     {
         $booleanFields = [
             'sba', 'note', 'mcq', 'flush', 'videos',
-            'ospe', 'written', 'mock_viva', 'self_assessment'
+            'ospe', 'written', 'mock_viva', 'self_assessment', 'secure_pdf'
         ];
 
         $data = ['name' => $validated['name']];
@@ -248,7 +249,7 @@ class ChapterController extends Controller
 
         // Get all lessons at once for better performance
         $lessons = Lesson::whereIn('id', $lessonIds)
-            ->select('id', 'sba', 'note', 'mcq', 'flush', 'videos', 'ospe', 'written', 'mock_viva', 'self_assessment')
+            ->select('id', 'sba', 'note', 'mcq', 'flush', 'videos', 'ospe', 'written', 'mock_viva', 'self_assessment', 'secure_pdf')
             ->get()
             ->keyBy('id');
 
@@ -266,6 +267,7 @@ class ChapterController extends Controller
                     'written'           => $lesson->written ?? 0,
                     'mock_viva'         => $lesson->mock_viva ?? 0,
                     'self_assessment'   => $lesson->self_assessment ?? 0,
+                    'secure_pdf'        => $lesson->secure_pdf ?? 0,
                 ];
             }
         }

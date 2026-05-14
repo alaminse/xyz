@@ -1,7 +1,6 @@
 <?php
 
 use App\Enums\Status;
-use App\Models\Assessment;
 use App\Models\Chapter;
 use App\Models\Course;
 use App\Models\EnrollUser;
@@ -25,28 +24,6 @@ if (! function_exists('getImageUrl')) {
         return asset('uploads/'.$path);
     }
 }
-
-// if (! function_exists('getCourse')) {
-//     function getCourse($assessment_id = null)
-//     {
-//         if (! $assessment_id) {
-//             return null;
-//         }
-
-//         $assessment = Assessment::with(['course', 'chapter'])
-//             ->find($assessment_id);
-
-//         if (! $assessment) {
-//             return null;
-//         }
-
-//         return [
-//             'assessment_name' => $assessment->name,
-//             'course_name' => $assessment->course->name ?? 'Unknown Course',
-//             'chapter_name' => $assessment->chapter->name ?? 'Unknown Chapter',
-//         ];
-//     }
-// }
 
 if (! function_exists('getProfile')) {
     function getProfile(?string $path = null): string
@@ -181,7 +158,7 @@ if (! function_exists('enrolled_courses')) {
             ->select(['id', 'course_id', 'status', 'start_date', 'end_date'])
             ->with([
                 'course:id,slug,name,status',
-                'course.detail:id,course_id,sba,mcq,flush,note,written,videos,mock_viva,ospe,self_assessment',
+                'course.detail:id,course_id,sba,mcq,flush,note,written,videos,mock_viva,ospe,self_assessment,secure_pdf',
             ])
             ->where('user_id', Auth::id())
             ->whereIn('status', $validStatuses)
@@ -210,19 +187,20 @@ if (! function_exists('enrolled_courses')) {
 
             // 🔹 Transform for sidebar
             ->map(fn ($enroll) => [
-                'id' => $enroll->course->id,
-                'name' => $enroll->course->name,
-                'slug' => $enroll->course->slug,
-                'status' => $enroll->course->status,
-                'sba' => (bool) $enroll->course->detail?->sba,
-                'mcq' => (bool) $enroll->course->detail?->mcq,
-                'flush' => (bool) $enroll->course->detail?->flush,
-                'note' => (bool) $enroll->course->detail?->note,
-                'written' => (bool) $enroll->course->detail?->written,
-                'videos' => (bool) $enroll->course->detail?->videos,
-                'mock_viva' => (bool) $enroll->course->detail?->mock_viva,
-                'ospe' => (bool) $enroll->course->detail?->ospe,
-                'self_assessment' => (bool) $enroll->course->detail?->self_assessment,
+                'id'                => $enroll->course->id,
+                'name'              => $enroll->course->name,
+                'slug'              => $enroll->course->slug,
+                'status'            => $enroll->course->status,
+                'sba'               => (bool) $enroll->course->detail?->sba,
+                'mcq'               => (bool) $enroll->course->detail?->mcq,
+                'flush'             => (bool) $enroll->course->detail?->flush,
+                'note'              => (bool) $enroll->course->detail?->note,
+                'written'           => (bool) $enroll->course->detail?->written,
+                'videos'            => (bool) $enroll->course->detail?->videos,
+                'mock_viva'         => (bool) $enroll->course->detail?->mock_viva,
+                'ospe'              => (bool) $enroll->course->detail?->ospe,
+                'self_assessment'   => (bool) $enroll->course->detail?->self_assessment,
+                'secure_pdf'        => (bool) $enroll->course->detail?->secure_pdf,
             ]);
     }
 }

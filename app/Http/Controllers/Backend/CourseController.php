@@ -267,7 +267,7 @@ class CourseController extends Controller
             'mock_viva'         => 'nullable|boolean',
             'ospe'              => 'nullable|boolean',
             'self_assessment'   => 'nullable|boolean',
-            'self_assessment'   => 'nullable|boolean',
+            'secure_pdf'        => 'nullable|boolean',
         ];
     }
 
@@ -332,6 +332,7 @@ class CourseController extends Controller
             'mock_viva'         => $validated['mock_viva'] ?? 0,
             'ospe'              => $validated['ospe'] ?? 0,
             'self_assessment'   => $validated['self_assessment'] ?? 0,
+            'secure_pdf'        => $validated['secure_pdf'] ?? 0,
         ];
 
         CourseDetails::updateOrCreate(

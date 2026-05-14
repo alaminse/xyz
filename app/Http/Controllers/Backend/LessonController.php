@@ -157,7 +157,7 @@ class LessonController extends Controller
     {
         $validated = $request->validate([
             'chapterid' => 'required|exists:chapters,id',
-            'for'       => 'nullable|in:sba,note,mcq,flush,videos,ospe,written,mock_viva,self_assessment'
+            'for'       => 'nullable|in:sba,note,mcq,flush,videos,ospe,written,mock_viva,self_assessment,secure_pdf'
         ]);
 
         $chapterId = $validated['chapterid'];
@@ -210,6 +210,7 @@ class LessonController extends Controller
             'written'           => 'nullable|boolean',
             'mock_viva'         => 'nullable|boolean',
             'self_assessment'   => 'nullable|boolean',
+            'secure_pdf'        => 'nullable|boolean'
         ];
 
         // Add status validation for updates
@@ -227,7 +228,7 @@ class LessonController extends Controller
     {
         $booleanFields = [
             'sba', 'note', 'mcq', 'flush', 'videos',
-            'ospe', 'written', 'mock_viva', 'self_assessment'
+            'ospe', 'written', 'mock_viva', 'self_assessment', 'secure_pdf'
         ];
 
         $data = [
@@ -249,7 +250,7 @@ class LessonController extends Controller
      */
     private function updateChapterPivots(Lesson $lesson, array $validated): void
     {
-        $pivotFields = ['sba', 'note', 'mcq', 'flush', 'videos', 'ospe', 'written', 'mock_viva','self_assessment'];
+        $pivotFields = ['sba', 'note', 'mcq', 'flush', 'videos', 'ospe', 'written', 'mock_viva', 'self_assessment', 'secure_pdf'];
 
         $pivotData = [];
         foreach ($pivotFields as $field) {

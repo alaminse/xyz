@@ -1,10 +1,9 @@
-@extends('layouts.backend')
-@section('title', 'Lessons')
-@section('css')
-    <link href="{{ asset('backend/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('backend/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css') }}" rel="stylesheet">
-@endsection
-@section('content')
+<?php $__env->startSection('title', 'Lessons'); ?>
+<?php $__env->startSection('css'); ?>
+    <link href="<?php echo e(asset('backend/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css')); ?>" rel="stylesheet">
+    <link href="<?php echo e(asset('backend/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css')); ?>" rel="stylesheet">
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
 
 <div class="col-md-12 col-sm-12 ">
     <div class="x_panel">
@@ -27,7 +26,7 @@
             <div class="row">
               <div class="col-sm-12">
                 <div class="card-box table-responsive">
-                    @include('backend.includes.message')
+                    <?php echo $__env->make('backend.includes.message', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                     <table id="datatable-responsive" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
                         <thead>
                             <tr>
@@ -38,19 +37,19 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($lessons as $key => $lesson)
+                            <?php $__currentLoopData = $lessons; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $lesson): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr>
-                                <td>{{ ++$key }}</td>
-                                <td>{{ $lesson->name }}</td>
+                                <td><?php echo e(++$key); ?></td>
+                                <td><?php echo e($lesson->name); ?></td>
                                 <td>
-                                    <a href="{{ route('admin.lessons.status', $lesson->id ) }}" class="btn btn-{{ $lesson->status == 1 ? 'success' : ($lesson->status == 3 ? 'danger' : 'warning') }} btn-sm  {{ $lesson->status == 3 ? 'disabled' : ''}}">{{\App\Enums\Status::from($lesson->status)->title()}}</a>
+                                    <a href="<?php echo e(route('admin.lessons.status', $lesson->id )); ?>" class="btn btn-<?php echo e($lesson->status == 1 ? 'success' : ($lesson->status == 3 ? 'danger' : 'warning')); ?> btn-sm  <?php echo e($lesson->status == 3 ? 'disabled' : ''); ?>"><?php echo e(\App\Enums\Status::from($lesson->status)->title()); ?></a>
                                 </td>
                                 <td>
-                                    <a class="btn btn-primary" href="{{route('admin.lessons.edit', $lesson->id)}}"> <i class="fa fa-edit"></i></a>
-                                    <a class="btn btn-danger {{ $lesson->status == 3 ? 'disabled' : ''}}" onclick="showDeleteConfirmation(event)" href="{{route('admin.lessons.destroy', $lesson->id)}}"><i class="fa fa-trash"></i></a>
+                                    <a class="btn btn-primary" href="<?php echo e(route('admin.lessons.edit', $lesson->id)); ?>"> <i class="fa fa-edit"></i></a>
+                                    <a class="btn btn-danger <?php echo e($lesson->status == 3 ? 'disabled' : ''); ?>" onclick="showDeleteConfirmation(event)" href="<?php echo e(route('admin.lessons.destroy', $lesson->id)); ?>"><i class="fa fa-trash"></i></a>
                                 </td>
                             </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                     </table>
                 </div>
@@ -60,7 +59,7 @@
     </div>
 </div>
 
-{{-- Create Modal --}}
+
 <div class="modal fade bs-lesson-modal-lg" tabindex="-1" role="dialog" aria-hidden="true" id="createModal">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -73,8 +72,8 @@
                 </button>
             </div>
 
-            <form action="{{ route('admin.lessons.store') }}" method="POST">
-                @csrf
+            <form action="<?php echo e(route('admin.lessons.store')); ?>" method="POST">
+                <?php echo csrf_field(); ?>
 
                 <!-- BODY -->
                 <div class="modal-body">
@@ -89,7 +88,7 @@
                                    class="form-control"
                                    name="name"
                                    placeholder="Enter Lesson Name"
-                                   value="{{ old('name') }}"
+                                   value="<?php echo e(old('name')); ?>"
                                    required>
                         </div>
 
@@ -100,7 +99,7 @@
                                     <h6 class="font-weight-bold mb-2">Lesson Has</h6>
 
                                     <div class="row">
-                                        @foreach ([
+                                        <?php $__currentLoopData = [
                                             'sba'               => 'SBA',
                                             'note'              => 'Note',
                                             'mcq'               => 'MCQ',
@@ -111,20 +110,21 @@
                                             'mock_viva'         => 'Mock Viva',
                                             'self_assessment'   => 'Self Assessment',
                                             'secure_pdf'        => 'Secure Pdf'
-                                        ] as $key => $label)
+                                        ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <div class="col-md-4 col-6 mb-2">
                                                 <div class="form-check">
                                                     <input class="form-check-input"
                                                            type="checkbox"
-                                                           name="{{ $key }}"
+                                                           name="<?php echo e($key); ?>"
                                                            value="1"
-                                                           {{ old($key, 1) ? 'checked' : '' }}>
+                                                           <?php echo e(old($key, 1) ? 'checked' : ''); ?>>
                                                     <label class="form-check-label">
-                                                        {{ $label }}
+                                                        <?php echo e($label); ?>
+
                                                     </label>
                                                 </div>
                                             </div>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </div>
 
                                 </div>
@@ -151,10 +151,12 @@
 </div>
 
 
-@push('scripts')
-    <script src="{{ asset('backend/vendors/datatables.net/js/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ asset('backend/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js') }}"></script>
-    <script src="{{ asset('backend/vendors/datatables.net-responsive/js/dataTables.responsive.min.js') }}"></script>
-    <script src="{{ asset('backend/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.js') }}"></script>
-@endpush
-@endsection
+<?php $__env->startPush('scripts'); ?>
+    <script src="<?php echo e(asset('backend/vendors/datatables.net/js/jquery.dataTables.min.js')); ?>"></script>
+    <script src="<?php echo e(asset('backend/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js')); ?>"></script>
+    <script src="<?php echo e(asset('backend/vendors/datatables.net-responsive/js/dataTables.responsive.min.js')); ?>"></script>
+    <script src="<?php echo e(asset('backend/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.js')); ?>"></script>
+<?php $__env->stopPush(); ?>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.backend', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/medimaniac/resources/views/backend/lesson/index.blade.php ENDPATH**/ ?>

@@ -52,15 +52,16 @@
                                                 @php
                                                     $detail = json_decode($course->detail);
                                                     $labels = [
-                                                        'sba' => 'SBA',
-                                                        'note' => 'Note',
-                                                        'mcq' => 'MCQ',
-                                                        'flush' => 'Flush',
-                                                        'written' => 'Written',
-                                                        'videos' => 'Video',
-                                                        'verbal' => 'Verbal',
-                                                        'ospe' => 'OSPE',
-                                                        'self_assessment' => 'Self Assessment',
+                                                        'sba'               => 'SBA',
+                                                        'note'              => 'Note',
+                                                        'mcq'               => 'MCQ',
+                                                        'flush'             => 'Flush',
+                                                        'written'           => 'Written',
+                                                        'videos'            => 'Video',
+                                                        'verbal'            => 'Verbal',
+                                                        'ospe'              => 'OSPE',
+                                                        'self_assessment'   => 'Self Assessment',
+                                                        'secure_pdf'        => 'Secure Pdf',
                                                     ];
                                                 @endphp
 

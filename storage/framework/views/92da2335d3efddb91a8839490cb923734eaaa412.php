@@ -1,11 +1,10 @@
-@extends('layouts.backend')
-@section('title', 'Chapters')
-@section('css')
-    <link href="{{ asset('backend/vendors/select2/dist/css/select2.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('backend/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('backend/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css') }}" rel="stylesheet">
-@endsection
-@section('content')
+<?php $__env->startSection('title', 'Chapters'); ?>
+<?php $__env->startSection('css'); ?>
+    <link href="<?php echo e(asset('backend/vendors/select2/dist/css/select2.min.css')); ?>" rel="stylesheet">
+    <link href="<?php echo e(asset('backend/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css')); ?>" rel="stylesheet">
+    <link href="<?php echo e(asset('backend/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css')); ?>" rel="stylesheet">
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
 
 <div class="col-md-12 col-sm-12 ">
     <div class="x_panel">
@@ -28,7 +27,7 @@
             <div class="row">
               <div class="col-sm-12">
                 <div class="card-box table-responsive">
-                    @include('backend.includes.message')
+                    <?php echo $__env->make('backend.includes.message', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                     <table id="datatable-responsive" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
                         <thead>
                             <tr>
@@ -40,28 +39,28 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($chapters as $key => $chapter)
+                            <?php $__currentLoopData = $chapters; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $chapter): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr>
-                                <td>{{ ++$key }}</td>
-                                <td>{{ $chapter->name }}</td>
+                                <td><?php echo e(++$key); ?></td>
+                                <td><?php echo e($chapter->name); ?></td>
                                 <td>
-                                    @if ($chapter->lessons !== null && count($chapter->lessons) > 0)
-                                        @foreach ($chapter->lessons as $lesson)
-                                        <span class="badge badge-success">{{$lesson->name}}</span>
-                                        @endforeach
-                                    @else
+                                    <?php if($chapter->lessons !== null && count($chapter->lessons) > 0): ?>
+                                        <?php $__currentLoopData = $chapter->lessons; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lesson): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <span class="badge badge-success"><?php echo e($lesson->name); ?></span>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    <?php else: ?>
                                         ---
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.chapters.status', $chapter->id ) }}" class="btn btn-{{ $chapter->status == 1 ? 'success' : ($chapter->status == 3 ? 'danger' : 'warning') }} btn-sm  {{ $chapter->status == 3 ? 'disabled' : ''}}">{{\App\Enums\Status::from($chapter->status)->title()}}</a>
+                                    <a href="<?php echo e(route('admin.chapters.status', $chapter->id )); ?>" class="btn btn-<?php echo e($chapter->status == 1 ? 'success' : ($chapter->status == 3 ? 'danger' : 'warning')); ?> btn-sm  <?php echo e($chapter->status == 3 ? 'disabled' : ''); ?>"><?php echo e(\App\Enums\Status::from($chapter->status)->title()); ?></a>
                                 </td>
                                 <td>
-                                    <a class="btn btn-primary" href="{{route('admin.chapters.edit', $chapter->id)}}"> <i class="fa fa-edit"></i></a>
-                                    <a class="btn btn-danger {{ $chapter->status == 3 ? 'disabled' : ''}}" onclick="showDeleteConfirmation(event)" href="{{route('admin.chapters.destroy', $chapter->id)}}"><i class="fa fa-trash"></i></a>
+                                    <a class="btn btn-primary" href="<?php echo e(route('admin.chapters.edit', $chapter->id)); ?>"> <i class="fa fa-edit"></i></a>
+                                    <a class="btn btn-danger <?php echo e($chapter->status == 3 ? 'disabled' : ''); ?>" onclick="showDeleteConfirmation(event)" href="<?php echo e(route('admin.chapters.destroy', $chapter->id)); ?>"><i class="fa fa-trash"></i></a>
                                 </td>
                             </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                     </table>
                 </div>
@@ -71,12 +70,12 @@
     </div>
 </div>
 
-{{-- Create Modal --}}
+
 <div class="modal fade bs-chapter-modal-lg" id="createModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content shadow-sm">
 
-            {{-- Header --}}
+            
             <div class="modal-header bg-light">
                 <h5 class="modal-title font-weight-bold">
                     <i class="fa fa-book mr-1"></i> Chapter Information
@@ -86,13 +85,13 @@
                 </button>
             </div>
 
-            {{-- Form --}}
-            <form action="{{ route('admin.chapters.store') }}" method="POST">
-                @csrf
+            
+            <form action="<?php echo e(route('admin.chapters.store')); ?>" method="POST">
+                <?php echo csrf_field(); ?>
 
                 <div class="modal-body px-4">
 
-                    {{-- Chapter Name --}}
+                    
                     <div class="form-group">
                         <label class="font-weight-semibold">
                             Chapter Name <span class="text-danger">*</span>
@@ -102,41 +101,41 @@
                             name="name"
                             class="form-control"
                             placeholder="Enter chapter name"
-                            value="{{ old('name') }}"
+                            value="<?php echo e(old('name')); ?>"
                             required
                         >
                     </div>
 
                     <div class="row">
-                        {{-- Lesson --}}
+                        
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="font-weight-semibold">Lesson</label>
                                 <select name="lesson_ids[]" class="form-control js-example-basic-multiple" multiple>
-                                    @foreach ($lessons as $lesson)
-                                        <option value="{{ $lesson->id }}">{{ $lesson->name }}</option>
-                                    @endforeach
+                                    <?php $__currentLoopData = $lessons; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lesson): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($lesson->id); ?>"><?php echo e($lesson->name); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                             </div>
                         </div>
 
-                        {{-- Course --}}
+                        
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="font-weight-semibold">Course</label>
                                 <select name="course_ids[]" class="form-control js-example-basic-multiple" multiple>
-                                    @foreach ($courses as $course)
-                                        <option value="{{ $course->id }}">{{ $course->name }}</option>
-                                    @endforeach
+                                    <?php $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($course->id); ?>"><?php echo e($course->name); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Divider --}}
+                    
                     <hr class="my-4">
 
-                    {{-- Features --}}
+                    
                     <div class="form-group">
                         <label class="font-weight-bold mb-3 d-block">
                             <i class="fa fa-cogs mr-1"></i> Available Features
@@ -146,7 +145,7 @@
                             <div class="card-body py-3">
                                 <div class="row">
 
-                                    @php
+                                    <?php
                                         $features = [
                                             'sba'             => 'SBA',
                                             'note'            => 'Note',
@@ -159,24 +158,25 @@
                                             'self_assessment' => 'Self Assessment',
                                             'secure_pdf'      => 'Secure Pdf',
                                         ];
-                                    @endphp
+                                    ?>
 
-                                    @foreach($features as $key => $label)
+                                    <?php $__currentLoopData = $features; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <div class="col-md-4 col-sm-6 mb-2">
                                             <div class="custom-control custom-checkbox">
                                                 <input
                                                     type="checkbox"
                                                     class="custom-control-input"
-                                                    id="{{ $key }}"
-                                                    name="{{ $key }}"
+                                                    id="<?php echo e($key); ?>"
+                                                    name="<?php echo e($key); ?>"
                                                     value="1"
                                                 >
-                                                <label class="custom-control-label" for="{{ $key }}">
-                                                    {{ $label }}
+                                                <label class="custom-control-label" for="<?php echo e($key); ?>">
+                                                    <?php echo e($label); ?>
+
                                                 </label>
                                             </div>
                                         </div>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                                 </div>
                             </div>
@@ -185,7 +185,7 @@
 
                 </div>
 
-                {{-- Footer --}}
+                
                 <div class="modal-footer bg-light">
                     <button type="submit" class="btn btn-primary px-4">
                         <i class="fa fa-save mr-1"></i> Create Chapter
@@ -200,8 +200,8 @@
 
 
 
-@push('scripts')
-    <script src="{{ asset('backend/vendors/select2/dist/js/select2.full.min.js') }}"></script>
+<?php $__env->startPush('scripts'); ?>
+    <script src="<?php echo e(asset('backend/vendors/select2/dist/js/select2.full.min.js')); ?>"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             $('#createModal').on('shown.bs.modal', function () {
@@ -210,9 +210,11 @@
         });
     </script>
 
-    <script src="{{ asset('backend/vendors/datatables.net/js/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ asset('backend/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js') }}"></script>
-    <script src="{{ asset('backend/vendors/datatables.net-responsive/js/dataTables.responsive.min.js') }}"></script>
-    <script src="{{ asset('backend/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.js') }}"></script>
-@endpush
-@endsection
+    <script src="<?php echo e(asset('backend/vendors/datatables.net/js/jquery.dataTables.min.js')); ?>"></script>
+    <script src="<?php echo e(asset('backend/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js')); ?>"></script>
+    <script src="<?php echo e(asset('backend/vendors/datatables.net-responsive/js/dataTables.responsive.min.js')); ?>"></script>
+    <script src="<?php echo e(asset('backend/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.js')); ?>"></script>
+<?php $__env->stopPush(); ?>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.backend', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/medimaniac/resources/views/backend/chapter/index.blade.php ENDPATH**/ ?>
