@@ -16,7 +16,7 @@ class Chapter extends Model
     public function lessons()
     {
         return $this->belongsToMany(Lesson::class, 'chapter_lesson', 'chapter_id', 'lesson_id')
-                    ->withPivot('sba', 'note', 'mcq', 'flush', 'videos', 'ospe', 'written', 'mock_viva', 'self_assessment');
+                    ->withPivot('sba', 'note', 'mcq', 'flush', 'videos', 'ospe', 'written', 'mock_viva', 'self_assessment', 'secure_pdf');
     }
 
     public function courses()

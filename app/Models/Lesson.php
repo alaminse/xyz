@@ -24,13 +24,14 @@ class Lesson extends Model
         'written',
         'mock_viva',
         'self_assessment',
+        'secure_pdf',
         'status',
     ];
 
     public function chapters()
     {
         return $this->belongsToMany(Chapter::class, 'chapter_lesson', 'lesson_id', 'chapter_id')
-                    ->withPivot('sba', 'note', 'mcq', 'flush', 'videos', 'ospe', 'written', 'mock_viva');
+                    ->withPivot('sba', 'note', 'mcq', 'flush', 'videos', 'ospe', 'written', 'mock_viva', 'secure_pdf');
     }
 
     // Existing relationships (keep your existing ones)

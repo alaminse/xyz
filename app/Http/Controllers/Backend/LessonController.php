@@ -68,8 +68,8 @@ class LessonController extends Controller
     {
         $validated = $this->validateLesson($request, $lesson->id);
 
-        DB::beginTransaction();
-        try {
+        // DB::beginTransaction();
+        // try {
             // Prepare lesson data
             $lessonData = $this->prepareLessonData($validated);
 
@@ -85,20 +85,20 @@ class LessonController extends Controller
                 ->route('admin.lessons.index')
                 ->with('success', 'Lesson updated successfully');
 
-        } catch (\Exception $e) {
-            DB::rollBack();
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
 
-            Log::error('Lesson update failed', [
-                'lesson_id' => $lesson->id,
-                'error'     => $e->getMessage(),
-                'data'      => $request->except(['_token'])
-            ]);
+        //     Log::error('Lesson update failed', [
+        //         'lesson_id' => $lesson->id,
+        //         'error'     => $e->getMessage(),
+        //         'data'      => $request->except(['_token'])
+        //     ]);
 
-            return redirect()
-                ->back()
-                ->withInput()
-                ->with('error', 'Failed to update lesson. Please try again.');
-        }
+        //     return redirect()
+        //         ->back()
+        //         ->withInput()
+        //         ->with('error', 'Failed to update lesson. Please try again.');
+        // }
     }
 
     /**

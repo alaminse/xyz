@@ -112,7 +112,7 @@
                     <i class="bx bx-folder me-2"></i>
                     {{ $item['name'] }}
                 </a>
-
+                
                 <ul class="collapse {{ $isExpanded ? 'show' : '' }}" id="course-{{ $item['slug'] }}">
 
                     @foreach ($modules as $routeKey => $module)

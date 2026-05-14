@@ -113,7 +113,7 @@
                     <?php echo e($item['name']); ?>
 
                 </a>
-
+                
                 <ul class="collapse <?php echo e($isExpanded ? 'show' : ''); ?>" id="course-<?php echo e($item['slug']); ?>">
 
                     <?php $__currentLoopData = $modules; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $routeKey => $module): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>

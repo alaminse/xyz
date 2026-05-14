@@ -164,18 +164,15 @@ Route::controller(CourseController::class)
         Route::get('/invoice/{slug}', 'invoice')->middleware('verified')->name('invoice');
     });
 
+
+// Add these routes to your web.php inside auth middleware group
+
 Route::middleware(['auth', 'anti.download'])->group(function () {
 
-    Route::get('/course/{course}/pdfs', [SecurePdfController::class, 'index'])
-        ->name('secure-pdfs.index');
 
-    Route::get('/pdf/view/{slug}', [SecurePdfController::class, 'view'])
-        ->name('secure-pdfs.view');
-
-    Route::get('/pdf/stream/{slug}', [SecurePdfController::class, 'stream'])
-        ->name('secure-pdfs.stream')
-        ->middleware('throttle:10,1');
-
-    Route::post('/pdf/token/refresh/{slug}', [SecurePdfController::class, 'refreshToken'])
-        ->name('secure-pdfs.token.refresh');
+    Route::get('/course/{course}/pdfs',                          [SecurePdfController::class, 'index'])->name('secure-pdfs.index');
+    Route::get('/course/{course}/pdfs/{chapter}/{lesson}',       [SecurePdfController::class, 'details'])->name('secure-pdfs.details');
+    Route::get('/pdf/view/{slug}',                               [SecurePdfController::class, 'view'])->name('secure-pdfs.view');
+    Route::get('/pdf/stream/{slug}',                             [SecurePdfController::class, 'stream'])->name('secure-pdfs.stream')->middleware('throttle:10,1');
+    Route::post('/pdf/token/refresh/{slug}',                     [SecurePdfController::class, 'refreshToken'])->name('secure-pdfs.token.refresh');
 });
