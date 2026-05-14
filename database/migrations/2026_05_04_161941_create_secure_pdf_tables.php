@@ -16,9 +16,12 @@ return new class extends Migration
             $table->string('original_name');
             $table->string('slug')->unique();
             $table->string('category')->nullable();
+            $table->unsignedBigInteger('chapter_id')->nullable();
+            $table->unsignedBigInteger('lesson_id')->nullable();
             $table->integer('total_pages')->default(0);
             $table->bigInteger('file_size')->default(0);
             $table->boolean('is_active')->default(true);
+            $table->boolean('isPaid')->default(false);
             $table->boolean('allow_print')->default(false);
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->timestamps();
@@ -49,8 +52,12 @@ return new class extends Migration
 
     public function down(): void
     {
+        Schema::disableForeignKeyConstraints();
+
         Schema::dropIfExists('pdf_access_logs');
         Schema::dropIfExists('pdf_view_tokens');
         Schema::dropIfExists('secure_pdfs');
+
+        Schema::enableForeignKeyConstraints();
     }
 };
