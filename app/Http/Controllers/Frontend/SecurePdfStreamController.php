@@ -92,6 +92,6 @@ class SecurePdfStreamController extends Controller
             ->where('is_active', true)
             ->firstOrFail();
         $token = $this->service->generateViewToken($pdf, $request);
-        return response()->json(['token' => $token, 'expires_in' => 1800]);
+        return response()->json(['token' => $token, 'expires_in' => 300]);
     }
 }

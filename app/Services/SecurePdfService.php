@@ -84,7 +84,7 @@ class SecurePdfService
             'user_id'       => $request->user()->id,
             'token'         => $token,
             'ip_address'    => $request->ip(),
-            'expires_at'    => now()->addMinutes(30),
+            'expires_at'    => now()->addMinutes(5),
         ]);
 
         return $token;
