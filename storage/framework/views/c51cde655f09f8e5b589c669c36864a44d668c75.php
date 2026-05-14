@@ -108,6 +108,13 @@
             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('ospe-station')): ?>
             <li><a href="<?php echo e(route('admin.ospestations.index')); ?>"><i class="fa fa-home"></i>OSPE Station</a></li>
             <?php endif; ?>
+
+            <li>
+                <a href="<?php echo e(route('admin.secure-pdfs.index')); ?>">
+                    <i class="fa fa-file-pdf-o"></i> Secure PDFs
+                </a>
+            </li>
+            
             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('settings')): ?>
             <li><a><i class="bi bi-gear-wide-connected"></i> Settings <span class="fa fa-chevron-down"></span></a>
                 <ul class="nav child_menu">
@@ -121,6 +128,7 @@
                 </ul>
             </li>
             <?php endif; ?>
+
           </ul>
         </div>
       </div>

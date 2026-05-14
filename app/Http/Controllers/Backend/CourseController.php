@@ -267,6 +267,7 @@ class CourseController extends Controller
             'mock_viva'         => 'nullable|boolean',
             'ospe'              => 'nullable|boolean',
             'self_assessment'   => 'nullable|boolean',
+            'self_assessment'   => 'nullable|boolean',
         ];
     }
 

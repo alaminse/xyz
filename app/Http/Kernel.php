@@ -67,6 +67,6 @@ class Kernel extends HttpKernel
         'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
         'role_or_permission' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
         'redirect.notadmin' => \App\Http\Middleware\RedirectIfNotAdmin::class,
-
+        'anti.download' => \App\Http\Middleware\AntiDownloadManager::class,
     ];
 }

@@ -39,6 +39,17 @@
 <script src="{{ asset('backend/build/js/custom.min.js') }}"></script>
 <script src="{{ asset('backend/custome.js') }}"></script>
 <script src="{{ asset('frontend/bootstrap-5.3.3/js/toastr.min.js') }}"></script>
+<script>
+// Fix: jQuery UI progressbar missing
+if (typeof $.fn.progressbar === 'undefined') {
+    $.fn.progressbar = function(options) {
+        if (options && options.value !== undefined) {
+            this.css('width', options.value + '%');
+        }
+        return this;
+    };
+}
+</script>
 @stack('scripts')
 
 <script>

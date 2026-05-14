@@ -60,7 +60,7 @@ class AssessmentController extends Controller
             return redirect()->back()->with('error', 'You are not enrolled in this course.');
         }
 
-        // ✅ Locked if FREETRIAL
+        // ✅ Locked if FREE TRIAL
         $isLocked = $enrolled->status === Status::FREETRIAL()->value;
 
         $data = $this->getDetails($user_assessment->slug);
@@ -192,19 +192,19 @@ class AssessmentController extends Controller
         }
     }
 
-    // Alternative: Accessor ব্যবহার করে rank পেতে - FIXED VERSION
+    // Alternative: Accessor rank - FIXED VERSION
     public function rank($slug)
     {
         $assessment = Assessment::where('slug', $slug)->firstOrFail();
 
-        // IMPORTANT: প্রথমে created_at তারপর achive_marks দিয়ে sort করতে হবে
+        // IMPORTANT: created_at then achive_marks to make sort
         $leaderboard = UserAssessmentProgress::with('user')
             ->where('assessment_id', $assessment->id)
             ->active()
-            ->orderBy('achive_marks', 'desc')   // দ্বিতীয় priority: একই সময়ে বেশি marks
+            ->orderBy('achive_marks', 'desc')   // priority: marks
             ->get();
 
-        // Current user এর rank খুঁজুন
+        // Current user rank
         $userId = auth()->id();
         $userRank = $leaderboard->firstWhere('user_id', $userId);
 
@@ -400,7 +400,7 @@ class AssessmentController extends Controller
                 $totalAnswered = 0;
                 $totalAvailableOptions = 0;
 
-                // প্রতিটি option check করুন
+                // option check
                 foreach (range(1, 5) as $optionIndex) {
                     $optionKey = 'option' . $optionIndex;
                     $answerKey = 'answers' . $optionIndex;
@@ -426,9 +426,9 @@ class AssessmentController extends Controller
                         }
                     }
                 }
-                // প্রতিটি option এর জন্য marks calculate
-                $marksPerOption = $question->mark_per_question; // প্রতিটি option এর value
-                $minusMarkPerOption = $question->minus_mark; // প্রতিটি ভুল এর জন্য minus
+                //  option marks calculate
+                $marksPerOption = $question->mark_per_question; //  option value
+                $minusMarkPerOption = $question->minus_mark; // minus
 
                 $questionMarks = ($totalCorrect * $marksPerOption) - ($totalWrong * $minusMarkPerOption);
                 $achieved_marks += $questionMarks;

@@ -108,6 +108,13 @@
             @can('ospe-station')
             <li><a href="{{ route('admin.ospestations.index') }}"><i class="fa fa-home"></i>OSPE Station</a></li>
             @endcan
+
+            <li>
+                <a href="{{ route('admin.secure-pdfs.index') }}">
+                    <i class="fa fa-file-pdf-o"></i> Secure PDFs
+                </a>
+            </li>
+            
             @can('settings')
             <li><a><i class="bi bi-gear-wide-connected"></i> Settings <span class="fa fa-chevron-down"></span></a>
                 <ul class="nav child_menu">
@@ -121,6 +128,7 @@
                 </ul>
             </li>
             @endcan
+
           </ul>
         </div>
       </div>

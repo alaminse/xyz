@@ -1,15 +1,14 @@
 <?php
 
+use App\Http\Controllers\Backend\SecurePdfController;
+use App\Http\Controllers\Backend\AdminController;
 use App\Http\Controllers\Backend\AssessmentController;
 use App\Http\Controllers\Backend\ChapterController;
 use App\Http\Controllers\Backend\CourseController;
 use App\Http\Controllers\Backend\EnrolleController;
-use App\Http\Controllers\Backend\LessonController;
-use Illuminate\Support\Facades\Route;
-
-use App\Http\Controllers\Backend\AdminController;
 use App\Http\Controllers\Backend\FlashCardController;
 use App\Http\Controllers\Backend\LectureVideoController;
+use App\Http\Controllers\Backend\LessonController;
 use App\Http\Controllers\Backend\McqController;
 use App\Http\Controllers\Backend\MockVivaController;
 use App\Http\Controllers\Backend\NoteController;
@@ -21,6 +20,7 @@ use App\Http\Controllers\Backend\SettingsController;
 use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\Backend\WrittenAssessmentController;
 use App\Http\Controllers\Dashboard\AssessmentController as DashboardAssessmentController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/admin', function () {
     return redirect()->route('admin.login');
@@ -176,7 +176,7 @@ Route::middleware('auth')
                 Route::post('/{flash}/questions', 'storeQuestion')->name('questions.store');
                 Route::get('/questions/{question}', 'getQuestion')->name('questions.get');
                 Route::post('/questions/{question}', 'updateQuestion')->name('questions.update');
-                
+
                 Route::delete('/questions/{question}', 'destroyQuestion')->name('questions.destroy');
                 Route::post('/{flash}/check-duplicate', 'checkDuplicate')->name('questions.check');
             });
@@ -350,4 +350,15 @@ Route::middleware('auth')
                 Route::post('/slider/update/{setting?}', 'slider_update')->name('slider.update');
                 Route::post('/snote/update/{setting?}', 'snote_update')->name('snote.update');
             });
+
+            Route::get('secure-pdfs/get/data', [SecurePdfController::class, 'getData'])
+                ->name('secure-pdfs.data');
+
+            Route::post('secure-pdfs/{securePdf}/toggle', [SecurePdfController::class, 'toggleStatus'])
+                ->name('secure-pdfs.toggle');
+
+            Route::get('secure-pdfs/{securePdf}/logs', [SecurePdfController::class, 'accessLogs'])
+                ->name('secure-pdfs.access-logs');
+
+            Route::resource('secure-pdfs', SecurePdfController::class);
     });

@@ -281,7 +281,7 @@ class ChapterController extends Controller
         $validated = $request->validate([
             'course_ids' => 'required|array|min:1',
             'course_ids.*' => 'exists:courses,id',
-            'for' => 'nullable|in:sba,note,mcq,flush,videos,ospe,written,mock_viva,self_assessment'
+            'for' => 'nullable|in:sba,note,mcq,flush,videos,ospe,written,mock_viva,self_assessment,secure_pdf'
         ]);
 
         $courseIds = $validated['course_ids'];

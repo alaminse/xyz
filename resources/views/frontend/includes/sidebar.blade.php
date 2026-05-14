@@ -89,6 +89,12 @@
                     'route' => 'assessments.index',
                     'group' => 'Self Assessment',
                 ],
+                'secure_pdfs' => [
+                    'enabled' => 'secure_pdf',
+                    'icon'    => 'bx-file-pdf',
+                    'title'   => 'Study Materials',
+                    'route'   => 'secure-pdfs.index',
+                ]
             ];
 
             $activeRouteGroup = collect(array_keys($modules))->first(fn($key) => request()->routeIs($key . '.*'));
@@ -129,8 +135,6 @@
                 </ul>
             </li>
         @endforeach
-
-
     </ul>
 </div>
 

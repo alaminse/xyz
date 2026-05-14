@@ -1,22 +1,23 @@
 <?php
 // FrontEnd Controllers
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ContactController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CourseController;
+use App\Http\Controllers\Dashboard\AssessmentController;
+use App\Http\Controllers\Dashboard\FlashCardController;
+use App\Http\Controllers\Dashboard\LectureVideoController;
+use App\Http\Controllers\Dashboard\McqController;
+use App\Http\Controllers\Dashboard\MockVivaController;
+use App\Http\Controllers\Dashboard\NoteController;
+use App\Http\Controllers\Dashboard\OspeStationController;
+use App\Http\Controllers\Dashboard\SbaController;
+use App\Http\Controllers\Dashboard\SecurePdfController;
+use App\Http\Controllers\Dashboard\VideoStreamController;
+use App\Http\Controllers\Dashboard\WrittenAssessmentController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\CourseController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Dashboard\McqController;
-use App\Http\Controllers\Dashboard\SbaController;
-use App\Http\Controllers\Dashboard\NoteController;
-use App\Http\Controllers\Dashboard\MockVivaController;
-use App\Http\Controllers\Dashboard\OspeStationController;
-use App\Http\Controllers\Dashboard\FlashCardController;
-use App\Http\Controllers\Dashboard\AssessmentController;
-use App\Http\Controllers\Dashboard\VideoStreamController;
-use App\Http\Controllers\Dashboard\LectureVideoController;
-use App\Http\Controllers\Dashboard\WrittenAssessmentController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 Auth::routes(['verify' => true]);
 
@@ -162,3 +163,19 @@ Route::controller(CourseController::class)
         Route::post('/checkout/store/{course}',  'checkout_store')->middleware('verified')->name('checkout.store');
         Route::get('/invoice/{slug}', 'invoice')->middleware('verified')->name('invoice');
     });
+
+Route::middleware(['auth', 'anti.download'])->group(function () {
+
+    Route::get('/course/{course}/pdfs', [SecurePdfController::class, 'index'])
+        ->name('secure-pdfs.index');
+
+    Route::get('/pdf/view/{slug}', [SecurePdfController::class, 'view'])
+        ->name('secure-pdfs.view');
+
+    Route::get('/pdf/stream/{slug}', [SecurePdfController::class, 'stream'])
+        ->name('secure-pdfs.stream')
+        ->middleware('throttle:10,1');
+
+    Route::post('/pdf/token/refresh/{slug}', [SecurePdfController::class, 'refreshToken'])
+        ->name('secure-pdfs.token.refresh');
+});

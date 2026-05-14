@@ -86,7 +86,8 @@
                                     'videos' 		=> 'Lecture Video',
                                     'mock_viva' 	=> 'Mock Viva',
                                     'ospe' 			=> 'OSPE Station',
-                                    'self_assessment' => 'Self Assessment'
+                                    'self_assessment' => 'Self Assessment',
+                                    'secure_pdf'    => 'Secure pdf'
                                 ] as $key => $label)
                                     <div class="form-check mb-1">
                                         <input class="form-check-input" type="checkbox" name="{{ $key }}" value="1"
