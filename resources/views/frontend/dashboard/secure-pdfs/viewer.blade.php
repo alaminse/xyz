@@ -549,4 +549,4 @@ function closeWarn() {
 // ── BOOT ────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', loadPdf);
 </script>
-@endpush
+@endpush    
