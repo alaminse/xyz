@@ -347,6 +347,25 @@
 
     </div>
 
+    {{-- ── DESCRIPTION BAR (always visible) ── --}}
+    @if($pdf->description)
+    <div id="desc-bar" style="
+        flex-shrink: 0;
+        background: rgba(248,184,74,0.06);
+        border-bottom: 1px solid rgba(248,184,74,0.15);
+        padding: 7px 14px;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 12px;
+        color: #c0c7d0;
+        line-height: 1.5;
+    ">
+        <i class="bx bx-info-circle" style="color:#f8b84a; font-size:15px; flex-shrink:0; margin-top:1px;"></i>
+        <span>{{ $pdf->description }}</span>
+    </div>
+    @endif
+
     {{-- ── MAIN BODY ── --}}
     <div id="main-body">
 
@@ -497,17 +516,179 @@ async function loadPdf() {
 }
 
 // ─────────────────────────────────────────────
-// RENDER
+// LAZY RENDER SYSTEM
+// - Creates placeholder divs for ALL pages instantly
+// - Renders only pages that enter the viewport
+// - Pre-renders 2 pages ahead/behind (eager neighbors)
 // ─────────────────────────────────────────────
-async function renderAll() {
-    if (!pdfDoc || rendering) return;
-    rendering = true;
 
+const renderedPages = new Set();
+const renderingPages = new Set();
+let pageObserver = null;
+
+// Estimate page height before rendering (use first page as reference)
+let estimatedPageHeight = 900;
+let estimatedPageWidth  = 600;
+
+async function getPageDimensions() {
+    const page     = await pdfDoc.getPage(1);
+    const area     = document.getElementById('canvas-area');
+    const cw       = Math.floor(area.clientWidth - 12);
+    const baseVp   = page.getViewport({ scale: 1 });
+    const fitScale = Math.max(0.3, cw / baseVp.width + zoomDelta);
+    const vp       = page.getViewport({ scale: fitScale });
+    estimatedPageHeight = vp.height;
+    estimatedPageWidth  = vp.width;
+}
+
+// Build ALL placeholder divs instantly — no rendering yet
+async function buildPlaceholders() {
     const area = document.getElementById('canvas-area');
     area.innerHTML = '';
 
+    await getPageDimensions();
+
     for (let i = 1; i <= totalPages; i++) {
-        await renderPage(i, area);
+        const wrap = document.createElement('div');
+        wrap.className = 'page-wrap page-placeholder';
+        wrap.id = `page-wrap-${i}`;
+        wrap.dataset.page = i;
+        wrap.dataset.rendered = '0';
+        wrap.style.width  = estimatedPageWidth  + 'px';
+        wrap.style.height = estimatedPageHeight + 'px';
+        wrap.style.background = '#2a2f3e';
+        wrap.style.display = 'flex';
+        wrap.style.alignItems = 'center';
+        wrap.style.justifyContent = 'center';
+        wrap.style.color = 'rgba(248,184,74,0.3)';
+        wrap.style.fontSize = '13px';
+        wrap.innerHTML = `
+            <div style="text-align:center;">
+                <div class="page-spinner" style="
+                    width:28px; height:28px; margin:0 auto 8px;
+                    border:2px solid rgba(248,184,74,.2);
+                    border-top-color:#f8b84a;
+                    border-radius:50%;
+                    animation:spin .8s linear infinite;
+                "></div>
+                <div>Page ${i}</div>
+            </div>`;
+        area.appendChild(wrap);
+    }
+}
+
+// Render a single page into its placeholder
+async function renderPageInto(pageNum) {
+    if (renderedPages.has(pageNum) || renderingPages.has(pageNum)) return;
+    renderingPages.add(pageNum);
+
+    const wrap = document.getElementById(`page-wrap-${pageNum}`);
+    if (!wrap) { renderingPages.delete(pageNum); return; }
+
+    try {
+        const page       = await pdfDoc.getPage(pageNum);
+        const area       = document.getElementById('canvas-area');
+        const cw         = Math.floor(area.clientWidth - 12);
+        const baseVp     = page.getViewport({ scale: 1 });
+        const fitScale   = Math.max(0.3, cw / baseVp.width + zoomDelta);
+        const viewport   = page.getViewport({ scale: fitScale });
+        const dpr        = window.devicePixelRatio || 1;
+
+        // Update wrap size to actual dimensions
+        wrap.style.width  = viewport.width  + 'px';
+        wrap.style.height = viewport.height + 'px';
+        wrap.dataset.scale = fitScale;
+
+        const canvas = document.createElement('canvas');
+        canvas.className = 'page-canvas';
+        canvas.width  = Math.floor(viewport.width  * dpr);
+        canvas.height = Math.floor(viewport.height * dpr);
+        canvas.style.width  = viewport.width  + 'px';
+        canvas.style.height = viewport.height + 'px';
+
+        const ctx = canvas.getContext('2d', { alpha: false });
+        ctx.scale(dpr, dpr);
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        burnWatermark(ctx, viewport.width, viewport.height);
+
+        const hl = document.createElement('div');
+        hl.className = 'highlight-layer';
+        hl.id = `hl-${pageNum}`;
+
+        const wm = document.createElement('div');
+        wm.className = 'wm-layer';
+        wm.innerHTML = svgWatermark(viewport.width, viewport.height);
+
+        // Replace placeholder content
+        wrap.innerHTML = '';
+        wrap.style.background = '#fff';
+        wrap.style.display = '';
+        wrap.style.alignItems = '';
+        wrap.style.justifyContent = '';
+        wrap.style.color = '';
+        wrap.style.fontSize = '';
+        wrap.dataset.rendered = '1';
+
+        wrap.appendChild(canvas);
+        wrap.appendChild(hl);
+        wrap.appendChild(wm);
+
+        renderedPages.add(pageNum);
+    } catch (e) {
+        console.error(`Page ${pageNum} render error:`, e);
+    }
+
+    renderingPages.delete(pageNum);
+}
+
+// Eager-load neighbors (2 ahead, 1 behind)
+function eagerLoadNeighbors(pageNum) {
+    const toLoad = [pageNum - 1, pageNum + 1, pageNum + 2, pageNum - 2];
+    for (const p of toLoad) {
+        if (p >= 1 && p <= totalPages) {
+            renderPageInto(p); // fire and forget
+        }
+    }
+}
+
+// Setup IntersectionObserver for lazy loading
+function setupObserver() {
+    if (pageObserver) pageObserver.disconnect();
+
+    pageObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const pageNum = parseInt(entry.target.dataset.page);
+                renderPageInto(pageNum);
+                eagerLoadNeighbors(pageNum);
+            }
+        });
+    }, {
+        root: document.getElementById('canvas-area'),
+        rootMargin: '200px 0px 200px 0px', // pre-load 200px before visible
+        threshold: 0.01
+    });
+
+    document.querySelectorAll('.page-placeholder').forEach(el => {
+        pageObserver.observe(el);
+    });
+}
+
+// Full re-render (zoom change etc.) — clear and rebuild
+async function renderAll() {
+    if (!pdfDoc) return;
+    rendering = true;
+
+    renderedPages.clear();
+    renderingPages.clear();
+    if (pageObserver) pageObserver.disconnect();
+
+    await buildPlaceholders();
+    setupObserver();
+
+    // Immediately render first 3 pages
+    for (let i = 1; i <= Math.min(3, totalPages); i++) {
+        await renderPageInto(i);
     }
 
     rendering = false;
@@ -515,48 +696,20 @@ async function renderAll() {
     updateNav();
 }
 
-async function renderPage(pageNum, container) {
-    const page       = await pdfDoc.getPage(pageNum);
-    const area       = document.getElementById('canvas-area');
-    const cw         = Math.floor(area.clientWidth - 12);
-    const baseVp     = page.getViewport({ scale: 1 });
-    const fitScale   = cw / baseVp.width;
-    const finalScale = Math.max(0.3, fitScale + zoomDelta);
-    const viewport   = page.getViewport({ scale: finalScale });
-    const dpr        = window.devicePixelRatio || 1;
-
-    const wrap = document.createElement('div');
-    wrap.className = 'page-wrap';
-    wrap.id = `page-wrap-${pageNum}`;
-    wrap.dataset.scale = finalScale;
-    wrap.style.width  = viewport.width  + 'px';
-    wrap.style.height = viewport.height + 'px';
-
-    const canvas = document.createElement('canvas');
-    canvas.className = 'page-canvas';
-    canvas.width  = Math.floor(viewport.width  * dpr);
-    canvas.height = Math.floor(viewport.height * dpr);
-    canvas.style.width  = viewport.width  + 'px';
-    canvas.style.height = viewport.height + 'px';
-
-    const ctx = canvas.getContext('2d', { alpha: false });
-    ctx.scale(dpr, dpr);
-    await page.render({ canvasContext: ctx, viewport }).promise;
-    burnWatermark(ctx, viewport.width, viewport.height);
-
-    // highlight layer for search
-    const hl = document.createElement('div');
-    hl.className = 'highlight-layer';
-    hl.id = `hl-${pageNum}`;
-
-    const wm = document.createElement('div');
-    wm.className = 'wm-layer';
-    wm.innerHTML = svgWatermark(viewport.width, viewport.height);
-
-    wrap.appendChild(canvas);
-    wrap.appendChild(hl);
-    wrap.appendChild(wm);
-    container.appendChild(wrap);
+// Blank all (security)
+function blankAllCanvases() {
+    document.querySelectorAll('.page-canvas').forEach(c => {
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#0a0e1a';
+        ctx.fillRect(0, 0, c.width, c.height);
+        ctx.fillStyle = 'rgba(248,184,74,0.3)';
+        ctx.font = `bold ${Math.max(16, c.width * 0.05)}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.fillText('🔒 Content Protected', c.width / 2, c.height / 2);
+        ctx.textAlign = 'left';
+    });
+    // Also reset rendered state so they re-render on restore
+    renderedPages.clear();
 }
 
 // ─────────────────────────────────────────────
@@ -976,20 +1129,7 @@ window.addEventListener('focus', () => {
     setTimeout(renderAll, 300);
 });
 
-// 9. Blank all canvases helper
-function blankAllCanvases() {
-    document.querySelectorAll('.page-canvas').forEach(c => {
-        const ctx = c.getContext('2d');
-        ctx.fillStyle = '#0a0e1a';
-        ctx.fillRect(0, 0, c.width, c.height);
-        // Draw "Protected" text on blank
-        ctx.fillStyle = 'rgba(248,184,74,0.3)';
-        ctx.font = `bold ${Math.max(16, c.width * 0.05)}px Arial`;
-        ctx.textAlign = 'center';
-        ctx.fillText('🔒 Content Protected', c.width / 2, c.height / 2);
-        ctx.textAlign = 'left';
-    });
-}
+// 9. Blank all canvases helper — defined in render section above
 
 function showWarn(msg) {
     document.getElementById('warn-msg').textContent = msg || 'Security alert.';
