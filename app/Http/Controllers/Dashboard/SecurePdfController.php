@@ -115,19 +115,15 @@ class SecurePdfController extends Controller
     }
 
     // controller
-    public function view(Request $request, string $slug)
+    public function view(Request $request, string $course_slug, string $slug)
     {
         $pdf = SecurePdf::with('courses')
             ->where('slug', $slug)
             ->where('is_active', true)
             ->firstOrFail();
 
-        // query parameter থেকে course নিন
-        $courseSlug = $request->query('course');
-
-        $course = $courseSlug
-            ? $pdf->courses->where('slug', $courseSlug)->first()
-            : null;
+        $course = $pdf->courses->where('slug', $course_slug)->first()
+                ?? $pdf->courses->first();
 
         // fallback
         $course = $course ?? $pdf->courses->first();
