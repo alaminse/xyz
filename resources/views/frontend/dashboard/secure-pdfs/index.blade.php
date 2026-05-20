@@ -105,14 +105,13 @@
                                         <i class="bi bi-unlock-fill text-success ms-1 small"></i>
                                     @endif
                                 </h5>
-
                                 @if ($item->isPaid && $isLocked)
                                     <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
                                         class="btn btn-sm btn-warning fw-bold flex-shrink-0">
                                         <i class="bi bi-star-fill me-1"></i> Upgrade to Premium
                                     </a>
                                 @else
-                                    <a href="{{ route('secure-pdfs.view', $item->slug) }}"
+                                    <a href="{{ route('secure-pdfs.view', ['slug' => $item->slug, 'course' => $course->slug]) }}"
                                         class="btn btn-sm button-yellow flex-shrink-0">
                                         <i class="fa fa-eye"></i> Open
                                     </a>

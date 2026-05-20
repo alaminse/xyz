@@ -26,15 +26,26 @@ class SecurePdfController extends Controller
         });
     }
 
-    private function isPaid($course)
+    private function isPaid($courseId)
     {
+        if (!Auth::check()) return 9;
+
+        $courseIds = collect([$courseId]);
+
+        $courseModel = Course::find($courseId);
+        if ($courseModel?->parent_id) {
+            $courseIds->push($courseModel->parent_id);
+        }
+
         $enrolled = EnrollUser::where('user_id', Auth::user()->id)
-            ->where('course_id', $course)
+            ->whereIn('course_id', $courseIds)
             ->first();
 
-        return $enrolled->status == Status::ACTIVE()->value
-            ? 1
-            : ($enrolled->status == Status::FREETRIAL()->value ? 0 : 9);
+        if (!$enrolled) return 9;
+        if ($enrolled->status == Status::ACTIVE()->value) return 1;
+        if ($enrolled->status == Status::FREETRIAL()->value) return 0;
+
+        return 9;
     }
 
     public function index($course)
@@ -47,7 +58,7 @@ class SecurePdfController extends Controller
             abort(404, 'Course not found');
         }
 
-        $isPaid   = $this->isPaid(course: $course->id);
+        $isPaid   = $this->isPaid($course->id);
         $isLocked = $isPaid == 0;
 
         $chapters = course_chapters($course, 'secure_pdf');
@@ -103,38 +114,47 @@ class SecurePdfController extends Controller
             compact('pdfs', 'course', 'course_slug', 'isLocked'));
     }
 
+    // controller
     public function view(Request $request, string $slug)
     {
-        $pdf = SecurePdf::where('slug', $slug)
+        $pdf = SecurePdf::with('courses')
+            ->where('slug', $slug)
             ->where('is_active', true)
             ->firstOrFail();
 
-        dd($pdf);
-        $course   = $pdf->courses->first();
-        $courseId = $course->id;
-        $course  = $pdf->courses->first();
-        $courseId = $course->id;
+        // query parameter থেকে course নিন
+        $courseSlug = $request->query('course');
 
-        dd([
-            'course_id'   => $courseId,
-            'user_id'     => Auth::user()->id,
-            'enrolled'    => EnrollUser::where('user_id', Auth::user()->id)
-                                ->first()
-        ]);
-        return $isPaid   = $this->isPaid($courseId ?? 0);
+        $course = $courseSlug
+            ? $pdf->courses->where('slug', $courseSlug)->first()
+            : null;
+
+        // fallback
+        $course = $course ?? $pdf->courses->first();
+
+        if (!$course) {
+            abort(404, 'No course linked to this PDF.');
+        }
+
+        $isPaid   = $this->isPaid($course->id);
         $isLocked = $isPaid == 0;
+
+        if ($pdf->isPaid && $isPaid === 9) {
+            return redirect()
+                ->route('courses.checkout', ['course' => $course->slug])
+                ->with('error', 'Upgrade to Premium to access this PDF.');
+        }
 
         if ($pdf->isPaid && $isLocked) {
             return redirect()
-                ->route('courses.checkout', ['course' => $course?->slug])
+                ->route('courses.checkout', ['course' => $course->slug])
                 ->with('error', 'Upgrade to Premium to access this PDF.');
         }
 
         $token = $this->service->generateViewToken($pdf, $request);
         $this->service->logAccess($pdf->id, $request->user()->id, $request, 'viewed');
 
-        return view('frontend.dashboard.secure-pdfs.viewer',
-            compact('pdf', 'token'));
+        return view('frontend.dashboard.secure-pdfs.viewer', compact('pdf', 'token'));
     }
 
     public function stream(Request $request, string $slug)

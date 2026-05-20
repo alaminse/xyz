@@ -63,16 +63,14 @@
                                         </small>
 
                                         @if ($pdf->isPaid && $isLocked)
-                                            {{-- Paid + free user → upgrade --}}
                                             <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
                                                 class="btn btn-sm btn-warning fw-bold flex-shrink-0">
                                                 <i class="bi bi-star-fill me-1"></i> Upgrade to Premium
                                             </a>
 
                                         @elseif (!$pdf->isPaid)
-                                            {{-- Free PDF → open + nudge if locked --}}
                                             <div class="d-flex gap-2 flex-shrink-0">
-                                                <a href="{{ route('secure-pdfs.view', $pdf->slug) }}"
+                                                <a href="{{ route('secure-pdfs.view', ['slug' => $pdf->slug, 'course' => $course->slug]) }}"
                                                     class="btn btn-sm button-yellow">
                                                     <i class="fa fa-eye"></i> Open
                                                 </a>
@@ -85,8 +83,7 @@
                                             </div>
 
                                         @else
-                                            {{-- Paid + enrolled → open --}}
-                                            <a href="{{ route('secure-pdfs.view', $pdf->slug) }}"
+                                            <a href="{{ route('secure-pdfs.view', ['slug' => $pdf->slug, 'course' => $course->slug]) }}"
                                                 class="btn btn-sm button-yellow flex-shrink-0">
                                                 <i class="fa fa-eye"></i> Open
                                             </a>
