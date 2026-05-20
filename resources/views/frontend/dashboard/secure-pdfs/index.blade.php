@@ -111,7 +111,7 @@
                                         <i class="bi bi-star-fill me-1"></i> Upgrade to Premium
                                     </a>
                                 @else
-                                    <a href="{{ route('secure-pdfs.view', ['slug' => $item->slug, 'course' => $course->slug]) }}"
+                                    <a href="{{ route('secure-pdfs.view', ['course_slug' => $course->slug, 'slug' => $item->slug]) }}"
                                         class="btn btn-sm button-yellow flex-shrink-0">
                                         <i class="fa fa-eye"></i> Open
                                     </a>

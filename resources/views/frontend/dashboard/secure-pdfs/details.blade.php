@@ -70,7 +70,7 @@
 
                                         @elseif (!$pdf->isPaid)
                                             <div class="d-flex gap-2 flex-shrink-0">
-                                                <a href="{{ route('secure-pdfs.view', ['slug' => $pdf->slug, 'course' => $course->slug]) }}"
+                                                <a href="{{ route('secure-pdfs.view', ['course_slug' => $course->slug, 'slug' => $pdf->slug]) }}"
                                                     class="btn btn-sm button-yellow">
                                                     <i class="fa fa-eye"></i> Open
                                                 </a>
@@ -83,7 +83,7 @@
                                             </div>
 
                                         @else
-                                            <a href="{{ route('secure-pdfs.view', ['slug' => $pdf->slug, 'course' => $course->slug]) }}"
+                                            <a href="{{ route('secure-pdfs.view', ['course_slug' => $course->slug, 'slug' => $pdf->slug]) }}"
                                                 class="btn btn-sm button-yellow flex-shrink-0">
                                                 <i class="fa fa-eye"></i> Open
                                             </a>
