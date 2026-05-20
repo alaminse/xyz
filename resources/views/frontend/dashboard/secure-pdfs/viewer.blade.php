@@ -1061,9 +1061,9 @@ document.addEventListener('keydown', e => {
         opacity: 1;
     `;
 
-    const name  = ${JSON.stringify(USER_NAME)};
-    const email = ${JSON.stringify(USER_EMAIL)};
-    const text  = `${name} • ${email}`;
+    const name  = USER_NAME;
+    const email = USER_EMAIL;
+    const text  = name + ' • ' + email;
 
     // Build a grid of watermark spans
     let html = '';
