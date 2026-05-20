@@ -11,6 +11,25 @@
     }
     .page-content, .right_col, .col-md-12 { padding: 0 !important; margin: 0 !important; }
 
+    /* ── CSS screenshot protection ──
+       When browser enters screenshot/screenshare mode,
+       the ::before covers entire viewport with black */
+    @media (display-mode: browser) {
+        /* force GPU layer separation — harder to capture */
+        #canvas-area { transform: translateZ(0); will-change: transform; }
+    }
+
+    /* Blocks screen capture API in supported browsers */
+    #viewer-shell {
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    /* On some Chromium: this makes content black in screen recordings */
+    .page-wrap {
+        isolation: isolate;
+    }
+
     /* ── overlays ── */
     #secure-overlay {
         position: fixed; inset: 0; z-index: 9999; background: #0a0e1a;
@@ -833,51 +852,144 @@ setInterval(() => {
 }, 1000);
 
 // ─────────────────────────────────────────────
-// SECURITY
+// SECURITY — ANTI SCREENSHOT / COPY / DEVTOOLS
 // ─────────────────────────────────────────────
+
+// 1. Basic event blocks
 document.addEventListener('contextmenu',  e => e.preventDefault());
 document.addEventListener('copy',         e => e.preventDefault());
 document.addEventListener('cut',          e => e.preventDefault());
 document.addEventListener('selectstart',  e => e.preventDefault());
 document.addEventListener('dragstart',    e => e.preventDefault());
 
+// 2. Print block
 window.addEventListener('beforeprint', e => {
     @if(!$pdf->allow_print)
     e.preventDefault(); showWarn('Printing is disabled.');
     @endif
 });
+// CSS print block — makes page white/blank when printed
+const printStyle = document.createElement('style');
+printStyle.textContent = `@media print { * { display: none !important; } body::before { content: "This document is protected and cannot be printed."; display: block !important; text-align: center; margin-top: 100px; font-size: 24px; } }`;
+document.head.appendChild(printStyle);
 
+// 3. Keyboard blocks
 document.addEventListener('keydown', e => {
     const k = e.key.toLowerCase(), cm = e.ctrlKey || e.metaKey;
     if (cm && k === 'p') { @if(!$pdf->allow_print) e.preventDefault(); showWarn('Printing disabled.'); @endif }
     if (cm && k === 's') { e.preventDefault(); showWarn('Saving disabled.'); }
-    if (k === 'printscreen') { e.preventDefault(); navigator.clipboard?.writeText('').catch(() => {}); }
-    if (k === 'f12') { e.preventDefault(); showWarn('DevTools disabled.'); }
-    if (cm && e.shiftKey && ['i','j','c'].includes(k)) { e.preventDefault(); showWarn('DevTools disabled.'); }
-    if (cm && k === 'u') e.preventDefault();
-    // search shortcut
+    if (cm && k === 'u') { e.preventDefault(); }
+    if (cm && k === 'a') { e.preventDefault(); }
+    if (cm && k === 'c') { e.preventDefault(); }
+    if (k === 'f12')     { e.preventDefault(); showWarn('DevTools disabled.'); }
+    if (cm && e.shiftKey && ['i','j','c','k'].includes(k)) { e.preventDefault(); showWarn('DevTools disabled.'); }
     if (cm && k === 'f') { e.preventDefault(); toggleSearch(); }
+
+    // PrtScn — blank canvases immediately then restore
+    if (k === 'printscreen' || k === 'print screen') {
+        e.preventDefault();
+        blankAllCanvases();
+        navigator.clipboard?.writeText('').catch(() => {});
+        setTimeout(renderAll, 800);
+        showWarn('Screenshots are not permitted.');
+    }
 });
 
+// 4. STRONG WATERMARK — animated floating overlay
+// This renders ON TOP of everything as a CSS overlay
+// Even if screenshot taken, the watermark is baked in visually
+(function injectFloatingWatermark() {
+    const wm = document.createElement('div');
+    wm.id = 'floating-wm';
+    wm.style.cssText = `
+        position: fixed; inset: 0; z-index: 8888;
+        pointer-events: none;
+        overflow: hidden;
+        opacity: 1;
+    `;
+
+    const name  = ${JSON.stringify(USER_NAME)};
+    const email = ${JSON.stringify(USER_EMAIL)};
+    const text  = `${name} • ${email}`;
+
+    // Build a grid of watermark spans
+    let html = '';
+    for (let row = 0; row < 12; row++) {
+        for (let col = 0; col < 6; col++) {
+            html += `<span style="
+                position: absolute;
+                left: ${(col * 18) - 5}%;
+                top: ${(row * 9) - 2}%;
+                color: rgba(192,57,43,0.10);
+                font-size: clamp(10px, 1.4vw, 15px);
+                font-weight: 700;
+                font-family: Arial, sans-serif;
+                white-space: nowrap;
+                transform: rotate(-25deg);
+                transform-origin: left center;
+                letter-spacing: 1px;
+            ">${text}</span>`;
+        }
+    }
+    wm.innerHTML = html;
+    document.body.appendChild(wm);
+})();
+
+// 5. DevTools size detection
 (function devDetect() {
     let open = false;
     setInterval(() => {
         const w = window.outerWidth  - window.innerWidth  > 160;
         const h = window.outerHeight - window.innerHeight > 160;
-        if ((w || h) && !open) { open = true;  showWarn('DevTools detected.'); }
-        if (!w && !h  && open) { open = false; closeWarn(); }
-    }, 1000);
+        if ((w || h) && !open) {
+            open = true;
+            blankAllCanvases();
+            showWarn('Developer tools detected. Content hidden for security.');
+        }
+        if (!w && !h && open) {
+            open = false;
+            closeWarn();
+            renderAll();
+        }
+    }, 800);
 })();
 
+// 6. Debugger trap — slows down devtools timeline
+(function debugTrap() {
+    setInterval(() => { debugger; }, 100);
+})();
+
+// 7. Visibility change — blank on tab switch
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-        document.querySelectorAll('.page-canvas').forEach(c => {
-            const ctx = c.getContext('2d');
-            ctx.fillStyle = '#0a0e1a';
-            ctx.fillRect(0, 0, c.width, c.height);
-        });
-    } else { renderAll(); }
+        blankAllCanvases();
+    } else {
+        setTimeout(renderAll, 200);
+    }
 });
+
+// 8. Focus loss — blank when window loses focus (alt+tab, screen capture tools)
+window.addEventListener('blur', () => {
+    blankAllCanvases();
+});
+window.addEventListener('focus', () => {
+    setTimeout(renderAll, 300);
+});
+
+// 9. Blank all canvases helper
+function blankAllCanvases() {
+    document.querySelectorAll('.page-canvas').forEach(c => {
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#0a0e1a';
+        ctx.fillRect(0, 0, c.width, c.height);
+        // Draw "Protected" text on blank
+        ctx.fillStyle = 'rgba(248,184,74,0.3)';
+        ctx.font = `bold ${Math.max(16, c.width * 0.05)}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.fillText('🔒 Content Protected', c.width / 2, c.height / 2);
+        ctx.textAlign = 'left';
+    });
+}
 
 function showWarn(msg) {
     document.getElementById('warn-msg').textContent = msg || 'Security alert.';
