@@ -118,7 +118,6 @@ class SecurePdfController extends Controller
             'course_id'   => $courseId,
             'user_id'     => Auth::user()->id,
             'enrolled'    => EnrollUser::where('user_id', Auth::user()->id)
-                                ->where('course_id', $courseId)
                                 ->first()
         ]);
         return $isPaid   = $this->isPaid($courseId ?? 0);
