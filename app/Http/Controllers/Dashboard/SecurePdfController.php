@@ -105,10 +105,11 @@ class SecurePdfController extends Controller
 
     public function view(Request $request, string $slug)
     {
-        return $pdf = SecurePdf::where('slug', $slug)
+        $pdf = SecurePdf::where('slug', $slug)
             ->where('is_active', true)
             ->firstOrFail();
 
+        dd($pdf);
         $course   = $pdf->courses->first();
         $courseId = $course->id;
         $course  = $pdf->courses->first();
