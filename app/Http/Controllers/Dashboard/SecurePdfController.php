@@ -111,6 +111,16 @@ class SecurePdfController extends Controller
 
         $course   = $pdf->courses->first();
         $courseId = $course->id;
+        $course  = $pdf->courses->first();
+        $courseId = $course->id;
+
+        dd([
+            'course_id'   => $courseId,
+            'user_id'     => Auth::user()->id,
+            'enrolled'    => EnrollUser::where('user_id', Auth::user()->id)
+                                ->where('course_id', $courseId)
+                                ->first()
+        ]);
         return $isPaid   = $this->isPaid($courseId ?? 0);
         $isLocked = $isPaid == 0;
 
