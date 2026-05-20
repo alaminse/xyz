@@ -109,7 +109,7 @@ class SecurePdfController extends Controller
             ->where('is_active', true)
             ->firstOrFail();
 
-        $course   = $pdf->courses->first();
+        return $course   = $pdf->courses->first();
         return $isPaid   = $this->isPaid($course?->id ?? 0);
         $isLocked = $isPaid == 0;
 
