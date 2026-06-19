@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\WrittenAssessment;
+use App\Models\WrittenAssessmentQuestion;
 use App\Traits\Upload;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class WrittenAssessmentController extends Controller
 {
@@ -270,8 +271,6 @@ class WrittenAssessmentController extends Controller
             'course_ids.*'      => 'required|exists:courses,id',
             'chapter_id'        => 'required|exists:chapters,id',
             'lesson_id'         => 'nullable|exists:lessons,id',
-            'question'          => 'required|string|max:1000',
-            'answer'            => 'required|string',
             'isPaid'            => 'nullable|boolean'
         ];
 
@@ -286,13 +285,65 @@ class WrittenAssessmentController extends Controller
             'chapter_id.required'       => 'Chapter is required',
             'chapter_id.exists'         => 'Selected chapter is invalid',
             'lesson_id.exists'          => 'Selected lesson is invalid',
-            'question.required'         => 'Question is required',
-            'question.max'              => 'Question cannot exceed 1000 characters',
-            'answer.required'           => 'Answer is required',
-            'status.required'           => 'Status is required',
             'status.in'                 => 'Invalid status value',
         ];
 
         return Validator::make($request->all(), $rules, $messages);
+    }
+
+
+
+    public function storeQuestionGroup(Request $request, $written)
+    {
+        $request->validate([
+            'questions'          => 'required|array|min:1',
+            'questions.*.question' => 'required|string',
+            'questions.*.answer'   => 'required|string',
+        ]);
+
+        WrittenAssessmentQuestion::create([
+            'written_assessment_id' => $written,
+            'questions'             => json_encode($request->questions),
+        ]);
+
+        return redirect()->route('admin.writtenassessments.show', $written)
+            ->with('success', 'Question group added.');
+    }
+
+    public function updateQuestionGroup(Request $request, $questionGroup)
+    {
+        $group = WrittenAssessmentQuestion::findOrFail($questionGroup);
+        $writtenId = $group->written_assessment_id;
+
+        $questions = $request->input('questions', []);
+
+        if (empty($questions)) {
+            $group->delete();
+            return redirect()->route('admin.writtenassessments.show', $writtenId)
+                ->with('success', 'Question group deleted as it had no questions remaining.');
+        }
+
+        $request->validate([
+            'questions'            => 'required|array|min:1',
+            'questions.*.question' => 'required|string',
+            'questions.*.answer'   => 'required|string',
+        ]);
+
+        $group->update([
+            'questions' => json_encode(array_values($questions)),
+        ]);
+
+        return redirect()->route('admin.writtenassessments.show', $writtenId)
+            ->with('success', 'Question group updated.');
+    }
+
+    public function destroyQuestionGroup($questionGroup)
+    {
+        $group = WrittenAssessmentQuestion::findOrFail($questionGroup);
+        $writtenId = $group->written_assessment_id;
+        $group->delete();
+
+        return redirect()->route('admin.writtenassessments.show', $writtenId)
+            ->with('success', 'Question group deleted.');
     }
 }

@@ -1,11 +1,10 @@
-@extends('layouts.backend')
-@section('title', 'Written Assessment Details')
+<?php $__env->startSection('title', 'Written Assessment Details'); ?>
 
-@section('css')
+<?php $__env->startSection('css'); ?>
     <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-lg-9 col-md-12">
@@ -16,7 +15,7 @@
                         <i class="fa fa-file-text-o text-primary"></i>
                         Written Assessment Details
                     </h5>
-                    <a href="{{ route('admin.writtenassessments.index') }}" class="btn btn-sm btn-outline-secondary">
+                    <a href="<?php echo e(route('admin.writtenassessments.index')); ?>" class="btn btn-sm btn-outline-secondary">
                         <i class="fa fa-arrow-left"></i> Back
                     </a>
                 </div>
@@ -25,25 +24,27 @@
 
                     <div class="row mb-2">
                         <div class="col-md-3 text-muted font-weight-bold">Chapter</div>
-                        <div class="col-md-9">{{ $written->chapter->name ?? '-' }}</div>
+                        <div class="col-md-9"><?php echo e($written->chapter->name ?? '-'); ?></div>
                     </div>
                     <div class="row mb-2">
                         <div class="col-md-3 text-muted font-weight-bold">Lesson</div>
-                        <div class="col-md-9">{{ $written->lesson->name ?? '-' }}</div>
+                        <div class="col-md-9"><?php echo e($written->lesson->name ?? '-'); ?></div>
                     </div>
                     <div class="row mb-2">
                         <div class="col-md-3 text-muted font-weight-bold">Paid</div>
                         <div class="col-md-9">
-                            <span class="badge badge-{{ $written->isPaid ? 'warning' : 'success' }}">
-                                {{ $written->isPaid ? 'Paid' : 'Free' }}
+                            <span class="badge badge-<?php echo e($written->isPaid ? 'warning' : 'success'); ?>">
+                                <?php echo e($written->isPaid ? 'Paid' : 'Free'); ?>
+
                             </span>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-3 text-muted font-weight-bold">Status</div>
                         <div class="col-md-9">
-                            <span class="badge badge-{{ $written->status ? 'success' : 'secondary' }}">
-                                {{ $written->status ? 'Active' : 'Inactive' }}
+                            <span class="badge badge-<?php echo e($written->status ? 'success' : 'secondary'); ?>">
+                                <?php echo e($written->status ? 'Active' : 'Inactive'); ?>
+
                             </span>
                         </div>
                     </div>
@@ -57,25 +58,26 @@
                         </button>
                     </div>
 
-                    @forelse($written->questionGroups as $index => $group)
-                    @php
+                    <?php $__empty_1 = true; $__currentLoopData = $written->questionGroups; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $group): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php
                         $questions = is_array($group->questions)
                             ? $group->questions
                             : json_decode($group->questions, true) ?? [];
-                    @endphp
+                    ?>
                     <div class="card mb-3 border">
                         <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
                             <span class="font-weight-bold text-muted" style="font-size:13px;">
-                                Group {{ $index + 1 }}
-                                <span class="text-muted font-weight-normal">· {{ count($questions) }} question(s)</span>
+                                Group <?php echo e($index + 1); ?>
+
+                                <span class="text-muted font-weight-normal">· <?php echo e(count($questions)); ?> question(s)</span>
                             </span>
                             <div>
                                 <button class="btn btn-sm btn-outline-primary mr-1 edit-group-btn"
-                                    data-id="{{ $group->id }}"
-                                    data-questions='{{ json_encode($questions) }}'>
+                                    data-id="<?php echo e($group->id); ?>"
+                                    data-questions='<?php echo e(json_encode($questions)); ?>'>
                                     <i class="fa fa-edit"></i>
                                 </button>
-                                <a href="{{ route('admin.writtenassessments.question.group.destroy', $group->id) }}"
+                                <a href="<?php echo e(route('admin.writtenassessments.question.group.destroy', $group->id)); ?>"
                                    onclick="showDeleteConfirmation(event)"
                                    class="btn btn-sm btn-outline-danger">
                                     <i class="fa fa-trash"></i>
@@ -83,47 +85,47 @@
                             </div>
                         </div>
                         <div class="card-body p-3">
-                            @foreach($questions as $qi => $qa)
+                            <?php $__currentLoopData = $questions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $qi => $qa): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <div class="border rounded p-3 mb-2 bg-white d-flex justify-content-between align-items-start">
                                 <div style="flex:1;">
-                                    <div class="text-uppercase text-muted mb-1" style="font-size:10px; font-weight:600; letter-spacing:.05em;">Question {{ $qi + 1 }}</div>
-                                    <div class="mb-2" style="font-size:14px;">{{ $qa['question'] }}</div>
+                                    <div class="text-uppercase text-muted mb-1" style="font-size:10px; font-weight:600; letter-spacing:.05em;">Question <?php echo e($qi + 1); ?></div>
+                                    <div class="mb-2" style="font-size:14px;"><?php echo e($qa['question']); ?></div>
                                     <div class="text-uppercase text-muted mb-1" style="font-size:10px; font-weight:600; letter-spacing:.05em;">Answer</div>
-                                    <div class="text-muted" style="font-size:13px;">{!! $qa['answer'] !!}</div>
+                                    <div class="text-muted" style="font-size:13px;"><?php echo $qa['answer']; ?></div>
                                 </div>
-                                <form action="{{ route('admin.writtenassessments.question.group.update', $group->id) }}" method="POST" class="ml-2">
-                                    @csrf
-                                    @foreach($questions as $k => $q)
-                                        @if($k !== $qi)
-                                            <input type="hidden" name="questions[{{ $k }}][question]" value="{{ $q['question'] }}">
-                                            <input type="hidden" name="questions[{{ $k }}][answer]" value="{{ $q['answer'] }}">
-                                        @endif
-                                    @endforeach
+                                <form action="<?php echo e(route('admin.writtenassessments.question.group.update', $group->id)); ?>" method="POST" class="ml-2">
+                                    <?php echo csrf_field(); ?>
+                                    <?php $__currentLoopData = $questions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $k => $q): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php if($k !== $qi): ?>
+                                            <input type="hidden" name="questions[<?php echo e($k); ?>][question]" value="<?php echo e($q['question']); ?>">
+                                            <input type="hidden" name="questions[<?php echo e($k); ?>][answer]" value="<?php echo e($q['answer']); ?>">
+                                        <?php endif; ?>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this question?')">
                                         <i class="fa fa-times"></i>
                                     </button>
                                 </form>
                             </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                     </div>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <div class="text-center text-muted py-4 border rounded">
                         <i class="fa fa-inbox fa-2x mb-2 d-block"></i>
                         <p class="mb-0">No question groups yet. Click "Add Question Group" to get started.</p>
                     </div>
-                    @endforelse
+                    <?php endif; ?>
 
                     <hr>
 
                     <div class="text-right">
-                        <a href="{{ route('admin.writtenassessments.edit', $written->id) }}"
+                        <a href="<?php echo e(route('admin.writtenassessments.edit', $written->id)); ?>"
                            class="btn btn-sm btn-primary mr-1">
                             <i class="fa fa-edit"></i> Edit
                         </a>
-                        <a href="{{ route('admin.writtenassessments.destroy', $written->id) }}"
+                        <a href="<?php echo e(route('admin.writtenassessments.destroy', $written->id)); ?>"
                            onclick="showDeleteConfirmation(event)"
-                           class="btn btn-sm btn-danger {{ $written->status == 3 ? 'disabled' : '' }}">
+                           class="btn btn-sm btn-danger <?php echo e($written->status == 3 ? 'disabled' : ''); ?>">
                             <i class="fa fa-trash"></i> Delete
                         </a>
                     </div>
@@ -135,12 +137,12 @@
     </div>
 </div>
 
-{{-- Add Group Modal --}}
+
 <div class="modal fade" id="addGroupModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form action="{{ route('admin.writtenassessments.question.group.store', $written->id) }}" method="POST">
-                @csrf
+            <form action="<?php echo e(route('admin.writtenassessments.question.group.store', $written->id)); ?>" method="POST">
+                <?php echo csrf_field(); ?>
                 <div class="modal-header">
                     <h5 class="modal-title font-weight-bold">Add Question Group</h5>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -171,12 +173,12 @@
     </div>
 </div>
 
-{{-- Edit Group Modal --}}
+
 <div class="modal fade" id="editGroupModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form id="editGroupForm" method="POST">
-                @csrf
+                <?php echo csrf_field(); ?>
                 <div class="modal-header">
                     <h5 class="modal-title font-weight-bold">Edit Question Group</h5>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -196,9 +198,9 @@
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 <script>
     let addQACount = 1;
@@ -214,7 +216,7 @@
                     var data = new FormData();
                     data.append('image', files[0]);
                     $.ajax({
-                        url: '{{ route('admin.summernote.upload') }}',
+                        url: '<?php echo e(route('admin.summernote.upload')); ?>',
                         method: 'POST',
                         data: data,
                         processData: false,
@@ -374,4 +376,6 @@
         $('#editGroupModal').modal('show');
     });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.backend', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/medimaniac/resources/views/backend/written-assessment/show.blade.php ENDPATH**/ ?>

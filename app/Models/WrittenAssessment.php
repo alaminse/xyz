@@ -41,4 +41,8 @@ class WrittenAssessment extends Model
     {
         return $this->lesson ? $this->lesson?->name : 'N/A';
     }
+    public function questionGroups()
+    {
+        return $this->hasMany(WrittenAssessmentQuestion::class, 'written_assessment_id');
+    }
 }

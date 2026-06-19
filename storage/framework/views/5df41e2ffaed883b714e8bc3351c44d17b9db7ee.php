@@ -1,15 +1,14 @@
-@extends('layouts.backend')
-@section('title', 'Written Assessment')
-@section('css')
-    <link href="{{ asset('backend/vendors/select2/dist/css/select2.min.css') }}" rel="stylesheet">
-@endsection
-@section('content')
+<?php $__env->startSection('title', 'Written Assessment'); ?>
+<?php $__env->startSection('css'); ?>
+    <link href="<?php echo e(asset('backend/vendors/select2/dist/css/select2.min.css')); ?>" rel="stylesheet">
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
     <div class="col-md-12 col-sm-12">
         <div class="x_panel">
             <div class="x_title">
                 <h2>Written Assessment <small></small></h2>
                 <ul class="nav navbar-right panel_toolbox">
-                    <li><a class="btn btn-warning text-white" href="{{ route('admin.writtenassessments.index') }}"> Back</a>
+                    <li><a class="btn btn-warning text-white" href="<?php echo e(route('admin.writtenassessments.index')); ?>"> Back</a>
                     </li>
                     <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                     </li>
@@ -20,20 +19,21 @@
             </div>
             <div class="x_content">
 
-                <form action="{{ route('admin.writtenassessments.update', $written->id) }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    @include('backend.includes.message')
+                <form action="<?php echo e(route('admin.writtenassessments.update', $written->id)); ?>" method="POST" enctype="multipart/form-data">
+                    <?php echo csrf_field(); ?>
+                    <?php echo $__env->make('backend.includes.message', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
                     <div class="row">
                         <div class="col-sm-12 col-md-6 mb-2">
                             <label class="form-label">Courses <span class="required text-danger">*</span></label>
                             <select name="course_ids[]" id="courseSelect" class="form-control select2" multiple required>
-                                @foreach ($courses as $course)
-                                    <option value="{{ $course->id }}"
-                                        {{ (collect(old('course_ids', $written->courses->pluck('id')))->contains($course->id)) ? 'selected' : '' }}>
-                                        {{ $course->name }}
+                                <?php $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($course->id); ?>"
+                                        <?php echo e((collect(old('course_ids', $written->courses->pluck('id')))->contains($course->id)) ? 'selected' : ''); ?>>
+                                        <?php echo e($course->name); ?>
+
                                     </option>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                         <div class="col-sm-12 col-md-6 mb-2">
@@ -55,14 +55,14 @@
                                     class="required text-danger">*</span></label>
                             <br>
                             <input type="checkbox" name="isPaid" id="isPaid" class="mt-2" value="1"
-                                {{ old('isPaid', $written->isPaid) == 1 ? 'checked' : '' }}>
+                                <?php echo e(old('isPaid', $written->isPaid) == 1 ? 'checked' : ''); ?>>
                         </div>
                         <div class="col-sm-12 col-md-6 mb-2">
                             <label class="form-label">Status <span class="required text-danger">*</span></label>
                             <select name="status" class="select2 form-control">
-                                <option value="1" {{ $written->status == 1 ? 'selected' : '' }}>Active</option>
-                                <option value="2" {{ $written->status == 2 ? 'selected' : '' }}>Inactive</option>
-                                <option value="3" {{ $written->status == 3 ? 'selected' : '' }}>Delete</option>
+                                <option value="1" <?php echo e($written->status == 1 ? 'selected' : ''); ?>>Active</option>
+                                <option value="2" <?php echo e($written->status == 2 ? 'selected' : ''); ?>>Inactive</option>
+                                <option value="3" <?php echo e($written->status == 3 ? 'selected' : ''); ?>>Delete</option>
                             </select>
                         </div>
                     </div>
@@ -77,9 +77,9 @@
             </div>
         </div>
     </div>
-    @push('scripts')
-        <script src="{{ asset('backend/vendors/select2/dist/js/select2.full.min.js') }}"></script>
-        <script src="{{ asset('backend/js/dependent-dropdown-handler.js') }}"></script>
+    <?php $__env->startPush('scripts'); ?>
+        <script src="<?php echo e(asset('backend/vendors/select2/dist/js/select2.full.min.js')); ?>"></script>
+        <script src="<?php echo e(asset('backend/js/dependent-dropdown-handler.js')); ?>"></script>
         <script>
             $(document).ready(function() {
                 // Initialize the combined form handler
@@ -95,12 +95,14 @@
                 });
 
                 // Initialize with existing data
-                const courseIds = @json(old('course_ids', $written->courses->pluck('id')));
-                const chapterId = '{{ old("chapter_id", $written->chapter_id) }}';
-                const lessonId = '{{ old("lesson_id", $written->lesson_id) }}';
+                const courseIds = <?php echo json_encode(old('course_ids', $written->courses->pluck('id')), 512) ?>;
+                const chapterId = '<?php echo e(old("chapter_id", $written->chapter_id)); ?>';
+                const lessonId = '<?php echo e(old("lesson_id", $written->lesson_id)); ?>';
 
                 formHandler.initializeWithData(courseIds, chapterId, lessonId);
             });
         </script>
-    @endpush
-@endsection
+    <?php $__env->stopPush(); ?>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.backend', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/medimaniac/resources/views/backend/written-assessment/edit.blade.php ENDPATH**/ ?>

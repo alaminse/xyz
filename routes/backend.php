@@ -239,6 +239,11 @@ Route::middleware('auth')
                 Route::get('/status/{written}', 'status')->name('status');
                 Route::get('/get/lesson', 'get_lesson')->name('get.lesson');
                 Route::get('/get/data', 'getData');
+
+
+                Route::post('/question-group/store/{written}', 'storeQuestionGroup')->name('question.group.store');
+                Route::post('/question-group/update/{questionGroup}', 'updateQuestionGroup')->name('question.group.update');
+                Route::get('/question-group/destroy/{questionGroup}', 'destroyQuestionGroup')->name('question.group.destroy');
             });
 
 
