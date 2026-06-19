@@ -126,6 +126,15 @@ Route::middleware(['auth', 'verified', 'role:user'])
                 Route::post('/finish', 'finishQuiz')->name('finish');
             });
 
+        // Route::controller(WrittenAssessmentController::class)
+        //     ->prefix('writtenassessment')
+        //     ->as('writtens.')
+        //     ->group(function () {
+        //         Route::get('/{course}', 'index')->name('index');
+        //         Route::get('/details/{course}/{chapter?}/{lesson?}', 'details')->name('details');
+        //         Route::get('/single/details/{slug}/{query?}', 'single_details')->name('single.details');
+        //     });
+
         Route::controller(WrittenAssessmentController::class)
             ->prefix('writtenassessment')
             ->as('writtens.')
@@ -133,8 +142,9 @@ Route::middleware(['auth', 'verified', 'role:user'])
                 Route::get('/{course}', 'index')->name('index');
                 Route::get('/details/{course}/{chapter?}/{lesson?}', 'details')->name('details');
                 Route::get('/single/details/{slug}/{query?}', 'single_details')->name('single.details');
+                Route::post('/progress/save', 'saveProgress')->name('progress.save');
+                Route::get('/progress/{course_id}', 'index_progress')->name('progress.index');
             });
-
 
         // Secure MP4 streaming
         Route::get('/secure-video/stream/{id}', [VideoStreamController::class, 'streamMp4'])

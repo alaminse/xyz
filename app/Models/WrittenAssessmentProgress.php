@@ -8,7 +8,10 @@ class WrittenAssessmentProgress extends Model
 {
     public $timestamps = false;
 
-    protected $fillable = ['user_id', 'course_id', 'chapter_id', 'lesson_id', 'status'];
+    protected $fillable = [
+        'user_id', 'course_id', 'chapter_id',
+        'lesson_id', 'question_group_id', 'status'
+    ];
 
     public function chapter()
     {

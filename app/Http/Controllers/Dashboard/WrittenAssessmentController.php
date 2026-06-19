@@ -10,6 +10,7 @@ use App\Models\EnrollUser;
 use App\Models\Lesson;
 use App\Models\WrittenAssessment;
 use App\Models\WrittenAssessmentProgress;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class WrittenAssessmentController extends Controller
@@ -20,6 +21,7 @@ class WrittenAssessmentController extends Controller
     {
         $this->middleware(function ($request, $next) {
             $this->user = Auth::user();
+
             return $next($request);
         });
     }
@@ -50,7 +52,8 @@ class WrittenAssessmentController extends Controller
         $progress = WrittenAssessmentProgress::with('chapter', 'lesson')
             ->where('user_id', $this->user->id)
             ->where('course_id', $course->id)
-            ->get();
+            ->get()
+            ->groupBy(fn ($p) => $p->chapter_id.'_'.$p->lesson_id);
 
         return view('frontend.dashboard.written-assessment.index', compact(
             'chapters',
@@ -62,9 +65,9 @@ class WrittenAssessmentController extends Controller
 
     public function details($course_slug, $chapter, $lesson = null)
     {
-        $course  = Course::select('id', 'slug')->where('slug', $course_slug)->firstOrFail();
-        $chapter = Chapter::select('id', 'slug')->where('slug', $chapter)->firstOrFail();
-        $lesson  = $lesson ? Lesson::select('id', 'slug')->where('slug', $lesson)->firstOrFail() : null;
+        $course = Course::select('id', 'slug', 'name')->where('slug', $course_slug)->firstOrFail();
+        $chapter = Chapter::select('id', 'slug', 'name')->where('slug', $chapter)->firstOrFail();
+        $lesson = $lesson ? Lesson::select('id', 'slug', 'name')->where('slug', $lesson)->firstOrFail() : null;
 
         $enrolled = $this->getEnrollment($course->id);
 
@@ -74,73 +77,163 @@ class WrittenAssessmentController extends Controller
 
         $isLocked = $enrolled->status === Status::FREETRIAL()->value;
 
-        $writtenQuery = WrittenAssessment::select('id', 'slug', 'isPaid', 'status')
+        $assessmentQuery = WrittenAssessment::with('questionGroups')
             ->where('chapter_id', $chapter->id)
             ->where('status', Status::ACTIVE())
             ->whereHas('courses', fn ($q) => $q->where('courses.id', $course->id));
 
         if ($lesson) {
-            $writtenQuery->where('lesson_id', $lesson->id);
+            $assessmentQuery->where('lesson_id', $lesson->id);
         }
 
-        $written = $writtenQuery->latest()->get();
+        $assessments = $assessmentQuery->latest()->get();
 
-        if ($written->isEmpty()) {
+        if ($assessments->isEmpty()) {
             return redirect()->back()->with('error', 'This lesson is Empty!');
         }
 
-        return view('frontend.dashboard.written-assessment.lists', compact(
-            'written',
-            'course_slug',
-            'isLocked'
-        ));
-    }
+        // Flatten all question groups across all assessments into one list
+        $questionGroups = $assessments->flatMap(function ($assessment) {
+            return $assessment->questionGroups->map(function ($group) use ($assessment) {
+                $group->questions = is_array($group->questions)
+                    ? $group->questions
+                    : json_decode($group->questions, true) ?? [];
+                $group->isPaid = $assessment->isPaid;
 
-    public function single_details($slug, $query = null)
-    {
-        $assessment = WrittenAssessment::with('questionGroups')
-            ->where('slug', $slug)
-            ->firstOrFail();
-
-        $course      = $assessment->courses->first();
-        $course_slug = $course?->slug;
-
-        $enrolled = $this->getEnrollment($course?->id);
-
-        if (! $enrolled) {
-            return redirect()->back()->with('error', 'You are not enrolled in this course.');
-        }
-
-        $isLocked = $enrolled->status === Status::FREETRIAL()->value;
-        $isPaid   = (bool) $assessment->isPaid;
-
-        if ($isPaid && $isLocked) {
-            return redirect()->route('courses.checkout', ['course' => $course_slug])
-                ->with('error', 'This is premium content. Please upgrade your plan.');
-        }
-
-        // Parse questions for each group
-        $questionGroups = $assessment->questionGroups->map(function ($group) {
-            $group->questions = is_array($group->questions)
-                ? $group->questions
-                : json_decode($group->questions, true) ?? [];
-            return $group;
+                return $group;
+            });
         });
 
-        WrittenAssessmentProgress::firstOrCreate([
-            'user_id'    => $this->user->id,
-            'course_id'  => $course->id,
-            'chapter_id' => $assessment->chapter_id,
-            'lesson_id'  => $assessment->lesson_id,
-        ]);
+        if ($questionGroups->isEmpty()) {
+            return redirect()->back()->with('error', 'No questions found!');
+        }
+
+        $totalGroups = $questionGroups->count();
+
+        // Check if 100% complete — if so reset progress so user starts fresh
+        $completedCount = WrittenAssessmentProgress::where('user_id', $this->user->id)
+            ->where('course_id', $course->id)
+            ->where('chapter_id', $chapter->id)
+            ->where('lesson_id', $lesson?->id)
+            ->whereNotNull('question_group_id')
+            ->count();
+
+        if ($completedCount >= $totalGroups && $totalGroups > 0) {
+            WrittenAssessmentProgress::where('user_id', $this->user->id)
+                ->where('course_id', $course->id)
+                ->where('chapter_id', $chapter->id)
+                ->where('lesson_id', $lesson?->id)
+                ->whereNotNull('question_group_id')
+                ->delete();
+
+            $completedGroupIds = [];
+            $completedGroups = 0;
+        } else {
+            $completedGroupIds = WrittenAssessmentProgress::where('user_id', $this->user->id)
+                ->where('course_id', $course->id)
+                ->where('chapter_id', $chapter->id)
+                ->where('lesson_id', $lesson?->id)
+                ->whereNotNull('question_group_id')
+                ->pluck('question_group_id')
+                ->toArray();
+
+            $completedGroups = count($completedGroupIds);
+        }
+
+        // isPaid — true if ANY assessment in this lesson is paid
+        $isPaid = $assessments->contains(fn ($a) => (bool) $a->isPaid);
 
         return view('frontend.dashboard.written-assessment.details', compact(
-            'assessment',
             'questionGroups',
-            'query',
+            'completedGroupIds',
+            'totalGroups',
+            'completedGroups',
+            'course',
             'course_slug',
+            'chapter',
+            'lesson',
             'isLocked',
             'isPaid'
         ));
+    }
+
+    public function saveProgress(Request $request)
+    {
+        $request->validate([
+            'course_id' => 'required|integer',
+            'chapter_id' => 'required|integer',
+            'lesson_id' => 'nullable|integer',
+            'question_group_id' => 'required|integer',
+        ]);
+
+        WrittenAssessmentProgress::updateOrCreate(
+            [
+                'user_id' => $this->user->id,
+                'course_id' => $request->course_id,
+                'chapter_id' => $request->chapter_id,
+                'lesson_id' => $request->lesson_id,
+                'question_group_id' => $request->question_group_id,
+            ],
+            ['status' => 1]
+        );
+
+        $completed = WrittenAssessmentProgress::where('user_id', $this->user->id)
+            ->where('course_id', $request->course_id)
+            ->where('chapter_id', $request->chapter_id)
+            ->where('lesson_id', $request->lesson_id)
+            ->whereNotNull('question_group_id')
+            ->count();
+
+        $total = WrittenAssessment::with('questionGroups')
+            ->where('chapter_id', $request->chapter_id)
+            ->where('lesson_id', $request->lesson_id)
+            ->get()
+            ->sum(fn ($a) => $a->questionGroups->count());
+
+        $percentage = $total > 0 ? round(($completed / $total) * 100) : 0;
+
+        return response()->json([
+            'success' => true,
+            'completed' => $completed,
+            'total' => $total,
+            'percentage' => $percentage,
+        ]);
+    }
+
+    public function index_progress($course_id)
+    {
+        $course = Course::select('id', 'slug')->findOrFail($course_id);
+
+        $progressData = WrittenAssessmentProgress::with('chapter', 'lesson')
+            ->where('user_id', $this->user->id)
+            ->where('course_id', $course->id)
+            ->whereNotNull('question_group_id')
+            ->get()
+            ->groupBy(fn ($p) => $p->chapter_id.'_'.$p->lesson_id)
+            ->map(function ($records) {
+                $first = $records->first();
+                $completed = $records->count();
+
+                $total = WrittenAssessment::with('questionGroups')
+                    ->where('chapter_id', $first->chapter_id)
+                    ->where('lesson_id', $first->lesson_id)
+                    ->get()
+                    ->sum(fn ($a) => $a->questionGroups->count());
+
+                $percentage = $total > 0 ? round(($completed / $total) * 100) : 0;
+
+                return [
+                    'chapter_name' => $first->chapter->name ?? '-',
+                    'lesson_name' => $first->lesson->name ?? '-',
+                    'chapter_slug' => $first->chapter->slug ?? '',
+                    'lesson_slug' => $first->lesson->slug ?? '',
+                    'completed' => $completed,
+                    'total' => $total,
+                    'percentage' => $percentage,
+                ];
+            })
+            ->values();
+
+        return response()->json(['success' => true, 'progress' => $progressData]);
     }
 }
