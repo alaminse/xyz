@@ -1,9 +1,8 @@
-@extends('frontend.dashboard.app')
-@section('title', 'Written Assessment Details')
-@section('css')
-    <link rel="stylesheet" href="{{ asset('frontend/css/sba.css') }}">
-@endsection
-@section('content')
+<?php $__env->startSection('title', 'Written Assessment Details'); ?>
+<?php $__env->startSection('css'); ?>
+    <link rel="stylesheet" href="<?php echo e(asset('frontend/css/sba.css')); ?>">
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
 
 <div class="card mb-3">
     <h5 class="p-3">Written Assessment</h5>
@@ -16,7 +15,7 @@
 
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <a class="btn btn-sm btn-warning"
-                        href="{{ route('writtens.details', ['course' => $course_slug, 'chapter' => $assessment->chapter?->slug, 'lesson' => $assessment->lesson?->slug]) }}">
+                        href="<?php echo e(route('writtens.details', ['course' => $course_slug, 'chapter' => $assessment->chapter?->slug, 'lesson' => $assessment->lesson?->slug])); ?>">
                         <i class="bi bi-arrow-left-circle"></i> Back
                     </a>
                 </div>
@@ -30,54 +29,56 @@
                         </div>
                         <div class="p-2">
                             <h6>Group <span id="current-group-number">1</span> of
-                                <span id="total-group-number">{{ $questionGroups->count() }}</span>
+                                <span id="total-group-number"><?php echo e($questionGroups->count()); ?></span>
                             </h6>
                         </div>
                         <div class="p-2">
                             <button type="button" class="btn btn-sm button-yellow" id="nextBtn"
-                                {{ $questionGroups->count() <= 1 ? 'disabled' : '' }}>
+                                <?php echo e($questionGroups->count() <= 1 ? 'disabled' : ''); ?>>
                                 <i class="bi bi-arrow-right-circle-fill"></i>
                             </button>
                         </div>
                     </div>
 
-                    @forelse($questionGroups as $gi => $group)
-                    <div class="question-card" id="group-{{ $gi }}" style="display: none;">
-                        @foreach($group->questions as $qi => $qa)
+                    <?php $__empty_1 = true; $__currentLoopData = $questionGroups; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $gi => $group): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <div class="question-card" id="group-<?php echo e($gi); ?>" style="display: none;">
+                        <?php $__currentLoopData = $group->questions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $qi => $qa): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <div class="mt-3 p-3 border rounded text-dark">
                             <div class="question-text p-2 mb-2 rounded note-title"
                                 style="cursor: pointer; font-weight: bold; background-color: #e2f0fb;">
-                                {{ $qi + 1 }}: {{ $qa['question'] }}
+                                <?php echo e($qi + 1); ?>: <?php echo e($qa['question']); ?>
+
                             </div>
 
-                            @if($isPaid && $isLocked)
+                            <?php if($isPaid && $isLocked): ?>
                             <div class="p-2 rounded text-center"
                                 style="background-color: #fff8e1; border: 2px dashed #ffc107; border-radius: 8px;">
                                 <i class="bi bi-lock-fill text-warning fs-5"></i>
                                 <p class="mb-2 mt-1 small">Answer is locked</p>
-                                <a href="{{ route('courses.checkout', ['course' => $course_slug]) }}"
+                                <a href="<?php echo e(route('courses.checkout', ['course' => $course_slug])); ?>"
                                     class="btn btn-warning btn-sm fw-bold">
                                     <i class="bi bi-unlock-fill me-1"></i> Upgrade to Premium
                                 </a>
                             </div>
-                            @else
+                            <?php else: ?>
                             <div class="answer-text p-2 rounded note-description"
                                 style="display: none; background-color: #d4edda;">
-                                {!! $qa['answer'] !!}
+                                <?php echo $qa['answer']; ?>
+
                             </div>
-                            @endif
+                            <?php endif; ?>
                         </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <div class="alert alert-info text-center">
                         <i class="bi bi-info-circle me-2"></i> No questions available for this assessment.
                     </div>
-                    @endforelse
+                    <?php endif; ?>
 
                     <!-- Finish Button -->
                     <div class="mt-4 text-center" id="finishSection" style="display: none;">
-                        <a href="{{ route('writtens.details', ['course' => $course_slug, 'chapter' => $assessment->chapter?->slug, 'lesson' => $assessment->lesson?->slug]) }}"
+                        <a href="<?php echo e(route('writtens.details', ['course' => $course_slug, 'chapter' => $assessment->chapter?->slug, 'lesson' => $assessment->lesson?->slug])); ?>"
                             class="btn button-yellow px-5">
                             Finish
                         </a>
@@ -89,7 +90,7 @@
     </div>
 </div>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(function() {
@@ -132,7 +133,7 @@
         showGroup(currentIndex);
 
         // Highlight search query
-        const query = @json($query ?? '');
+        const query = <?php echo json_encode($query ?? '', 15, 512) ?>;
         if (query) {
             const regex = new RegExp(query, 'gi');
             document.querySelectorAll('.note-title, .note-description').forEach(el => {
@@ -142,5 +143,6 @@
         }
     });
 </script>
-@endpush
-@endsection
+<?php $__env->stopPush(); ?>
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('frontend.dashboard.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/medimaniac/resources/views/frontend/dashboard/written-assessment/details.blade.php ENDPATH**/ ?>

@@ -3,18 +3,10 @@
 @section('css')
     <link rel="stylesheet" href="{{ asset('frontend/css/sba.css') }}">
     <style>
-        .button-yellow:hover,
-        .button-white:hover {
-            color: white;
-        }
-        .list-group {
-            background-color: transparent !important;
-        }
-
-        .list-group .list-group-item {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-</style>
+        .button-yellow:hover, .button-white:hover { color: white; }
+        .list-group { background-color: transparent !important; }
+        .list-group .list-group-item { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    </style>
 @endsection
 @section('content')
     <div class="row">
@@ -68,6 +60,7 @@
                 </div>
             </div>
         </div>
+
         <div class="col-sm-12 col-md-6 col-lg-7 mb-3">
             <div class="card topic-card">
                 <div class="card-body">
@@ -76,36 +69,36 @@
                             <i class="bi bi-clock-history"></i> Recent Progress
                         </h4>
                     </div>
-                    @forelse ($latest as $item)
-                        <div class="card mb-2">
-                            <div class="card-body">
-                                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2">
-                                    <h5 class="flex-grow-1 mb-0">{!! $item->question !!}</h5>
-
-                                    @if($item->isPaid && $isLocked)
-                                        {{-- 🔒 Paid item + free trial --}}
-                                        <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
-                                            class="btn btn-sm btn-warning fw-bold flex-shrink-0">
-                                            <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
-                                        </a>
-                                    @else
-                                        {{-- ✅ Free OR premium enrolled --}}
-                                        <a href="{{ route('writtens.single.details', $item->slug) }}"
-                                            class="btn btn-sm button-yellow flex-shrink-0">Details</a>
-                                    @endif
+                    @forelse ($progress as $item)
+                        <div class="sba-item">
+                            <div class="sba-item-header">
+                                <h5>{{ $item->chapter->name ?? '-' }} / {{ $item->lesson->name ?? '-' }}</h5>
+                                @if($isLocked)
+                                    <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}"
+                                        class="btn btn-warning fw-bold">
+                                        <i class="bi bi-lock-fill me-1"></i> Upgrade to Premium
+                                    </a>
+                                @else
+                                    <a href="{{ route('writtens.details', ['course' => $course->slug, 'chapter' => $item->chapter->slug, 'lesson' => $item->lesson->slug]) }}"
+                                        class="btn btn-primary">Re-Practice</a>
+                                @endif
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar"
+                                    style="width: {{ $item->status ? 100 : 0 }}%;"
+                                    aria-valuenow="{{ $item->status ? 100 : 0 }}"
+                                    aria-valuemin="0" aria-valuemax="100">
+                                    {{ $item->status ? 100 : 0 }}%
                                 </div>
                             </div>
                         </div>
                     @empty
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle me-2"></i>No progress yet. Start practicing to see your results here!
+                        <div class="text-center text-white-50 py-4">
+                            <i class="bi bi-info-circle me-2"></i>No progress yet. Start practicing!
                         </div>
                     @endforelse
                 </div>
             </div>
         </div>
     </div>
-
-    @push('scripts')
-    @endpush
 @endsection
