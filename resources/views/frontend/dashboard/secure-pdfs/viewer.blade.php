@@ -124,26 +124,17 @@ html,body { margin:0!important; padding:0!important; background:#0a0e1a!importan
 .sb-panel::-webkit-scrollbar { width:3px; }
 .sb-panel::-webkit-scrollbar-thumb { background:rgba(248,184,74,.3); border-radius:4px; }
 
-.bm-item {
+.pgl-item {
     display:flex; align-items:center; justify-content:space-between;
-    padding:7px 8px; margin-bottom:4px;
+    padding:7px 10px; margin-bottom:4px;
     background:rgba(255,255,255,.04); border-radius:6px;
     cursor:pointer; gap:6px; border:1px solid rgba(255,255,255,.06);
-    transition:background .15s;
+    transition:background .15s,border-color .15s;
 }
-.bm-item:hover { background:rgba(248,184,74,.1); }
-.bm-lbl { color:#eaeaea; font-size:12px; flex:1; }
-.bm-pg  { color:#f8b84a; font-size:11px; white-space:nowrap; }
-.bm-del { color:#d9534f; font-size:14px; cursor:pointer; background:none; border:none; padding:0; line-height:1; opacity:.6; }
-.bm-del:hover { opacity:1; }
-.bm-empty { color:#6b7280; font-size:12px; text-align:center; padding:20px 10px; }
-.bm-add {
-    width:100%; padding:7px; margin-bottom:10px;
-    background:rgba(248,184,74,.08); border:1px dashed rgba(248,184,74,.3);
-    color:#f8b84a; border-radius:6px; cursor:pointer; font-size:12px;
-    transition:background .15s;
-}
-.bm-add:hover { background:rgba(248,184,74,.18); }
+.pgl-item:hover { background:rgba(248,184,74,.1); }
+.pgl-item.active { background:rgba(248,184,74,.18); border-color:rgba(248,184,74,.5); }
+.pgl-lbl { color:#eaeaea; font-size:12px; }
+.pgl-item.active .pgl-lbl { color:#f8b84a; font-weight:600; }
 
 .info-ttl  { color:#f8b84a; font-size:13px; font-weight:600; margin-bottom:8px; }
 .info-desc { color:#c0c7d0; font-size:12px; line-height:1.7; }
@@ -245,8 +236,7 @@ html,body { margin:0!important; padding:0!important; background:#0a0e1a!importan
         <div id="tb3">
             <button class="btn" id="btn-srch" onclick="toggleSearch()"><i class="bx bx-search"></i> Search</button>
             <button class="btn" id="btn-gt"   onclick="toggleGoto()"><i class="bx bx-navigation"></i> Go to</button>
-            <button class="btn" id="btn-bm"   onclick="addBookmark()"><i class="bx bx-bookmark-plus"></i> Bookmark</button>
-            <button class="btn" id="btn-sb"   onclick="toggleSidebar()"><i class="bx bx-panel"></i> Panel</button>
+            <button class="btn" id="btn-sb"   onclick="toggleSidebar()"><i class="bx bx-list-ul"></i> Pages</button>
 
             <div id="srch-bar">
                 <i class="bx bx-search" style="color:#9aa4b2;font-size:13px"></i>
@@ -280,14 +270,11 @@ html,body { margin:0!important; padding:0!important; background:#0a0e1a!importan
         {{-- Sidebar --}}
         <div id="sidebar">
             <div class="sb-tabs">
-                <div class="sb-tab on"  onclick="sbTab('bm')"><i class="bx bx-bookmark"></i> Bookmarks</div>
+                <div class="sb-tab on"  onclick="sbTab('pages')"><i class="bx bx-list-ul"></i> Pages</div>
                 <div class="sb-tab"     onclick="sbTab('info')"><i class="bx bx-info-circle"></i> Info</div>
             </div>
-            <div class="sb-panel on" id="panel-bm">
-                <button class="bm-add" onclick="addBookmark()">
-                    <i class="bx bx-bookmark-plus"></i> Bookmark Page <span id="bm-cur">1</span>
-                </button>
-                <div id="bm-list"><div class="bm-empty">No bookmarks yet.</div></div>
+            <div class="sb-panel on" id="panel-pages">
+                <div id="pg-list"></div>
             </div>
             <div class="sb-panel" id="panel-info">
                 <div class="info-ttl">{{ $pdf->title }}</div>
@@ -337,87 +324,69 @@ let zDelta     = 0;
 let expiry     = 5 * 60;
 let rendering  = false;
 
-// ── FETCH PDF AS ARRAYBUFFER (with retry) ────────────────────────────────
-async function fetchBytes(retries) {
-    retries = retries || 3;
-    var lastErr = null;
+// ── LOAD PDF (progressive/range-request streaming, with retry) ───────────
+// Instead of downloading the whole file into memory first, we hand pdf.js
+// the URL directly. pdf.js then uses HTTP Range requests to pull in only
+// the bytes it needs, so early pages can start rendering before the full
+// file has finished downloading. This requires the stream endpoint to
+// support Range requests (Accept-Ranges + 206 Partial Content responses) —
+// see the note at the bottom of this file if that isn't already the case.
+async function loadPdf(attempt) {
+    attempt = attempt || 1;
+    var maxAttempts = 3;
 
-    for (var attempt = 1; attempt <= retries; attempt++) {
-        var controller = new AbortController();
-        var timeoutId  = setTimeout(function(){ controller.abort(); }, 30000); // 30s per attempt
-
-        try {
-            var res = await fetch(STREAM_URL + '?token=' + TOKEN, {
-                credentials: 'include',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-
-            var cl     = res.headers.get('Content-Length');
-            var reader = res.body.getReader();
-            var chunks = [], got = 0;
-
-            while (true) {
-                var rd = await reader.read();
-                if (rd.done) break;
-                chunks.push(rd.value);
-                got += rd.value.length;
-                if (cl) {
-                    var pct = Math.min(99, Math.round(got / +cl * 100));
-                    document.getElementById('prog-bar').style.width = pct + '%';
-                    document.getElementById('ov-msg').textContent   = 'Downloading\u2026 ' + pct + '%';
-                }
-            }
-
-            var total = chunks.reduce(function(a,c){ return a + c.length; }, 0);
-            var buf   = new Uint8Array(total);
-            var off   = 0;
-            for (var i = 0; i < chunks.length; i++) { buf.set(chunks[i], off); off += chunks[i].length; }
-            return buf.buffer;
-        } catch (err) {
-            clearTimeout(timeoutId);
-            lastErr = err;
-            console.warn('fetchBytes attempt ' + attempt + ' failed:', err);
-            if (attempt < retries) {
-                document.getElementById('ov-msg').textContent =
-                    'Connection issue, retrying\u2026 (' + attempt + '/' + (retries - 1) + ')';
-                document.getElementById('prog-bar').style.width = '0%';
-                await new Promise(function(r){ setTimeout(r, 1000 * attempt); });
-            }
-        }
-    }
-    throw lastErr;
-}
-
-// ── LOAD PDF ────────────────────────────────────────────────────────────
-async function loadPdf() {
     document.getElementById('ov-load').classList.remove('gone');
     document.getElementById('prog-bar').style.background = '#f8b84a';
     document.getElementById('prog-bar').style.width = '0%';
-    document.getElementById('ov-msg').textContent = 'Downloading secure PDF\u2026';
+    document.getElementById('ov-msg').textContent = 'Loading secure PDF\u2026';
 
     try {
-        var buffer = await fetchBytes();
-        document.getElementById('ov-msg').textContent = 'Rendering\u2026';
-        document.getElementById('prog-bar').style.width = '100%';
+        var loadingTask = pdfjsLib.getDocument({
+            url: STREAM_URL + '?token=' + TOKEN,
+            withCredentials: true,
+            httpHeaders: { 'X-Requested-With': 'XMLHttpRequest' },
+            rangeChunkSize: 1 << 18 // 256KB chunks
+        });
 
-        pdfDoc   = await pdfjsLib.getDocument({ data: buffer }).promise;
+        loadingTask.onProgress = function(p) {
+            if (p.total) {
+                var pct = Math.min(99, Math.round(p.loaded / p.total * 100));
+                document.getElementById('prog-bar').style.width = pct + '%';
+                document.getElementById('ov-msg').textContent   = 'Loading\u2026 ' + pct + '%';
+            }
+        };
+
+        pdfDoc   = await loadingTask.promise;
         totPages = pdfDoc.numPages;
         document.getElementById('tot-pages').textContent = totPages;
         document.getElementById('pg-in').max = totPages;
         document.getElementById('gt-in').max = totPages;
 
         await initPages();
-        renderBookmarks();
+        renderPageList();
     } catch (e) {
         console.error(e);
+        if (attempt < maxAttempts) {
+            document.getElementById('ov-msg').textContent =
+                'Connection issue, retrying\u2026 (' + attempt + '/' + (maxAttempts - 1) + ')';
+            await new Promise(function(r){ setTimeout(r, 1000 * attempt); });
+            return loadPdf(attempt + 1);
+        }
         document.getElementById('ov-msg').innerHTML =
             'Failed to load. <a href="#" onclick="loadPdf();return false;">Tap to retry</a>';
         document.getElementById('prog-bar').style.background = '#d9534f';
     }
 }
+// NOTE ON SERVER SUPPORT: if your `secure-pdfs.stream` route reads the file
+// with something like `readfile()` or a plain streamed response, it likely
+// ignores the `Range` header and always sends the whole file — in that case
+// pdf.js automatically falls back to downloading the full file (same speed
+// as before, just no regression). To get the actual speed-up, the route
+// needs to honor `Range` requests and respond with `206 Partial Content` +
+// `Content-Range` + `Accept-Ranges: bytes`. In Laravel this is easiest via
+// `response()->file($path)` (Symfony's BinaryFileResponse supports Range
+// out of the box) or `Storage::response()` if the disk driver supports it —
+// rather than manually streaming bytes yourself.
 
 // ── LAZY RENDER SYSTEM ──────────────────────────────────────────────────
 var rendered  = {};
@@ -454,13 +423,17 @@ async function initPages() {
 
     setupObserver();
 
-    // Render first 3 immediately
-    for (var j = 1; j <= Math.min(3, totPages); j++) {
-        await renderPage(j);
-    }
-
+    // Render only page 1 before hiding the spinner, so the user sees
+    // content as soon as possible. Pages 2/3 render right after in the
+    // background — this can shave several seconds off perceived load time
+    // versus waiting for all 3 to finish first.
+    await renderPage(1);
     document.getElementById('ov-load').classList.add('gone');
     updateNav();
+
+    for (var j = 2; j <= Math.min(3, totPages); j++) {
+        renderPage(j); // not awaited — runs in background
+    }
 }
 
 async function renderPage(n) {
@@ -476,7 +449,11 @@ async function renderPage(n) {
         var bvp  = page.getViewport({ scale: 1 });
         var fs   = Math.max(0.3, cw / bvp.width + zDelta);
         var vp   = page.getViewport({ scale: fs });
-        var dpr  = window.devicePixelRatio || 1;
+        // Cap the pixel ratio used for canvas rendering. On modern phones
+        // devicePixelRatio can be 3+, which triples canvas dimensions and
+        // makes each page noticeably slower to draw for barely-visible
+        // sharpness gains. 2x is already sharp on virtually any screen.
+        var dpr  = Math.min(window.devicePixelRatio || 1, 2);
 
         wrap.style.width  = vp.width  + 'px';
         wrap.style.height = vp.height + 'px';
@@ -601,7 +578,7 @@ function goPage(n) {
     n = Math.max(1, Math.min(totPages, n));
     curPage = n;
     document.getElementById('pg-in').value = n;
-    document.getElementById('bm-cur').textContent = n;
+    updateActivePageInList();
     var el = document.getElementById('pw-' + n);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     updateNav();
@@ -621,7 +598,7 @@ document.getElementById('cv-area').addEventListener('scroll', function() {
     if (closest !== curPage) {
         curPage = closest;
         document.getElementById('pg-in').value = closest;
-        document.getElementById('bm-cur').textContent = closest;
+        updateActivePageInList();
         updateNav();
     }
 });
@@ -746,42 +723,26 @@ function clearSearch() {
     document.getElementById('srch-cnt').textContent = '';
 }
 
-// ── BOOKMARKS ─────────────────────────────────────────────────────────────
-var BM_KEY    = 'bm_' + PDF_SLUG + '_' + UID;
-var bookmarks = [];
-try { bookmarks = JSON.parse(localStorage.getItem(BM_KEY) || '[]'); } catch(e) { bookmarks = []; }
-
-function addBookmark() {
-    var p = curPage;
-    if (bookmarks.find(function(b){ return b.page === p; })) {
-        alert('Page ' + p + ' is already bookmarked.'); return;
-    }
-    bookmarks.push({ page: p, label: 'Page ' + p });
-    bookmarks.sort(function(a,b){ return a.page - b.page; });
-    try { localStorage.setItem(BM_KEY, JSON.stringify(bookmarks)); } catch(e){}
-    renderBookmarks();
-    document.getElementById('sidebar').classList.add('on');
-    sbTab('bm');
-}
-
-function removeBookmark(p) {
-    bookmarks = bookmarks.filter(function(b){ return b.page !== p; });
-    try { localStorage.setItem(BM_KEY, JSON.stringify(bookmarks)); } catch(e){}
-    renderBookmarks();
-}
-
-function renderBookmarks() {
-    var list = document.getElementById('bm-list');
-    if (!bookmarks.length) {
-        list.innerHTML = '<div class="bm-empty">No bookmarks yet.</div>'; return;
-    }
-    list.innerHTML = bookmarks.map(function(b) {
-        return '<div class="bm-item" onclick="goPage(' + b.page + ')">'
-            + '<span class="bm-lbl"><i class="bx bx-bookmark" style="color:#f8b84a"></i> ' + b.label + '</span>'
-            + '<span class="bm-pg">p.' + b.page + '</span>'
-            + '<button class="bm-del" onclick="event.stopPropagation();removeBookmark(' + b.page + ')">&#10005;</button>'
+// ── PAGE LIST ─────────────────────────────────────────────────────────────
+// Builds a clickable list of every page in the sidebar so the user can
+// jump straight to any page. Called once totPages is known.
+function renderPageList() {
+    var list = document.getElementById('pg-list');
+    var html = '';
+    for (var i = 1; i <= totPages; i++) {
+        html += '<div class="pgl-item' + (i === curPage ? ' active' : '') + '" id="pgl-' + i + '" onclick="goPage(' + i + ')">'
+            + '<span class="pgl-lbl">Page ' + i + '</span>'
             + '</div>';
-    }).join('');
+    }
+    list.innerHTML = html;
+}
+
+function updateActivePageInList() {
+    document.querySelectorAll('.pgl-item').forEach(function(el) {
+        el.classList.toggle('active', el.id === 'pgl-' + curPage);
+    });
+    var active = document.getElementById('pgl-' + curPage);
+    if (active) active.scrollIntoView({ block: 'nearest' });
 }
 
 // ── SIDEBAR ───────────────────────────────────────────────────────────────
@@ -792,10 +753,10 @@ function toggleSidebar() {
 }
 function sbTab(tab) {
     document.querySelectorAll('.sb-tab').forEach(function(t, i) {
-        t.classList.toggle('on', ['bm','info'][i] === tab);
+        t.classList.toggle('on', ['pages','info'][i] === tab);
     });
-    document.getElementById('panel-bm').classList.toggle('on',   tab === 'bm');
-    document.getElementById('panel-info').classList.toggle('on', tab === 'info');
+    document.getElementById('panel-pages').classList.toggle('on', tab === 'pages');
+    document.getElementById('panel-info').classList.toggle('on',  tab === 'info');
 }
 
 // ── TOKEN REFRESH ─────────────────────────────────────────────────────────
