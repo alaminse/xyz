@@ -1,7 +1,6 @@
 @foreach ($notes as $index => $note)
     <tr>
         <td>{{ $index + 1 }}</td>
-        <td>{{ $note->title }}</td>
         <td>{{ $note->getCourseName() }}</td>
         <td>{{ $note->getChapterName() }}</td>
         <td>

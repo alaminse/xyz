@@ -15,7 +15,8 @@ html,body { margin:0!important; padding:0!important; background:#0a0e1a!importan
 #ov-load.gone { display:none; }
 .spin { width:42px; height:42px; border:3px solid rgba(248,184,74,.2); border-top-color:#f8b84a; border-radius:50%; animation:spin .8s linear infinite; }
 @keyframes spin { to{transform:rotate(360deg);} }
-#ov-load p { color:#9aa4b2; font-size:13px; margin:0; }
+#ov-load p { color:#9aa4b2; font-size:13px; margin:0; text-align:center; }
+#ov-load p a { color:#f8b84a; }
 #prog-wrap { width:180px; height:3px; background:rgba(255,255,255,.1); border-radius:4px; overflow:hidden; }
 #prog-bar  { height:100%; background:#f8b84a; border-radius:4px; transition:width .2s; width:0; }
 
@@ -187,20 +188,6 @@ html,body { margin:0!important; padding:0!important; background:#0a0e1a!importan
 .lk-badge { display:flex; align-items:center; gap:3px; color:#5cb85c; font-weight:600; }
 .timer    { color:#f8b84a; font-weight:700; }
 
-/* floating watermark overlay — always on top */
-#float-wm {
-    position:fixed; inset:0; z-index:8888;
-    pointer-events:none; overflow:hidden;
-}
-#float-wm span {
-    position:absolute; font-family:Arial,sans-serif;
-    font-weight:700; white-space:nowrap;
-    color:rgba(180,40,40,0.09);
-    font-size:clamp(10px,1.3vw,14px);
-    transform:rotate(-25deg); transform-origin:left center;
-    letter-spacing:1px;
-}
-
 @media (min-width:640px) {
     #toolbar { flex-direction:row; align-items:center; padding:8px 14px; gap:10px; flex-wrap:wrap; }
     #tb1 { flex:1; min-width:180px; }
@@ -232,9 +219,6 @@ html,body { margin:0!important; padding:0!important; background:#0a0e1a!importan
     <p id="warn-msg">Suspicious activity detected.</p>
     <button class="btn" onclick="closeWarn()">Resume Reading</button>
 </div>
-
-{{-- Floating watermark --}}
-<div id="float-wm"></div>
 
 <div id="shell">
 
@@ -343,6 +327,7 @@ const U_NAME      = @json(auth()->user()->name);
 const U_EMAIL     = @json(auth()->user()->email);
 const PDF_SLUG    = @json($pdf->slug);
 const UID         = @json(auth()->id());
+const WM_TEXT     = 'MediManiac \u2022 ' + U_NAME + ' \u2022 ' + U_EMAIL;
 
 let TOKEN      = @json($token);
 let pdfDoc     = null;
@@ -352,52 +337,67 @@ let zDelta     = 0;
 let expiry     = 5 * 60;
 let rendering  = false;
 
-// ── FLOATING WATERMARK ─────────────────────────────────────────────────
-(function buildFloatWm() {
-    var wm   = document.getElementById('float-wm');
-    var text = U_NAME + ' \u2022 ' + U_EMAIL;
-    var html = '';
-    for (var r = 0; r < 14; r++) {
-        for (var c = 0; c < 7; c++) {
-            html += '<span style="left:' + ((c * 16) - 4) + '%;top:' + ((r * 8) - 2) + '%">' + text + '</span>';
+// ── FETCH PDF AS ARRAYBUFFER (with retry) ────────────────────────────────
+async function fetchBytes(retries) {
+    retries = retries || 3;
+    var lastErr = null;
+
+    for (var attempt = 1; attempt <= retries; attempt++) {
+        var controller = new AbortController();
+        var timeoutId  = setTimeout(function(){ controller.abort(); }, 30000); // 30s per attempt
+
+        try {
+            var res = await fetch(STREAM_URL + '?token=' + TOKEN, {
+                credentials: 'include',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+
+            var cl     = res.headers.get('Content-Length');
+            var reader = res.body.getReader();
+            var chunks = [], got = 0;
+
+            while (true) {
+                var rd = await reader.read();
+                if (rd.done) break;
+                chunks.push(rd.value);
+                got += rd.value.length;
+                if (cl) {
+                    var pct = Math.min(99, Math.round(got / +cl * 100));
+                    document.getElementById('prog-bar').style.width = pct + '%';
+                    document.getElementById('ov-msg').textContent   = 'Downloading\u2026 ' + pct + '%';
+                }
+            }
+
+            var total = chunks.reduce(function(a,c){ return a + c.length; }, 0);
+            var buf   = new Uint8Array(total);
+            var off   = 0;
+            for (var i = 0; i < chunks.length; i++) { buf.set(chunks[i], off); off += chunks[i].length; }
+            return buf.buffer;
+        } catch (err) {
+            clearTimeout(timeoutId);
+            lastErr = err;
+            console.warn('fetchBytes attempt ' + attempt + ' failed:', err);
+            if (attempt < retries) {
+                document.getElementById('ov-msg').textContent =
+                    'Connection issue, retrying\u2026 (' + attempt + '/' + (retries - 1) + ')';
+                document.getElementById('prog-bar').style.width = '0%';
+                await new Promise(function(r){ setTimeout(r, 1000 * attempt); });
+            }
         }
     }
-    wm.innerHTML = html;
-})();
-
-// ── FETCH PDF AS ARRAYBUFFER ────────────────────────────────────────────
-async function fetchBytes() {
-    var res = await fetch(STREAM_URL + '?token=' + TOKEN, {
-        credentials: 'include',
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-
-    var cl     = res.headers.get('Content-Length');
-    var reader = res.body.getReader();
-    var chunks = [], got = 0;
-
-    while (true) {
-        var rd = await reader.read();
-        if (rd.done) break;
-        chunks.push(rd.value);
-        got += rd.value.length;
-        if (cl) {
-            var pct = Math.min(99, Math.round(got / +cl * 100));
-            document.getElementById('prog-bar').style.width = pct + '%';
-            document.getElementById('ov-msg').textContent   = 'Downloading\u2026 ' + pct + '%';
-        }
-    }
-
-    var total = chunks.reduce(function(a,c){ return a + c.length; }, 0);
-    var buf   = new Uint8Array(total);
-    var off   = 0;
-    for (var i = 0; i < chunks.length; i++) { buf.set(chunks[i], off); off += chunks[i].length; }
-    return buf.buffer;
+    throw lastErr;
 }
 
 // ── LOAD PDF ────────────────────────────────────────────────────────────
 async function loadPdf() {
+    document.getElementById('ov-load').classList.remove('gone');
+    document.getElementById('prog-bar').style.background = '#f8b84a';
+    document.getElementById('prog-bar').style.width = '0%';
+    document.getElementById('ov-msg').textContent = 'Downloading secure PDF\u2026';
+
     try {
         var buffer = await fetchBytes();
         document.getElementById('ov-msg').textContent = 'Rendering\u2026';
@@ -413,7 +413,8 @@ async function loadPdf() {
         renderBookmarks();
     } catch (e) {
         console.error(e);
-        document.getElementById('ov-msg').textContent = 'Failed to load. Please refresh.';
+        document.getElementById('ov-msg').innerHTML =
+            'Failed to load. <a href="#" onclick="loadPdf();return false;">Tap to retry</a>';
         document.getElementById('prog-bar').style.background = '#d9534f';
     }
 }
@@ -548,26 +549,27 @@ async function reRenderAll() {
     if (srchMatches.length) reDrawSearch();
 }
 
-// ── WATERMARK ────────────────────────────────────────────────────────────
+// ── WATERMARK (single instance per page) ─────────────────────────────────
 function burnWm(ctx, w, h) {
     ctx.save();
-    ctx.globalAlpha = 0.07;
-    ctx.font = 'bold ' + Math.max(11, Math.floor(w * 0.026)) + 'px Arial';
+    ctx.globalAlpha = 0.12;
+    ctx.font = 'bold ' + Math.max(13, Math.floor(w * 0.032)) + 'px Arial';
     ctx.fillStyle = '#c0392b';
-    ctx.translate(w/2, h/2); ctx.rotate(-Math.PI/6); ctx.translate(-w/2, -h/2);
-    var t = U_NAME + ' \u2022 ' + U_EMAIL;
-    for (var y = -h; y < h*2; y += 170)
-        for (var x = -w; x < w*2; x += 190) ctx.fillText(t, x, y);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.translate(w / 2, h / 2);
+    ctx.rotate(-Math.PI / 6);
+    ctx.fillText(WM_TEXT, 0, 0);
     ctx.restore();
 }
 function svgWm(w, h) {
+    var cx = w / 2, cy = h / 2;
+    var fs = Math.max(11, Math.floor(w * 0.018));
     return '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '">'
-        + '<defs><pattern id="wmp" x="0" y="0" width="210" height="105"'
-        + ' patternUnits="userSpaceOnUse" patternTransform="rotate(-25)">'
-        + '<text x="6" y="58" font-family="Arial" font-size="11" font-weight="bold"'
-        + ' fill="rgba(192,57,43,0.055)">' + U_NAME + '</text>'
-        + '</pattern></defs>'
-        + '<rect width="100%" height="100%" fill="url(#wmp)"/></svg>';
+        + '<text x="' + cx + '" y="' + cy + '" font-family="Arial" font-size="' + fs + '" font-weight="bold"'
+        + ' fill="rgba(192,57,43,0.06)" text-anchor="middle"'
+        + ' transform="rotate(-25 ' + cx + ' ' + cy + ')">' + WM_TEXT + '</text>'
+        + '</svg>';
 }
 
 // ── BLANK ALL (security) ─────────────────────────────────────────────────
@@ -854,8 +856,11 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// DevTools size detection
+// DevTools size detection (desktop only — this heuristic is unreliable on
+// mobile where the browser chrome resizing the viewport can false-trigger it)
 (function() {
+    var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) return;
     var open = false;
     setInterval(function() {
         var w = window.outerWidth  - window.innerWidth  > 160;
@@ -865,8 +870,11 @@ document.addEventListener('keydown', function(e) {
     }, 800);
 })();
 
-// Debugger trap
+// Debugger trap (desktop only — negligible cost when devtools are closed,
+// but skip on mobile since some in-app browsers handle rapid intervals poorly)
 (function() {
+    var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) return;
     setInterval(function() { debugger; }, 100);
 })();
 

@@ -1,4 +1,3 @@
-
 <?php $__env->startSection('title', 'Notes'); ?>
 <?php $__env->startSection('css'); ?>
     <link href="<?php echo e(asset('backend/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css')); ?>" rel="stylesheet">
@@ -39,12 +38,11 @@
                     <div class="col-12">
                         <div class="card-box table-responsive">
                             <?php echo $__env->make('backend.includes.message', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-                            
+
                             <table id="datatable-responsive" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th>Title</th>
                                         <th>Course</th>
                                         <th>Chapter</th>
                                         <th>IsPaid</th>

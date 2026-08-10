@@ -38,12 +38,11 @@
                     <div class="col-12">
                         <div class="card-box table-responsive">
                             @include('backend.includes.message')
-                            
+
                             <table id="datatable-responsive" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th>Title</th>
                                         <th>Course</th>
                                         <th>Chapter</th>
                                         <th>IsPaid</th>

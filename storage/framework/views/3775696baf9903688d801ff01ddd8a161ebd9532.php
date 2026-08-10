@@ -1,7 +1,6 @@
 <?php $__currentLoopData = $notes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $note): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
     <tr>
         <td><?php echo e($index + 1); ?></td>
-        <td><?php echo e($note->title); ?></td>
         <td><?php echo e($note->getCourseName()); ?></td>
         <td><?php echo e($note->getChapterName()); ?></td>
         <td>
