@@ -124,16 +124,24 @@ html,body { margin:0!important; padding:0!important; background:#0a0e1a!importan
 .sb-panel::-webkit-scrollbar { width:3px; }
 .sb-panel::-webkit-scrollbar-thumb { background:rgba(248,184,74,.3); border-radius:4px; }
 
-.pgl-item {
-    display:flex; align-items:center; justify-content:space-between;
-    padding:7px 10px; margin-bottom:4px;
-    background:rgba(255,255,255,.04); border-radius:6px;
-    cursor:pointer; gap:6px; border:1px solid rgba(255,255,255,.06);
-    transition:background .15s,border-color .15s;
+#pg-list {
+    display:grid; grid-template-columns:1fr 1fr; gap:10px;
 }
-.pgl-item:hover { background:rgba(248,184,74,.1); }
-.pgl-item.active { background:rgba(248,184,74,.18); border-color:rgba(248,184,74,.5); }
-.pgl-lbl { color:#eaeaea; font-size:12px; }
+.pgl-item {
+    display:flex; flex-direction:column; align-items:center; gap:5px;
+    cursor:pointer;
+}
+.pgl-thumb {
+    width:100%; background:#fff; border-radius:4px; overflow:hidden;
+    border:2px solid rgba(255,255,255,.1); position:relative;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 6px rgba(0,0,0,.4); transition:border-color .15s;
+}
+.pgl-item:hover .pgl-thumb  { border-color:rgba(248,184,74,.5); }
+.pgl-item.active .pgl-thumb { border-color:#f8b84a; box-shadow:0 0 0 1px #f8b84a,0 2px 8px rgba(0,0,0,.5); }
+.pgl-canvas { width:100%; height:100%; display:block; }
+.pgl-num    { color:#4a5568; font-size:15px; font-weight:700; }
+.pgl-lbl    { color:#9aa4b2; font-size:11px; }
 .pgl-item.active .pgl-lbl { color:#f8b84a; font-weight:600; }
 
 .info-ttl  { color:#f8b84a; font-size:13px; font-weight:600; margin-bottom:8px; }
@@ -190,6 +198,7 @@ html,body { margin:0!important; padding:0!important; background:#0a0e1a!importan
 @media (max-width:480px) {
     #sidebar { width:200px; }
     .btn { padding:4px 7px; font-size:11px; }
+    #pg-list { grid-template-columns:1fr; }
 }
 </style>
 @endsection
@@ -449,11 +458,12 @@ async function renderPage(n) {
         var bvp  = page.getViewport({ scale: 1 });
         var fs   = Math.max(0.3, cw / bvp.width + zDelta);
         var vp   = page.getViewport({ scale: fs });
-        // Cap the pixel ratio used for canvas rendering. On modern phones
-        // devicePixelRatio can be 3+, which triples canvas dimensions and
-        // makes each page noticeably slower to draw for barely-visible
-        // sharpness gains. 2x is already sharp on virtually any screen.
-        var dpr  = Math.min(window.devicePixelRatio || 1, 2);
+        // Only cap the pixel ratio for large documents (many pages), where
+        // rendering cost adds up fast. Short documents render at full
+        // devicePixelRatio for maximum sharpness since the cost is small.
+        var dpr  = totPages > 50
+            ? Math.min(window.devicePixelRatio || 1, 2)
+            : Math.min(window.devicePixelRatio || 1, 3);
 
         wrap.style.width  = vp.width  + 'px';
         wrap.style.height = vp.height + 'px';
@@ -723,18 +733,72 @@ function clearSearch() {
     document.getElementById('srch-cnt').textContent = '';
 }
 
-// ── PAGE LIST ─────────────────────────────────────────────────────────────
-// Builds a clickable list of every page in the sidebar so the user can
-// jump straight to any page. Called once totPages is known.
+// ── PAGE LIST (with lazy-loaded thumbnails) ──────────────────────────────
+// Builds a grid of small page previews in the sidebar so the user can see
+// and jump to any page at a glance. Thumbnails render lazily as they
+// scroll into view in the sidebar (same lazy pattern as the main canvas
+// area) so opening the panel on a long document stays fast.
+var thumbRendered = {};
+var thumbObserver = null;
+
 function renderPageList() {
-    var list = document.getElementById('pg-list');
-    var html = '';
+    var list  = document.getElementById('pg-list');
+    var ratio = estW ? (estH / estW) : 1.3; // fallback aspect if not known yet
+    var html  = '';
     for (var i = 1; i <= totPages; i++) {
-        html += '<div class="pgl-item' + (i === curPage ? ' active' : '') + '" id="pgl-' + i + '" onclick="goPage(' + i + ')">'
+        html += '<div class="pgl-item' + (i === curPage ? ' active' : '') + '" id="pgl-' + i + '" data-page="' + i + '" onclick="goPage(' + i + ')">'
+            + '<div class="pgl-thumb" id="pglt-' + i + '" style="aspect-ratio:' + (1 / ratio).toFixed(3) + '">'
+            + '<span class="pgl-num">' + i + '</span>'
+            + '</div>'
             + '<span class="pgl-lbl">Page ' + i + '</span>'
             + '</div>';
     }
     list.innerHTML = html;
+    setupThumbObserver();
+}
+
+function setupThumbObserver() {
+    if (thumbObserver) thumbObserver.disconnect();
+    thumbObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+            if (e.isIntersecting) renderThumb(+e.target.dataset.page);
+        });
+    }, {
+        root: document.getElementById('pg-list'),
+        rootMargin: '150px 0px 150px 0px',
+        threshold: 0.01
+    });
+    document.querySelectorAll('.pgl-item').forEach(function(el) {
+        thumbObserver.observe(el);
+    });
+}
+
+async function renderThumb(n) {
+    if (thumbRendered[n]) return;
+    thumbRendered[n] = true; // reserve immediately so we don't double-render
+    var box = document.getElementById('pglt-' + n);
+    if (!box) return;
+
+    try {
+        var page = await pdfDoc.getPage(n);
+        var bvp  = page.getViewport({ scale: 1 });
+        var tw   = box.clientWidth || 90;
+        var vp   = page.getViewport({ scale: tw / bvp.width });
+
+        var canvas    = document.createElement('canvas');
+        canvas.className = 'pgl-canvas';
+        canvas.width  = Math.floor(vp.width);
+        canvas.height = Math.floor(vp.height);
+
+        var ctx = canvas.getContext('2d', { alpha: false });
+        await page.render({ canvasContext: ctx, viewport: vp }).promise;
+
+        box.innerHTML = '';
+        box.appendChild(canvas);
+    } catch (e) {
+        console.error('Thumb ' + n + ' error:', e);
+        thumbRendered[n] = false; // allow retry (e.g. via IntersectionObserver re-trigger)
+    }
 }
 
 function updateActivePageInList() {
