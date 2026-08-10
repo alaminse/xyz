@@ -764,12 +764,27 @@ function setupThumbObserver() {
             if (e.isIntersecting) renderThumb(+e.target.dataset.page);
         });
     }, {
-        root: document.getElementById('pg-list'),
+        root: document.getElementById('panel-pages'), // the actual scrolling element
         rootMargin: '150px 0px 150px 0px',
         threshold: 0.01
     });
     document.querySelectorAll('.pgl-item').forEach(function(el) {
         thumbObserver.observe(el);
+    });
+}
+
+// Fallback: explicitly render whatever thumbnails are currently visible.
+// Covers cases where the sidebar was just made visible (display:none -> flex)
+// and the IntersectionObserver hasn't re-checked geometry yet.
+function renderVisibleThumbs() {
+    var panel = document.getElementById('panel-pages');
+    if (!panel) return;
+    var pRect = panel.getBoundingClientRect();
+    document.querySelectorAll('.pgl-item').forEach(function(el) {
+        var r = el.getBoundingClientRect();
+        if (r.bottom > pRect.top - 150 && r.top < pRect.bottom + 150) {
+            renderThumb(+el.dataset.page);
+        }
     });
 }
 
@@ -814,7 +829,14 @@ function toggleSidebar() {
     var sb = document.getElementById('sidebar');
     sb.classList.toggle('on');
     document.getElementById('btn-sb').classList.toggle('on', sb.classList.contains('on'));
+    if (sb.classList.contains('on')) {
+        setTimeout(renderVisibleThumbs, 50);
+    }
 }
+
+document.getElementById('panel-pages')?.addEventListener('scroll', function() {
+    renderVisibleThumbs();
+});
 function sbTab(tab) {
     document.querySelectorAll('.sb-tab').forEach(function(t, i) {
         t.classList.toggle('on', ['pages','info'][i] === tab);
