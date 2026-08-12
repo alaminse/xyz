@@ -392,7 +392,23 @@ async function loadPdf(attempt) {
             rangeChunkSize: 1 << 18 // 256KB chunks
         });
 
+        // Stall watchdog: genuinely slow connections that are still making
+        // progress are left alone (no overall time limit), but if 25s pass
+        // with zero progress — the connection likely died silently — we
+        // destroy the task so the catch block below can trigger a retry
+        // instead of hanging forever with no feedback.
+        var lastProgress = Date.now();
+        var stalled = false;
+        var stallTimer = setInterval(function() {
+            if (Date.now() - lastProgress > 25000) {
+                stalled = true;
+                clearInterval(stallTimer);
+                loadingTask.destroy();
+            }
+        }, 2000);
+
         loadingTask.onProgress = function(p) {
+            lastProgress = Date.now();
             if (p.total) {
                 var pct = Math.min(99, Math.round(p.loaded / p.total * 100));
                 document.getElementById('prog-bar').style.width = pct + '%';
@@ -400,7 +416,8 @@ async function loadPdf(attempt) {
             }
         };
 
-        pdfDoc   = await loadingTask.promise;
+        pdfDoc = await loadingTask.promise;
+        clearInterval(stallTimer);
         totPages = pdfDoc.numPages;
         document.getElementById('tot-pages').textContent = totPages;
         document.getElementById('pg-in').max = totPages;
@@ -409,6 +426,7 @@ async function loadPdf(attempt) {
         await initPages();
     } catch (e) {
         console.error(e);
+        if (typeof stallTimer !== 'undefined') clearInterval(stallTimer);
         if (attempt < maxAttempts) {
             document.getElementById('ov-msg').textContent =
                 'Connection issue, retrying\u2026 (' + attempt + '/' + (maxAttempts - 1) + ')';
@@ -416,7 +434,8 @@ async function loadPdf(attempt) {
             return loadPdf(attempt + 1);
         }
         document.getElementById('ov-msg').innerHTML =
-            'Failed to load. <a href="#" onclick="manualRetry();return false;">Tap to retry</a>';
+            'Failed to load — your connection may be too slow or unstable. '
+            + '<a href="#" onclick="manualRetry();return false;">Tap to retry</a>';
         document.getElementById('prog-bar').style.background = '#d9534f';
     }
 }
@@ -887,15 +906,20 @@ document.getElementById('pgo-body-pages')?.addEventListener('scroll', function()
 // Shared by both the periodic background refresh and the load-retry flow,
 // so a retry never keeps hammering the server with an already-expired token.
 async function refreshToken() {
+    var controller = new AbortController();
+    var timeoutId  = setTimeout(function(){ controller.abort(); }, 15000); // 15s cap
     try {
         var r = await fetch(REFRESH_URL, {
             method: 'POST', credentials: 'include',
-            headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json' }
+            headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json' },
+            signal: controller.signal
         });
         var d = await r.json();
         if (d.token) { TOKEN = d.token; expiry = d.expires_in; return true; }
     } catch (e) {
         console.warn('Token refresh failed:', e);
+    } finally {
+        clearTimeout(timeoutId);
     }
     return false;
 }
