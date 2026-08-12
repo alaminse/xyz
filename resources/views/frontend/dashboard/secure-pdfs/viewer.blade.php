@@ -105,48 +105,59 @@ html,body { margin:0!important; padding:0!important; background:#0a0e1a!importan
 /* main body */
 #body { flex:1; display:flex; overflow:hidden; }
 
-/* sidebar */
-#sidebar {
-    width:230px; flex-shrink:0; background:#020b1c;
-    border-right:1px solid rgba(255,255,255,.07);
-    display:none; flex-direction:column; overflow:hidden;
+/* page overview — full-screen thumbnail grid */
+#pg-overview {
+    display:none; position:fixed; inset:0; z-index:20000;
+    background:#0a0e1a; flex-direction:column;
 }
-#sidebar.on { display:flex; }
-.sb-tabs { display:flex; border-bottom:1px solid rgba(255,255,255,.07); flex-shrink:0; }
-.sb-tab {
-    flex:1; padding:8px 4px; text-align:center; color:#9aa4b2;
-    font-size:11px; cursor:pointer; border-bottom:2px solid transparent;
-    transition:color .15s,border-color .15s;
+#pg-overview.on { display:flex; }
+#pgo-header {
+    flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
+    padding:10px 14px; background:linear-gradient(90deg,#020b1c,#03132e);
+    border-bottom:1px solid rgba(255,255,255,.08);
 }
-.sb-tab.on { color:#f8b84a; border-bottom-color:#f8b84a; }
-.sb-panel { display:none; flex:1; overflow-y:auto; padding:10px; }
-.sb-panel.on { display:block; }
-.sb-panel::-webkit-scrollbar { width:3px; }
-.sb-panel::-webkit-scrollbar-thumb { background:rgba(248,184,74,.3); border-radius:4px; }
+#pgo-tabs { display:flex; gap:6px; }
+.pgo-tab {
+    padding:6px 14px; border-radius:16px; font-size:13px; color:#9aa4b2;
+    cursor:pointer; transition:background .15s,color .15s;
+}
+.pgo-tab.on { background:rgba(248,184,74,.16); color:#f8b84a; font-weight:600; }
+#pgo-close {
+    background:none; border:none; color:#eaeaea; font-size:26px;
+    line-height:1; cursor:pointer; padding:0 4px;
+}
+#pgo-close:hover { color:#f8b84a; }
+.pgo-body { display:none; flex:1; overflow-y:auto; padding:16px; }
+.pgo-body.on { display:block; }
+.pgo-body::-webkit-scrollbar { width:4px; }
+.pgo-body::-webkit-scrollbar-thumb { background:rgba(248,184,74,.3); border-radius:4px; }
 
 #pg-list {
-    display:grid; grid-template-columns:1fr 1fr; gap:10px;
+    display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
 }
 .pgl-item {
-    display:flex; flex-direction:column; align-items:center; gap:5px;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
     cursor:pointer;
 }
 .pgl-thumb {
-    width:100%; background:#fff; border-radius:4px; overflow:hidden;
+    width:100%; background:#fff; border-radius:5px; overflow:hidden;
     border:2px solid rgba(255,255,255,.1); position:relative;
     display:flex; align-items:center; justify-content:center;
-    box-shadow:0 2px 6px rgba(0,0,0,.4); transition:border-color .15s;
+    box-shadow:0 2px 8px rgba(0,0,0,.5); transition:border-color .15s,box-shadow .15s;
 }
 .pgl-item:hover .pgl-thumb  { border-color:rgba(248,184,74,.5); }
-.pgl-item.active .pgl-thumb { border-color:#f8b84a; box-shadow:0 0 0 1px #f8b84a,0 2px 8px rgba(0,0,0,.5); }
+.pgl-item.active .pgl-thumb { border-color:#4a9eff; box-shadow:0 0 0 2px #4a9eff,0 2px 10px rgba(0,0,0,.6); }
 .pgl-canvas { width:100%; height:100%; display:block; }
-.pgl-num    { color:#4a5568; font-size:15px; font-weight:700; }
-.pgl-lbl    { color:#9aa4b2; font-size:11px; }
-.pgl-item.active .pgl-lbl { color:#f8b84a; font-weight:600; }
+.pgl-num    { color:#4a5568; font-size:20px; font-weight:700; }
+.pgl-lbl    { color:#9aa4b2; font-size:12px; }
+.pgl-item.active .pgl-lbl { color:#4a9eff; font-weight:600; }
 
-.info-ttl  { color:#f8b84a; font-size:13px; font-weight:600; margin-bottom:8px; }
-.info-desc { color:#c0c7d0; font-size:12px; line-height:1.7; }
-.info-meta { color:#6b7280; font-size:11px; margin-top:10px; line-height:1.9; }
+@media (min-width:640px) { #pg-list { grid-template-columns:repeat(4,1fr); } }
+@media (min-width:900px) { #pg-list { grid-template-columns:repeat(6,1fr); } }
+
+.info-ttl  { color:#f8b84a; font-size:16px; font-weight:600; margin-bottom:10px; }
+.info-desc { color:#c0c7d0; font-size:13px; line-height:1.7; max-width:560px; }
+.info-meta { color:#6b7280; font-size:12px; margin-top:12px; line-height:2; }
 .info-meta span { color:#9aa4b2; }
 
 /* canvas area */
@@ -196,9 +207,8 @@ html,body { margin:0!important; padding:0!important; background:#0a0e1a!importan
     #status-bar { font-size:11px; }
 }
 @media (max-width:480px) {
-    #sidebar { width:200px; }
     .btn { padding:4px 7px; font-size:11px; }
-    #pg-list { grid-template-columns:1fr; }
+    #pg-list { grid-template-columns:repeat(2,1fr); }
 }
 </style>
 @endsection
@@ -218,6 +228,31 @@ html,body { margin:0!important; padding:0!important; background:#0a0e1a!importan
     <h3>Security Alert</h3>
     <p id="warn-msg">Suspicious activity detected.</p>
     <button class="btn" onclick="closeWarn()">Resume Reading</button>
+</div>
+
+{{-- Page overview (full-screen thumbnail grid) --}}
+<div id="pg-overview">
+    <div id="pgo-header">
+        <div id="pgo-tabs">
+            <div class="pgo-tab on" onclick="pgoTab('pages')">Pages</div>
+            <div class="pgo-tab"    onclick="pgoTab('info')">Info</div>
+        </div>
+        <button id="pgo-close" onclick="closePageOverview()">&times;</button>
+    </div>
+    <div id="pgo-body-pages" class="pgo-body on">
+        <div id="pg-list"></div>
+    </div>
+    <div id="pgo-body-info" class="pgo-body">
+        <div class="info-ttl">{{ $pdf->title }}</div>
+        <div class="info-desc">{{ $pdf->description ?? 'No description.' }}</div>
+        <div class="info-meta">
+            Pages: <span>{{ $pdf->total_pages }}</span><br>
+            Size: <span>{{ $pdf->file_size_formatted }}</span><br>
+            Chapter: <span>{{ $pdf->chapter?->name ?? '—' }}</span><br>
+            Lesson: <span>{{ $pdf->lesson?->name ?? '—' }}</span><br>
+            Type: <span style="color:{{ $pdf->isPaid ? '#f8b84a' : '#5cb85c' }}">{{ $pdf->isPaid ? 'Premium' : 'Free' }}</span>
+        </div>
+    </div>
 </div>
 
 <div id="shell">
@@ -245,7 +280,7 @@ html,body { margin:0!important; padding:0!important; background:#0a0e1a!importan
         <div id="tb3">
             <button class="btn" id="btn-srch" onclick="toggleSearch()"><i class="bx bx-search"></i> Search</button>
             <button class="btn" id="btn-gt"   onclick="toggleGoto()"><i class="bx bx-navigation"></i> Go to</button>
-            <button class="btn" id="btn-sb"   onclick="toggleSidebar()"><i class="bx bx-list-ul"></i> Pages</button>
+            <button class="btn" id="btn-sb"   onclick="openPageOverview()"><i class="bx bx-list-ul"></i> Pages</button>
 
             <div id="srch-bar">
                 <i class="bx bx-search" style="color:#9aa4b2;font-size:13px"></i>
@@ -275,31 +310,9 @@ html,body { margin:0!important; padding:0!important; background:#0a0e1a!importan
     @endif
 
     <div id="body">
-
-        {{-- Sidebar --}}
-        <div id="sidebar">
-            <div class="sb-tabs">
-                <div class="sb-tab on"  onclick="sbTab('pages')"><i class="bx bx-list-ul"></i> Pages</div>
-                <div class="sb-tab"     onclick="sbTab('info')"><i class="bx bx-info-circle"></i> Info</div>
-            </div>
-            <div class="sb-panel on" id="panel-pages">
-                <div id="pg-list"></div>
-            </div>
-            <div class="sb-panel" id="panel-info">
-                <div class="info-ttl">{{ $pdf->title }}</div>
-                <div class="info-desc">{{ $pdf->description ?? 'No description.' }}</div>
-                <div class="info-meta">
-                    Pages: <span>{{ $pdf->total_pages }}</span><br>
-                    Size: <span>{{ $pdf->file_size_formatted }}</span><br>
-                    Chapter: <span>{{ $pdf->chapter?->name ?? '—' }}</span><br>
-                    Lesson: <span>{{ $pdf->lesson?->name ?? '—' }}</span><br>
-                    Type: <span style="color:{{ $pdf->isPaid ? '#f8b84a' : '#5cb85c' }}">{{ $pdf->isPaid ? 'Premium' : 'Free' }}</span>
-                </div>
-            </div>
-        </div>
-
         <div id="cv-area"></div>
     </div>
+
 
     <div id="status-bar">
         <div class="lk-badge"><i class="bx bx-lock-alt"></i> No download &bull; No copy &bull; Watermarked</div>
@@ -394,7 +407,6 @@ async function loadPdf(attempt) {
         document.getElementById('gt-in').max = totPages;
 
         await initPages();
-        renderPageList();
     } catch (e) {
         console.error(e);
         if (attempt < maxAttempts) {
@@ -759,20 +771,37 @@ function clearSearch() {
     document.getElementById('srch-cnt').textContent = '';
 }
 
-// ── PAGE LIST (with lazy-loaded thumbnails) ──────────────────────────────
-// Builds a grid of small page previews in the sidebar so the user can see
-// and jump to any page at a glance. Thumbnails render lazily as they
-// scroll into view in the sidebar (same lazy pattern as the main canvas
-// area) so opening the panel on a long document stays fast.
+// ── PAGE OVERVIEW (full-screen thumbnail grid, like a native PDF app) ────
+// Tapping any thumbnail jumps straight to that page and closes the overview.
+// Thumbnails render lazily as they scroll into view so opening this on a
+// long document (hundreds of pages) still stays fast.
 var thumbRendered = {};
 var thumbObserver = null;
+var pageListBuilt  = false;
+
+function openPageOverview() {
+    if (!pageListBuilt && totPages) { renderPageList(); pageListBuilt = true; }
+    document.getElementById('pg-overview').classList.add('on');
+    updateActivePageInList();
+    setTimeout(renderVisibleThumbs, 50); // fallback in case the observer hasn't caught up yet
+}
+function closePageOverview() {
+    document.getElementById('pg-overview').classList.remove('on');
+}
+function pgoTab(tab) {
+    document.querySelectorAll('.pgo-tab').forEach(function(t, i) {
+        t.classList.toggle('on', ['pages','info'][i] === tab);
+    });
+    document.getElementById('pgo-body-pages').classList.toggle('on', tab === 'pages');
+    document.getElementById('pgo-body-info').classList.toggle('on',  tab === 'info');
+}
 
 function renderPageList() {
     var list  = document.getElementById('pg-list');
     var ratio = estW ? (estH / estW) : 1.3; // fallback aspect if not known yet
     var html  = '';
     for (var i = 1; i <= totPages; i++) {
-        html += '<div class="pgl-item' + (i === curPage ? ' active' : '') + '" id="pgl-' + i + '" data-page="' + i + '" onclick="goPage(' + i + ')">'
+        html += '<div class="pgl-item' + (i === curPage ? ' active' : '') + '" id="pgl-' + i + '" data-page="' + i + '" onclick="goPage(' + i + ');closePageOverview();">'
             + '<div class="pgl-thumb" id="pglt-' + i + '" style="aspect-ratio:' + (1 / ratio).toFixed(3) + '">'
             + '<span class="pgl-num">' + i + '</span>'
             + '</div>'
@@ -790,8 +819,8 @@ function setupThumbObserver() {
             if (e.isIntersecting) renderThumb(+e.target.dataset.page);
         });
     }, {
-        root: document.getElementById('panel-pages'), // the actual scrolling element
-        rootMargin: '150px 0px 150px 0px',
+        root: document.getElementById('pgo-body-pages'), // the actual scrolling element
+        rootMargin: '250px 0px 250px 0px',
         threshold: 0.01
     });
     document.querySelectorAll('.pgl-item').forEach(function(el) {
@@ -800,15 +829,15 @@ function setupThumbObserver() {
 }
 
 // Fallback: explicitly render whatever thumbnails are currently visible.
-// Covers cases where the sidebar was just made visible (display:none -> flex)
-// and the IntersectionObserver hasn't re-checked geometry yet.
+// Covers the moment the overview was just opened (display:none -> flex)
+// before the IntersectionObserver has re-checked geometry.
 function renderVisibleThumbs() {
-    var panel = document.getElementById('panel-pages');
-    if (!panel) return;
+    var panel = document.getElementById('pgo-body-pages');
+    if (!panel || !panel.classList.contains('on')) return;
     var pRect = panel.getBoundingClientRect();
     document.querySelectorAll('.pgl-item').forEach(function(el) {
         var r = el.getBoundingClientRect();
-        if (r.bottom > pRect.top - 150 && r.top < pRect.bottom + 150) {
+        if (r.bottom > pRect.top - 250 && r.top < pRect.bottom + 250) {
             renderThumb(+el.dataset.page);
         }
     });
@@ -823,7 +852,7 @@ async function renderThumb(n) {
     try {
         var page = await pdfDoc.getPage(n);
         var bvp  = page.getViewport({ scale: 1 });
-        var tw   = box.clientWidth || 90;
+        var tw   = box.clientWidth || 120;
         var vp   = page.getViewport({ scale: tw / bvp.width });
 
         var canvas    = document.createElement('canvas');
@@ -847,29 +876,12 @@ function updateActivePageInList() {
         el.classList.toggle('active', el.id === 'pgl-' + curPage);
     });
     var active = document.getElementById('pgl-' + curPage);
-    if (active) active.scrollIntoView({ block: 'nearest' });
+    if (active) active.scrollIntoView({ block: 'center' });
 }
 
-// ── SIDEBAR ───────────────────────────────────────────────────────────────
-function toggleSidebar() {
-    var sb = document.getElementById('sidebar');
-    sb.classList.toggle('on');
-    document.getElementById('btn-sb').classList.toggle('on', sb.classList.contains('on'));
-    if (sb.classList.contains('on')) {
-        setTimeout(renderVisibleThumbs, 50);
-    }
-}
-
-document.getElementById('panel-pages')?.addEventListener('scroll', function() {
+document.getElementById('pgo-body-pages')?.addEventListener('scroll', function() {
     renderVisibleThumbs();
 });
-function sbTab(tab) {
-    document.querySelectorAll('.sb-tab').forEach(function(t, i) {
-        t.classList.toggle('on', ['pages','info'][i] === tab);
-    });
-    document.getElementById('panel-pages').classList.toggle('on', tab === 'pages');
-    document.getElementById('panel-info').classList.toggle('on',  tab === 'info');
-}
 
 // ── TOKEN REFRESH ─────────────────────────────────────────────────────────
 // Shared by both the periodic background refresh and the load-retry flow,
@@ -928,6 +940,7 @@ document.addEventListener('keydown', function(e) {
     if (cm && k === 'a') { e.preventDefault(); }
     if (cm && k === 'c') { e.preventDefault(); }
     if (k === 'f12') { e.preventDefault(); showWarn('DevTools disabled.'); }
+    if (k === 'escape') { closePageOverview(); }
     if (cm && e.shiftKey && (k==='i'||k==='j'||k==='c'||k==='k')) { e.preventDefault(); showWarn('DevTools disabled.'); }
     if (cm && k === 'f') { e.preventDefault(); toggleSearch(); }
     if (k === 'printscreen' || k === 'print screen') {
