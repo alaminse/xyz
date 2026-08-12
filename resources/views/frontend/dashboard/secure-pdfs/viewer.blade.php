@@ -333,6 +333,20 @@ let zDelta     = 0;
 let expiry     = 5 * 60;
 let rendering  = false;
 
+// ── DEBUG MODE ─────────────────────────────────────────────────────────
+// Add ?debug=1 to the URL to see JS errors as an on-screen alert, useful
+// when DevTools access is restricted. Remove once the issue is diagnosed.
+var DEBUG_MODE = new URLSearchParams(location.search).get('debug') === '1';
+if (DEBUG_MODE) {
+    window.onerror = function(msg, url, line, col) {
+        alert('JS Error: ' + msg + '\nAt line ' + line + ':' + col);
+        return false;
+    };
+    window.addEventListener('unhandledrejection', function(e) {
+        alert('Promise error: ' + (e.reason && e.reason.message ? e.reason.message : e.reason));
+    });
+}
+
 // ── LOAD PDF (progressive/range-request streaming, with retry) ───────────
 // Instead of downloading the whole file into memory first, we hand pdf.js
 // the URL directly. pdf.js then uses HTTP Range requests to pull in only
@@ -348,6 +362,14 @@ async function loadPdf(attempt) {
     document.getElementById('prog-bar').style.background = '#f8b84a';
     document.getElementById('prog-bar').style.width = '0%';
     document.getElementById('ov-msg').textContent = 'Loading secure PDF\u2026';
+
+    // On any retry (auto or manual), the token may already be stale/expired
+    // — especially on slow connections where the first attempt alone can
+    // eat into the token's short lifetime. Get a fresh one before trying
+    // again so a retry isn't doomed to repeat the same failure.
+    if (attempt > 1) {
+        await refreshToken();
+    }
 
     try {
         var loadingTask = pdfjsLib.getDocument({
@@ -382,9 +404,13 @@ async function loadPdf(attempt) {
             return loadPdf(attempt + 1);
         }
         document.getElementById('ov-msg').innerHTML =
-            'Failed to load. <a href="#" onclick="loadPdf();return false;">Tap to retry</a>';
+            'Failed to load. <a href="#" onclick="manualRetry();return false;">Tap to retry</a>';
         document.getElementById('prog-bar').style.background = '#d9534f';
     }
+}
+
+function manualRetry() {
+    loadPdf(2); // start at attempt 2 so it refreshes the token before trying again
 }
 // NOTE ON SERVER SUPPORT: if your `secure-pdfs.stream` route reads the file
 // with something like `readfile()` or a plain streamed response, it likely
@@ -846,14 +872,23 @@ function sbTab(tab) {
 }
 
 // ── TOKEN REFRESH ─────────────────────────────────────────────────────────
-setInterval(function() {
-    fetch(REFRESH_URL, {
-        method: 'POST', credentials: 'include',
-        headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json' }
-    }).then(function(r){ return r.json(); })
-      .then(function(d){ if (d.token) { TOKEN = d.token; expiry = d.expires_in; } })
-      .catch(function(){});
-}, 4 * 60 * 1000);
+// Shared by both the periodic background refresh and the load-retry flow,
+// so a retry never keeps hammering the server with an already-expired token.
+async function refreshToken() {
+    try {
+        var r = await fetch(REFRESH_URL, {
+            method: 'POST', credentials: 'include',
+            headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json' }
+        });
+        var d = await r.json();
+        if (d.token) { TOKEN = d.token; expiry = d.expires_in; return true; }
+    } catch (e) {
+        console.warn('Token refresh failed:', e);
+    }
+    return false;
+}
+
+setInterval(function() { refreshToken(); }, 4 * 60 * 1000);
 
 // ── COUNTDOWN ─────────────────────────────────────────────────────────────
 setInterval(function() {
