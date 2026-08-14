@@ -184,8 +184,32 @@ class FlashCardController extends Controller
         $questions = $flashCard->questions->whereIn('id', $remainingQuestionIds);
 
         if ($questions->isEmpty()) {
-            return redirect()->back()->with('error', 'No questions available.');
+
+            $quiz->fill([
+                'total' => $totalOriginalQuestions,
+                'current_question_index' => 0,
+                'correct' => 0,
+                'wrong' => 0,
+                'flashs_id' => json_encode($questionIds),
+                'answered_flashcards' => json_encode([]),
+                'remaining_flashcards' => json_encode($questionIds),
+                'answers' => json_encode([]),
+                'question_queue' => json_encode([]),
+                'status' => null,
+                'finished_at' => null,
+            ])->save();
+
+            // Start again from beginning
+            $remainingQuestionIds = $questionIds;
+
+            $questions = $flashCard->questions
+                ->whereIn('id', $remainingQuestionIds)
+                ->values();
         }
+
+        // if ($questions->isEmpty()) {
+        //     return redirect()->back()->with('error', 'No questions available.');
+        // }
 
         /* =====================
         VIEW
