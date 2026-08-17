@@ -58,15 +58,15 @@ class AntiDownloadManager
             $referer = $request->headers->get('referer', '');
             $appUrl  = rtrim(config('app.url'), '/');
 
-            // No referer = direct request from IDM or address bar
-            if (empty($referer)) {
-                abort(403);
-            }
+            // // No referer = direct request from IDM or address bar
+            // if (empty($referer)) {
+            //     abort(403);
+            // }
 
-            // Referer must be from our domain
-            if (!str_starts_with($referer, $appUrl)) {
-                abort(403);
-            }
+            // // Referer must be from our domain
+            // if (!str_starts_with($referer, $appUrl)) {
+            //     abort(403);
+            // }
         }
 
         return $next($request);
