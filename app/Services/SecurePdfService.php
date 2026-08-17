@@ -70,44 +70,36 @@ class SecurePdfService
     /**
      * Generate 30-minute token — tied to user IP.
      */
-public function generateViewToken(SecurePdf $pdf, Request $request): string
-{
-    PdfViewToken::where('secure_pdf_id', $pdf->id)
-        ->where('user_id', $request->user()->id)
-        ->delete();
+    public function generateViewToken(SecurePdf $pdf, Request $request): string
+    {
+        PdfViewToken::where('secure_pdf_id', $pdf->id)
+            ->where('user_id', $request->user()->id)
+            ->delete();
 
-    $token = Str::random(64);
+        $token = Str::random(64);
 
-    PdfViewToken::create([
-        'secure_pdf_id' => $pdf->id,
-        'user_id'       => $request->user()->id,
-        'token'         => hash('sha256', $token),
-        'expires_at'    => now()->addMinutes(10),
-    ]);
+        PdfViewToken::create([
+            'secure_pdf_id' => $pdf->id,
+            'user_id'       => $request->user()->id,
+            'token'         => hash('sha256', $token),
+            'ip_address'    => $request->ip(), // ADD THIS
+            'expires_at'    => now()->addMinutes(10),
+        ]);
 
-    return $token;
-}
+        return $token;
+    }
 
     /**
      * Validate token — IP must match, not expired, correct user.
      */
-public function validateToken(string $token, Request $request): ?PdfViewToken
-{
-    return PdfViewToken::where(
-            'token',
-            hash('sha256', $token)
-        )
-        ->where(
-            'user_id',
-            $request->user()->id
-        )
-        ->where(
-            'expires_at',
-            '>',
-            now()
-        )
-        ->first();
-}
+    public function validateToken(string $token, Request $request): ?PdfViewToken
+    {
+        return PdfViewToken::where('token', hash('sha256', $token))
+            ->where('ip_address', $request->ip())
+            ->where('user_id', $request->user()->id)
+            ->where('expires_at', '>', now())
+            ->first();
+    }
 
     /**
      * Decrypt and return real file path.
