@@ -11,9 +11,9 @@ class OspeQuestion extends Model
 
     protected $guarded = ['id'];
 
-       public function note()
+    public function note()
     {
-        return $this->belongsTo(Note::class, 'note_id');
+        return $this->belongsTo(NoteDetail::class, 'note_id');
     }
 
     public function getNoteTitle(): string

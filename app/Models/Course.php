@@ -15,11 +15,11 @@ class Course extends Model
     protected $guarded = ['id'];
     protected $hidden = ['created_at', 'updated_at'];
 
-
     public function notes()
     {
-        return $this->belongsToMany(Note::class, 'course_note');
+        return $this->belongsToMany(Note::class, 'course_note', 'course_id', 'note_id');
     }
+
 
     public function mcqs()
     {
@@ -77,7 +77,7 @@ class Course extends Model
     {
         return $this->belongsToMany(Assessment::class, 'assessment_course', 'course_id', 'assessment_id');
     }
-    
+
     public function securePdfs()
     {
         return $this->belongsToMany(

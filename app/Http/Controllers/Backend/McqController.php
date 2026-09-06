@@ -317,6 +317,43 @@ class McqController extends Controller
 
     // ============ EXISTING METHODS ============
 
+    // public function getNotes(Request $request)
+    // {
+    //     try {
+    //         $validated = $request->validate([
+    //             'course_ids'   => 'required|array|min:1',
+    //             'course_ids.*' => 'exists:courses,id',
+    //             'chapter_id'   => 'nullable|exists:chapters,id',
+    //             'lesson_id'    => 'nullable|exists:lessons,id',
+    //         ]);
+
+    //         $query = Note::select('notes.id', 'notes.title', 'notes.slug', 'notes.chapter_id', 'notes.lesson_id', 'notes.isPaid')
+    //             ->join('course_note', 'notes.id', '=', 'course_note.note_id')
+    //             ->whereIn('course_note.course_id', $validated['course_ids'])
+    //             ->where('notes.status', Status::ACTIVE())
+    //             ->distinct();
+
+    //         if (!empty($validated['chapter_id'])) {
+    //             $query->where('notes.chapter_id', $validated['chapter_id']);
+    //         }
+
+    //         if (!empty($validated['lesson_id'])) {
+    //             $query->where('notes.lesson_id', $validated['lesson_id']);
+    //         }
+
+    //         $notes = $query->orderBy('notes.title')->get();
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'notes'   => $notes,
+    //             'count'   => $notes->count()
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         Log::error('MCQ getNotes error', ['error' => $e->getMessage()]);
+    //         return response()->json(['success' => false, 'message' => 'Failed to load notes'], 500);
+    //     }
+    // }
+
     public function getNotes(Request $request)
     {
         try {
@@ -327,7 +364,15 @@ class McqController extends Controller
                 'lesson_id'    => 'nullable|exists:lessons,id',
             ]);
 
-            $query = Note::select('notes.id', 'notes.title', 'notes.slug', 'notes.chapter_id', 'notes.lesson_id', 'notes.isPaid')
+            $query = \App\Models\NoteDetail::select(
+                    'note_details.id',
+                    'note_details.title',
+                    'note_details.slug',
+                    'notes.chapter_id',
+                    'notes.lesson_id',
+                    'notes.isPaid'
+                )
+                ->join('notes', 'note_details.note_id', '=', 'notes.id')
                 ->join('course_note', 'notes.id', '=', 'course_note.note_id')
                 ->whereIn('course_note.course_id', $validated['course_ids'])
                 ->where('notes.status', Status::ACTIVE())
@@ -341,7 +386,7 @@ class McqController extends Controller
                 $query->where('notes.lesson_id', $validated['lesson_id']);
             }
 
-            $notes = $query->orderBy('notes.title')->get();
+            $notes = $query->orderBy('note_details.title')->get();
 
             return response()->json([
                 'success' => true,

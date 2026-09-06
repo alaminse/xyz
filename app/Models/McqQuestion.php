@@ -40,7 +40,7 @@ class McqQuestion extends Model
 
     public function note()
     {
-        return $this->belongsTo(Note::class);
+        return $this->belongsTo(NoteDetail::class, 'note_id');
     }
 
     // Get correct answers as array

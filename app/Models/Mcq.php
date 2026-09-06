@@ -54,7 +54,7 @@ class Mcq extends Model
     // Note relationship
     public function note()
     {
-        return $this->belongsTo(\App\Models\Note::class, 'note_id');
+        return $this->belongsTo(NoteDetail::class, 'note_id');
     }
 
     public function getNoteTitle(): string

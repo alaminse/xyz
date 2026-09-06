@@ -1,16 +1,14 @@
-@extends('layouts.backend')
-
-@section('title', 'Manage Note Sections')
-@section('css')
+<?php $__env->startSection('title', 'Manage Note Sections'); ?>
+<?php $__env->startSection('css'); ?>
     <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
     <style>
         .btn-link:hover { text-decoration: none; }
         .fa-chevron-down { transition: transform 0.2s ease; }
         .btn-link[aria-expanded="true"] .fa-chevron-down { transform: rotate(180deg); }
     </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="col-md-12">
     <div class="x_panel">
 
@@ -23,7 +21,7 @@
                     </button>
                 </li>
                 <li>
-                    <a href="{{ route('admin.notes.index') }}" class="btn btn-warning btn-sm text-white">
+                    <a href="<?php echo e(route('admin.notes.index')); ?>" class="btn btn-warning btn-sm text-white">
                         <i class="fa fa-arrow-left"></i> Back
                     </a>
                 </li>
@@ -32,11 +30,11 @@
         </div>
 
         <div class="x_content">
-            @include('backend.includes.message')
+            <?php echo $__env->make('backend.includes.message', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
             <div class="row">
 
-                {{-- LEFT : Meta Info --}}
+                
                 <div class="col-md-4">
                     <div class="card mb-3">
                         <div class="card-header font-weight-bold">Information</div>
@@ -44,80 +42,82 @@
 
                             <div class="mb-3">
                                 <small class="text-muted d-block">Courses</small>
-                                @forelse($note->courses as $course)
-                                    <span class="badge badge-primary mr-1 mb-1">{{ $course->name }}</span>
-                                @empty
+                                <?php $__empty_1 = true; $__currentLoopData = $note->courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                    <span class="badge badge-primary mr-1 mb-1"><?php echo e($course->name); ?></span>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                     <span class="text-muted">N/A</span>
-                                @endforelse
+                                <?php endif; ?>
                             </div>
 
                             <div class="mb-3">
                                 <small class="text-muted d-block">Chapter</small>
-                                <strong>{{ $note->chapter->name ?? '-' }}</strong>
+                                <strong><?php echo e($note->chapter->name ?? '-'); ?></strong>
                             </div>
 
                             <div class="mb-3">
                                 <small class="text-muted d-block">Lesson</small>
-                                <strong>{{ $note->lesson->name ?? '-' }}</strong>
+                                <strong><?php echo e($note->lesson->name ?? '-'); ?></strong>
                             </div>
 
                             <div class="mb-3">
                                 <small class="text-muted d-block">IsPaid</small>
-                                <strong>{{ $note->isPaid ? 'Yes' : 'No' }}</strong>
+                                <strong><?php echo e($note->isPaid ? 'Yes' : 'No'); ?></strong>
                             </div>
 
-                            <a href="{{ route('admin.notes.edit', $note->id) }}" class="btn btn-primary btn-sm">
+                            <a href="<?php echo e(route('admin.notes.edit', $note->id)); ?>" class="btn btn-primary btn-sm">
                                 <i class="fa fa-edit"></i> Edit Note Info
                             </a>
                         </div>
                     </div>
                 </div>
 
-                {{-- RIGHT : Sections list (accordion) --}}
+                
                 <div class="col-md-8">
                     <div class="accordion" id="sectionsAccordion">
                         <div id="sections-wrapper">
-                            @forelse ($note->details as $index => $detail)
-                                <div class="card mb-2" id="section-card-{{ $detail->id }}">
-                                    <div class="card-header p-0" id="heading-{{ $detail->id }}">
+                            <?php $__empty_1 = true; $__currentLoopData = $note->details; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $detail): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                <div class="card mb-2" id="section-card-<?php echo e($detail->id); ?>">
+                                    <div class="card-header p-0" id="heading-<?php echo e($detail->id); ?>">
                                         <div class="d-flex justify-content-between align-items-center px-3 py-2">
                                             <button type="button"
                                                     class="btn btn-link text-left flex-grow-1 font-weight-bold text-dark p-0"
                                                     style="text-decoration:none;"
                                                     data-toggle="collapse"
-                                                    data-target="#collapse-{{ $detail->id }}"
-                                                    aria-expanded="{{ $index == 0 ? 'true' : 'false' }}"
-                                                    aria-controls="collapse-{{ $detail->id }}">
-                                                <i class="fa fa-chevron-down mr-2"></i>{{ $detail->title }}
+                                                    data-target="#collapse-<?php echo e($detail->id); ?>"
+                                                    aria-expanded="<?php echo e($index == 0 ? 'true' : 'false'); ?>"
+                                                    aria-controls="collapse-<?php echo e($detail->id); ?>">
+                                                <i class="fa fa-chevron-down mr-2"></i><?php echo e($detail->title); ?>
+
                                             </button>
                                             <div class="flex-shrink-0">
                                                 <button type="button" class="btn btn-sm btn-primary"
-                                                        onclick="event.stopPropagation(); openEditModal({{ $detail->id }})">
+                                                        onclick="event.stopPropagation(); openEditModal(<?php echo e($detail->id); ?>)">
                                                     <i class="fa fa-edit"></i>
                                                 </button>
                                                 <button type="button" class="btn btn-sm btn-danger"
-                                                        onclick="event.stopPropagation(); deleteDetail({{ $detail->id }})">
+                                                        onclick="event.stopPropagation(); deleteDetail(<?php echo e($detail->id); ?>)">
                                                     <i class="fa fa-trash"></i>
                                                 </button>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div id="collapse-{{ $detail->id }}"
-                                         class="collapse {{ $index == 0 ? 'show' : '' }}"
-                                         aria-labelledby="heading-{{ $detail->id }}"
+                                    <div id="collapse-<?php echo e($detail->id); ?>"
+                                         class="collapse <?php echo e($index == 0 ? 'show' : ''); ?>"
+                                         aria-labelledby="heading-<?php echo e($detail->id); ?>"
                                          data-parent="#sectionsAccordion">
                                         <div class="card-body bg-light">
-                                            {!! $detail->description !!}
+                                            <?php echo $detail->description; ?>
+
                                         </div>
                                     </div>
                                 </div>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <div class="alert alert-info" id="no-sections-alert">
                                     <i class="fa fa-info-circle"></i>
                                     No sections added yet. Click "Add Section" to create the first one.
                                 </div>
-                            @endforelse
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -127,7 +127,7 @@
     </div>
 </div>
 
-{{-- ===================== Add/Edit Section Modal ===================== --}}
+
 <div class="modal fade" id="sectionModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -160,16 +160,16 @@
     </div>
 </div>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 <script>
-    const noteId = {{ $note->id }};
-    const csrfToken = '{{ csrf_token() }}';
+    const noteId = <?php echo e($note->id); ?>;
+    const csrfToken = '<?php echo e(csrf_token()); ?>';
 
-    const storeUrl = "{{ route('admin.notes.details.store', $note->id) }}";
-    const getUrlBase = "{{ url('admin/notes/details') }}"; // + /{id}
-    const updateUrlBase = "{{ url('admin/notes/details') }}"; // + /{id}
-    const destroyUrlBase = "{{ url('admin/notes/details') }}"; // + /{id}
+    const storeUrl = "<?php echo e(route('admin.notes.details.store', $note->id)); ?>";
+    const getUrlBase = "<?php echo e(url('admin/notes/details')); ?>"; // + /{id}
+    const updateUrlBase = "<?php echo e(url('admin/notes/details')); ?>"; // + /{id}
+    const destroyUrlBase = "<?php echo e(url('admin/notes/details')); ?>"; // + /{id}
 
     $(document).ready(function () {
         $('.summernote').summernote({ height: 250 });
@@ -294,5 +294,7 @@
         });
     }
 </script>
-@endpush
-@endsection
+<?php $__env->stopPush(); ?>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.backend', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/medimaniac/resources/views/backend/note/show.blade.php ENDPATH**/ ?>

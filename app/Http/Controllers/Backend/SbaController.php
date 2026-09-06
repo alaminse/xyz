@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Enums\Status;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
+use App\Models\Course;
 use App\Models\Sba;
 use App\Models\SbaQuestion;
-use App\Models\Course;
-use App\Models\Note;
-use App\Enums\Status;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class SbaController extends Controller
@@ -17,39 +16,41 @@ class SbaController extends Controller
     private function rules(bool $update = false): array
     {
         return [
-            'course_ids'      => 'required|array|min:1',
-            'course_ids.*'    => 'exists:courses,id',
-            'chapter_id'      => 'required|exists:chapters,id',
-            'lesson_id'       => 'nullable|exists:lessons,id',
-            'status'          => $update ? 'required|numeric' : 'nullable',
-            'isPaid'          => 'nullable',
+            'course_ids' => 'required|array|min:1',
+            'course_ids.*' => 'exists:courses,id',
+            'chapter_id' => 'required|exists:chapters,id',
+            'lesson_id' => 'nullable|exists:lessons,id',
+            'status' => $update ? 'required|numeric' : 'nullable',
+            'isPaid' => 'nullable',
         ];
     }
 
     private function questionRules(): array
     {
         return [
-            'note_id'         => 'nullable|exists:notes,id',
-            'question'        => 'required|string',
-            'option1'         => 'required|string',
-            'option2'         => 'required|string',
-            'option3'         => 'required|string',
-            'option4'         => 'required|string',
-            'option5'         => 'required|string',
-            'correct_option'  => 'required|string|in:option1,option2,option3,option4,option5',
-            'explain'         => 'required|string'
+            'note_id' => 'nullable|exists:notes,id',
+            'question' => 'required|string',
+            'option1' => 'required|string',
+            'option2' => 'required|string',
+            'option3' => 'required|string',
+            'option4' => 'required|string',
+            'option5' => 'required|string',
+            'correct_option' => 'required|string|in:option1,option2,option3,option4,option5',
+            'explain' => 'required|string',
         ];
     }
 
     public function index()
     {
         $courses = courseByModule('sba');
+
         return view('backend.sba.index', compact('courses'));
     }
 
     public function create()
     {
         $courses = courseByModule('sba');
+
         return view('backend.sba.create', compact('courses'));
     }
 
@@ -83,6 +84,7 @@ class SbaController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('SBA Store Failed', ['error' => $e->getMessage()]);
+
             return back()->withInput()->with('error', 'Something went wrong!');
         }
     }
@@ -90,6 +92,7 @@ class SbaController extends Controller
     public function edit(Sba $sba)
     {
         $courses = courseByModule('sba');
+
         return view('backend.sba.edit', compact('sba', 'courses'));
     }
 
@@ -105,7 +108,7 @@ class SbaController extends Controller
 
         $data['isPaid'] = $request->boolean('isPaid');
 
-        $data['slug']   = checkSlug('sbas');
+        $data['slug'] = checkSlug('sbas');
         $courseIds = $data['course_ids'];
         unset($data['course_ids']);
 
@@ -121,6 +124,7 @@ class SbaController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('SBA Update Failed', ['error' => $e->getMessage()]);
+
             return back()->withInput()->with('error', 'Update failed!');
         }
     }
@@ -128,6 +132,7 @@ class SbaController extends Controller
     public function show(Sba $sba)
     {
         $sba->load('questions');
+
         return view('backend.sba.show', compact('sba'));
     }
 
@@ -146,6 +151,7 @@ class SbaController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('SBA Delete Failed', ['error' => $e->getMessage()]);
+
             return back()->with('error', 'Delete failed!');
         }
     }
@@ -154,9 +160,11 @@ class SbaController extends Controller
     {
         try {
             $sba->update(['status' => $sba->status == 1 ? 2 : 1]);
+
             return redirect()->back()->with('success', 'Status Updated Successfully');
         } catch (\Exception $e) {
             Log::error('Error updating SBA status', ['error' => $e->getMessage()]);
+
             return redirect()->back()->with('error', 'Failed to update status.');
         }
     }
@@ -177,7 +185,7 @@ class SbaController extends Controller
         if ($exists) {
             return response()->json([
                 'success' => false,
-                'message' => 'This question already exists!'
+                'message' => 'This question already exists!',
             ], 422);
         }
 
@@ -190,12 +198,13 @@ class SbaController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Question added successfully!',
-                'question' => $question
+                'question' => $question,
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Question Store Failed', ['error' => $e->getMessage()]);
+
             return response()->json(['success' => false, 'message' => 'Failed to add question!'], 500);
         }
     }
@@ -204,7 +213,7 @@ class SbaController extends Controller
     {
         return response()->json([
             'success' => true,
-            'question' => $question
+            'question' => $question,
         ]);
     }
 
@@ -221,7 +230,7 @@ class SbaController extends Controller
         if ($exists) {
             return response()->json([
                 'success' => false,
-                'message' => 'This question already exists!'
+                'message' => 'This question already exists!',
             ], 422);
         }
 
@@ -234,12 +243,13 @@ class SbaController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Question updated successfully!',
-                'question' => $question
+                'question' => $question,
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Question Update Failed', ['error' => $e->getMessage()]);
+
             return response()->json(['success' => false, 'message' => 'Update failed!'], 500);
         }
     }
@@ -248,12 +258,14 @@ class SbaController extends Controller
     {
         try {
             $question->delete();
+
             return response()->json([
                 'success' => true,
-                'message' => 'Question deleted successfully!'
+                'message' => 'Question deleted successfully!',
             ]);
         } catch (\Exception $e) {
             Log::error('Question Delete Failed', ['error' => $e->getMessage()]);
+
             return response()->json(['success' => false, 'message' => 'Delete failed!'], 500);
         }
     }
@@ -274,7 +286,7 @@ class SbaController extends Controller
 
         return response()->json([
             'exists' => $exists ? true : false,
-            'question' => $exists
+            'question' => $exists,
         ]);
     }
 
@@ -284,35 +296,44 @@ class SbaController extends Controller
     {
         try {
             $validated = $request->validate([
-                'course_ids'   => 'required|array|min:1',
+                'course_ids' => 'required|array|min:1',
                 'course_ids.*' => 'exists:courses,id',
-                'chapter_id'   => 'nullable|exists:chapters,id',
-                'lesson_id'    => 'nullable|exists:lessons,id',
+                'chapter_id' => 'nullable|exists:chapters,id',
+                'lesson_id' => 'nullable|exists:lessons,id',
             ]);
 
-            $query = Note::select('notes.id', 'notes.title', 'notes.slug', 'notes.chapter_id', 'notes.lesson_id', 'notes.isPaid')
+            $query = \App\Models\NoteDetail::select(
+                'note_details.id',
+                'note_details.title',
+                'note_details.slug',
+                'notes.chapter_id',
+                'notes.lesson_id',
+                'notes.isPaid'
+            )
+                ->join('notes', 'note_details.note_id', '=', 'notes.id')
                 ->join('course_note', 'notes.id', '=', 'course_note.note_id')
                 ->whereIn('course_note.course_id', $validated['course_ids'])
                 ->where('notes.status', Status::ACTIVE())
                 ->distinct();
 
-            if (!empty($validated['chapter_id'])) {
+            if (! empty($validated['chapter_id'])) {
                 $query->where('notes.chapter_id', $validated['chapter_id']);
             }
 
-            if (!empty($validated['lesson_id'])) {
+            if (! empty($validated['lesson_id'])) {
                 $query->where('notes.lesson_id', $validated['lesson_id']);
             }
 
-            $notes = $query->orderBy('notes.title')->get();
+            $notes = $query->orderBy('note_details.title')->get();
 
             return response()->json([
                 'success' => true,
-                'notes'   => $notes,
-                'count'   => $notes->count()
+                'notes' => $notes,
+                'count' => $notes->count(),
             ]);
         } catch (\Exception $e) {
-            Log::error('SBA getNotes error', ['error' => $e->getMessage()]);
+            Log::error('MCQ getNotes error', ['error' => $e->getMessage()]);
+
             return response()->json(['success' => false, 'message' => 'Failed to load notes'], 500);
         }
     }
@@ -321,12 +342,12 @@ class SbaController extends Controller
     {
         $slug = request('slug');
 
-        if (!$slug) {
+        if (! $slug) {
             return response()->json(['msg' => 'Course not selected!']);
         }
 
         $course = Course::select('id')->where('slug', $slug)->first();
-        if (!$course) {
+        if (! $course) {
             return response()->json(['html' => '']);
         }
 

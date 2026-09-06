@@ -182,21 +182,41 @@ Route::middleware('auth')
             });
         // Unchecked
 
-        Route::controller(NoteController::class)
-            ->prefix('notes')
-            ->as('notes.')
-            ->group(function () {
-                Route::get('/', 'index')->name('index');
-                Route::get('/create', 'create')->name('create');
-                Route::post('/store', 'store')->name('store');
-                Route::get('/show/{note}', 'show')->name('show');
-                Route::get('/edit/{note}', 'edit')->name('edit');
-                Route::put('/update/{note}', 'update')->name('update');
-                Route::get('/destroy/{note}', 'destroy')->name('destroy');
-                Route::get('/status/{note}', 'status')->name('status');
-                Route::get('/get/lesson', 'get_lesson')->name('get.lesson');
-                Route::get('/get/data', 'getData');
-            });
+        // Route::controller(NoteController::class)
+        //     ->prefix('notes')
+        //     ->as('notes.')
+        //     ->group(function () {
+        //         Route::get('/', 'index')->name('index');
+        //         Route::get('/create', 'create')->name('create');
+        //         Route::post('/store', 'store')->name('store');
+        //         Route::get('/show/{note}', 'show')->name('show');
+        //         Route::get('/edit/{note}', 'edit')->name('edit');
+        //         Route::put('/update/{note}', 'update')->name('update');
+        //         Route::get('/destroy/{note}', 'destroy')->name('destroy');
+        //         Route::get('/status/{note}', 'status')->name('status');
+        //         Route::get('/get/lesson', 'get_lesson')->name('get.lesson');
+        //         Route::get('/get/data', 'getData');
+        //     });
+
+
+        Route::prefix('notes')->as('notes.')->group(function () {
+            Route::get('/', [NoteController::class, 'index'])->name('index');
+            Route::get('/create', [NoteController::class, 'create'])->name('create');
+            Route::post('/', [NoteController::class, 'store'])->name('store');
+            Route::get('/get/data', [NoteController::class, 'getData'])->name('getData');
+            Route::get('/{note}', [NoteController::class, 'show'])->name('show');
+            Route::get('/{note}/edit', [NoteController::class, 'edit'])->name('edit');
+            Route::put('/{note}', [NoteController::class, 'update'])->name('update');
+            Route::delete('/{note}', [NoteController::class, 'destroy'])->name('destroy');
+            Route::patch('/{note}/status', [NoteController::class, 'status'])->name('status');
+
+            // ----- Section (NoteDetail) management, mirrors SbaController's question routes -----
+            Route::post('/{note}/details', [NoteController::class, 'storeDetail'])->name('details.store');
+            Route::post('/{note}/details/check-duplicate', [NoteController::class, 'checkDuplicate'])->name('details.checkDuplicate');
+            Route::get('/details/{detail}', [NoteController::class, 'getDetail'])->name('details.get');
+            Route::put('/details/{detail}', [NoteController::class, 'updateDetail'])->name('details.update');
+            Route::delete('/details/{detail}', [NoteController::class, 'destroyDetail'])->name('details.destroy');
+        });
 
         Route::controller(AssessmentController::class)
             ->prefix('assessments')
