@@ -61,6 +61,7 @@
                                                         'ospe'              => 'OSPE',
                                                         'self_assessment'   => 'Self Assessment',
                                                         'secure_pdf'        => 'Secure Pdf',
+                                                        'review_questions'  => 'Review Questions'
                                                     ];
                                                 ?>
 

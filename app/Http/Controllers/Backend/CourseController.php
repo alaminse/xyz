@@ -268,6 +268,7 @@ class CourseController extends Controller
             'ospe'              => 'nullable|boolean',
             'self_assessment'   => 'nullable|boolean',
             'secure_pdf'        => 'nullable|boolean',
+            'review_questions'  => 'nullable|boolean',
         ];
     }
 
@@ -333,6 +334,7 @@ class CourseController extends Controller
             'ospe'              => $validated['ospe'] ?? 0,
             'self_assessment'   => $validated['self_assessment'] ?? 0,
             'secure_pdf'        => $validated['secure_pdf'] ?? 0,
+            'review_questions'  => $validated['review_questions'] ?? 0,
         ];
 
         CourseDetails::updateOrCreate(

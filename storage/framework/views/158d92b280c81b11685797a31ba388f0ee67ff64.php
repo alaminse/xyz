@@ -77,16 +77,17 @@
                                 <h6 class="font-weight-bold mb-2">Course Has</h6>
 
                                 <?php $__currentLoopData = [
-                                    'sba' 			=> 'SBA',
-                                    'note' 			=> 'Note',
-                                    'mcq' 			=> 'MCQ',
-                                    'flush' 		=> 'Flush',
-                                    'written' 		=> 'Written Assessment',
-                                    'videos' 		=> 'Lecture Video',
-                                    'mock_viva' 	=> 'Mock Viva',
-                                    'ospe' 			=> 'OSPE Station',
-                                    'self_assessment' => 'Self Assessment',
-                                    'secure_pdf'    => 'Secure pdf'
+                                    'sba' 			    => 'SBA',
+                                    'note' 			    => 'Note',
+                                    'mcq' 			    => 'MCQ',
+                                    'flush' 		    => 'Flush',
+                                    'written' 		    => 'Written Assessment',
+                                    'videos' 		    => 'Lecture Video',
+                                    'mock_viva' 	    => 'Mock Viva',
+                                    'ospe' 			    => 'OSPE Station',
+                                    'self_assessment'   => 'Self Assessment',
+                                    'secure_pdf'        => 'Secure pdf',
+                                    'review_questions'  => 'Review Questions',
                                 ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <div class="form-check mb-1">
                                         <input class="form-check-input" type="checkbox" name="<?php echo e($key); ?>" value="1"

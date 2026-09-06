@@ -2,8 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
+use App\Enums\Status;
 use App\Models\EnrollUser;
+use Illuminate\Console\Command;
 
 class UpdateEnrollUserStatus extends Command
 {

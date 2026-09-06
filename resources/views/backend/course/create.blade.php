@@ -75,16 +75,17 @@
                                     <h6 class="font-weight-bold mb-2">Course Has</h6>
 
                                     @foreach ([
-                                        'sba' 			=> 'SBA',
-                                        'note' 			=> 'Note',
-                                        'mcq' 			=> 'MCQ',
-                                        'flush' 		=> 'Flush',
-                                        'written' 		=> 'Written Assessment',
-                                        'videos' 		=> 'Lecture Video',
-                                        'mock_viva' 	=> 'Mock Viva',
-                                        'ospe' 			=> 'OSPE Station',
-                                        'self_assessment' => 'Self Assessment',
-                                        'secure_pdf'    => 'Secure pdf'
+                                        'sba' 			    => 'SBA',
+                                        'note' 			    => 'Note',
+                                        'mcq' 			    => 'MCQ',
+                                        'flush' 		    => 'Flush',
+                                        'written' 		    => 'Written Assessment',
+                                        'videos' 		    => 'Lecture Video',
+                                        'mock_viva' 	    => 'Mock Viva',
+                                        'ospe' 			    => 'OSPE Station',
+                                        'self_assessment'   => 'Self Assessment',
+                                        'secure_pdf'        => 'Secure pdf',
+                                        'review_questions'  => 'Review Questions',
                                     ] as $key => $label)
                                         <div class="form-check mb-1">
                                             <input class="form-check-input" type="checkbox" name="{{ $key }}" value="1"

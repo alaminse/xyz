@@ -1,4 +1,5 @@
 <?php
+
 // FrontEnd Controllers
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CourseController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\Dashboard\McqController;
 use App\Http\Controllers\Dashboard\MockVivaController;
 use App\Http\Controllers\Dashboard\NoteController;
 use App\Http\Controllers\Dashboard\OspeStationController;
+use App\Http\Controllers\Dashboard\ReviewQuestionController;
 use App\Http\Controllers\Dashboard\SbaController;
 use App\Http\Controllers\Dashboard\SecurePdfController;
 use App\Http\Controllers\Dashboard\VideoStreamController;
@@ -30,7 +32,6 @@ Route::group(['middleware' => ['auth', 'verified', 'role:user']], function () {
 
     Route::get('/password/change', [UserController::class, 'password_change'])->name('password.change');
 });
-
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::middleware(['auth', 'verified', 'role:user'])
@@ -74,7 +75,6 @@ Route::middleware(['auth', 'verified', 'role:user'])
                 Route::get('/details/{course}/{chapter?}/{lesson?}', 'details')->name('details');
                 Route::get('/single/details/{slug}/{course?}', 'single_details')->name('single.details');
             });
-
 
         Route::controller(McqController::class)
             ->prefix('mcqs')
@@ -126,6 +126,18 @@ Route::middleware(['auth', 'verified', 'role:user'])
                 Route::post('/finish', 'finishQuiz')->name('finish');
             });
 
+        Route::controller(ReviewQuestionController::class)
+            ->prefix('review-questions')
+            ->as('review_questions.')
+            ->group(function () {
+
+                // Chapter/lesson picker page (like mcqs.index / sbas.index)
+                Route::get('/{course}', 'index')->name('index');
+
+                // Actual combined SBA + MCQ review for a chapter (lesson optional)
+                Route::get('/{course}/{chapter}/{lesson?}', 'show')->name('show');
+            });
+
         // Route::controller(WrittenAssessmentController::class)
         //     ->prefix('writtenassessment')
         //     ->as('writtens.')
@@ -168,19 +180,18 @@ Route::controller(CourseController::class)
     ->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('details/{course}', 'details')->name('details');
-        Route::get('/{slug}',  'getCourse');
-        Route::get('/checkout/{course}/{isTrial?}',  'checkout')->middleware('verified')->name('checkout');
-        Route::post('/checkout/store/{course}',  'checkout_store')->middleware('verified')->name('checkout.store');
+        Route::get('/{slug}', 'getCourse');
+        Route::get('/checkout/{course}/{isTrial?}', 'checkout')->middleware('verified')->name('checkout');
+        Route::post('/checkout/store/{course}', 'checkout_store')->middleware('verified')->name('checkout.store');
         Route::get('/invoice/{slug}', 'invoice')->middleware('verified')->name('invoice');
     });
-
 
 // Add these routes to your web.php inside auth middleware group
 
 Route::middleware(['auth', 'anti.download'])->group(function () {
-    Route::get('/course/{course}/pdfs',                          [SecurePdfController::class, 'index'])->name('secure-pdfs.index');
-    Route::get('/course/{course}/pdfs/{chapter}/{lesson}',       [SecurePdfController::class, 'details'])->name('secure-pdfs.details');
-    Route::get('/pdf/view/{course_slug}/{slug}',                 [SecurePdfController::class, 'view'])->name('secure-pdfs.view');
-    Route::get('/pdf/stream/{slug}',                             [SecurePdfController::class, 'stream'])->name('secure-pdfs.stream');
-    Route::post('/pdf/token/refresh/{slug}',                     [SecurePdfController::class, 'refreshToken'])->name('secure-pdfs.token.refresh');
+    Route::get('/course/{course}/pdfs', [SecurePdfController::class, 'index'])->name('secure-pdfs.index');
+    Route::get('/course/{course}/pdfs/{chapter}/{lesson}', [SecurePdfController::class, 'details'])->name('secure-pdfs.details');
+    Route::get('/pdf/view/{course_slug}/{slug}', [SecurePdfController::class, 'view'])->name('secure-pdfs.view');
+    Route::get('/pdf/stream/{slug}', [SecurePdfController::class, 'stream'])->name('secure-pdfs.stream');
+    Route::post('/pdf/token/refresh/{slug}', [SecurePdfController::class, 'refreshToken'])->name('secure-pdfs.token.refresh');
 });

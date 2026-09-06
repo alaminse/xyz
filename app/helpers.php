@@ -158,7 +158,7 @@ if (! function_exists('enrolled_courses')) {
             ->select(['id', 'course_id', 'status', 'start_date', 'end_date'])
             ->with([
                 'course:id,slug,name,status',
-                'course.detail:id,course_id,sba,mcq,flush,note,written,videos,mock_viva,ospe,self_assessment,secure_pdf',
+                'course.detail:id,course_id,sba,mcq,flush,note,written,videos,mock_viva,ospe,self_assessment,secure_pdf,review_questions,performance_status,modeltest,question_bank',
             ])
             ->where('user_id', Auth::id())
             ->whereIn('status', $validStatuses)
@@ -187,20 +187,24 @@ if (! function_exists('enrolled_courses')) {
 
             // 🔹 Transform for sidebar
             ->map(fn ($enroll) => [
-                'id'                => $enroll->course->id,
-                'name'              => $enroll->course->name,
-                'slug'              => $enroll->course->slug,
-                'status'            => $enroll->course->status,
-                'sba'               => (bool) $enroll->course->detail?->sba,
-                'mcq'               => (bool) $enroll->course->detail?->mcq,
-                'flush'             => (bool) $enroll->course->detail?->flush,
-                'note'              => (bool) $enroll->course->detail?->note,
-                'written'           => (bool) $enroll->course->detail?->written,
-                'videos'            => (bool) $enroll->course->detail?->videos,
-                'mock_viva'         => (bool) $enroll->course->detail?->mock_viva,
-                'ospe'              => (bool) $enroll->course->detail?->ospe,
-                'self_assessment'   => (bool) $enroll->course->detail?->self_assessment,
-                'secure_pdf'        => (bool) $enroll->course->detail?->secure_pdf,
+                'id' => $enroll->course->id,
+                'name' => $enroll->course->name,
+                'slug' => $enroll->course->slug,
+                'status' => $enroll->course->status,
+                'sba' => (bool) $enroll->course->detail?->sba,
+                'mcq' => (bool) $enroll->course->detail?->mcq,
+                'flush' => (bool) $enroll->course->detail?->flush,
+                'note' => (bool) $enroll->course->detail?->note,
+                'written' => (bool) $enroll->course->detail?->written,
+                'videos' => (bool) $enroll->course->detail?->videos,
+                'mock_viva' => (bool) $enroll->course->detail?->mock_viva,
+                'ospe' => (bool) $enroll->course->detail?->ospe,
+                'self_assessment' => (bool) $enroll->course->detail?->self_assessment,
+                'secure_pdf' => (bool) $enroll->course->detail?->secure_pdf,
+                'review_questions' => (bool) $enroll->course->detail?->review_questions,
+                'performance_status' => (bool) $enroll->course->detail?->performance_status,
+                'modeltest' => (bool) $enroll->course->detail?->modeltest,
+                'question_bank' => (bool) $enroll->course->detail?->question_bank,
             ]);
     }
 }
@@ -289,11 +293,11 @@ if (! function_exists('courseByModule')) {
         $courses = Course::query()
             ->select('id', 'parent_id', 'slug', 'name', 'status')
             ->whereNotNull('parent_id');
-            // ->where('is_pricing', 1)
-            // ->where('status', Status::ACTIVE())
-            // ->whereHas('detail', function ($query) use ($module) {
-            //     $query->where($module, 1);
-            // });
+        // ->where('is_pricing', 1)
+        // ->where('status', Status::ACTIVE())
+        // ->whereHas('detail', function ($query) use ($module) {
+        //     $query->where($module, 1);
+        // });
 
         // Filter by assigned instructor if user is a director
         if (\Illuminate\Support\Facades\Gate::allows('director')) {
@@ -328,7 +332,7 @@ if (! function_exists('course_chapters')) {
             // ✅ Chapter has lessons with feature enabled
             ->whereHas('lessons', function ($q) use ($feature) {
                 $q->where('lessons.status', Status::ACTIVE())
-                  ->where("chapter_lesson.$feature", 1);
+                    ->where("chapter_lesson.$feature", 1);
             })
 
             // ✅ Load lessons
@@ -340,8 +344,8 @@ if (! function_exists('course_chapters')) {
                         'lessons.name',
                         'lessons.status'
                     )
-                    ->where('lessons.status', Status::ACTIVE())
-                    ->where("chapter_lesson.$feature", 1);
+                        ->where('lessons.status', Status::ACTIVE())
+                        ->where("chapter_lesson.$feature", 1);
                 },
             ])
 

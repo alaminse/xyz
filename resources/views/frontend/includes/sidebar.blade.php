@@ -89,6 +89,13 @@
                     'route' => 'assessments.index',
                     'group' => 'Self Assessment',
                 ],
+                'review_questions' => [
+                    'enabled' => 'review_questions',
+                    'icon' => 'bx-task',
+                    'title' => 'Review Questions',
+                    'route' => 'review_questions.index',
+                    'group' => 'Review Questions',
+                ],
                 'secure_pdfs' => [
                     'enabled' => 'secure_pdf',
                     'icon'    => 'bx-file-pdf',
@@ -112,7 +119,7 @@
                     <i class="bx bx-folder me-2"></i>
                     {{ $item['name'] }}
                 </a>
-                
+
                 <ul class="collapse {{ $isExpanded ? 'show' : '' }}" id="course-{{ $item['slug'] }}">
 
                     @foreach ($modules as $routeKey => $module)

@@ -89,6 +89,13 @@
                     'route' => 'assessments.index',
                     'group' => 'Self Assessment',
                 ],
+                'review_questions' => [
+                    'enabled' => 'review_questions',
+                    'icon' => 'bx-task',
+                    'title' => 'Review Questions',
+                    'route' => 'review_questions.index',
+                    'group' => 'Review Questions',
+                ],
                 'secure_pdfs' => [
                     'enabled' => 'secure_pdf',
                     'icon'    => 'bx-file-pdf',
@@ -113,7 +120,7 @@
                     <?php echo e($item['name']); ?>
 
                 </a>
-                
+
                 <ul class="collapse <?php echo e($isExpanded ? 'show' : ''); ?>" id="course-<?php echo e($item['slug']); ?>">
 
                     <?php $__currentLoopData = $modules; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $routeKey => $module): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
