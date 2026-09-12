@@ -3,57 +3,62 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Enums\Status;
+use App\Exports\McqQuestionsExport;
 use App\Http\Controllers\Controller;
+use App\Imports\McqQuestionsImport;
+use App\Models\Course;
 use App\Models\Mcq;
 use App\Models\McqQuestion;
-use App\Models\Course;
-use App\Models\Note;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class McqController extends Controller
 {
     private function rules(bool $update = false): array
     {
         return [
-            'course_ids'      => 'required|array|min:1',
-            'course_ids.*'    => 'exists:courses,id',
-            'chapter_id'      => 'required|exists:chapters,id',
-            'lesson_id'       => 'nullable|exists:lessons,id',
-            'status'          => $update ? 'required|numeric' : 'nullable',
-            'isPaid'          => 'nullable',
+            'course_ids' => 'required|array|min:1',
+            'course_ids.*' => 'exists:courses,id',
+            'chapter_id' => 'required|exists:chapters,id',
+            'lesson_id' => 'nullable|exists:lessons,id',
+            'status' => $update ? 'required|numeric' : 'nullable',
+            'isPaid' => 'nullable',
         ];
     }
 
     private function questionRules(): array
     {
         return [
-            'note_id'   => 'nullable|exists:notes,id',
-            'question'  => 'required|string|max:1000',
-            'option1'   => 'required|string|max:500',
-            'answer1'   => 'required|boolean',
-            'option2'   => 'required|string|max:500',
-            'answer2'   => 'required|boolean',
-            'option3'   => 'required|string|max:500',
-            'answer3'   => 'required|boolean',
-            'option4'   => 'required|string|max:500',
-            'answer4'   => 'required|boolean',
-            'option5'   => 'required|string|max:500',
-            'answer5'   => 'required|boolean',
-            'explain'   => 'required|string|max:50000',
+            'note_id' => 'nullable|exists:notes,id',
+            'question' => 'required|string|max:1000',
+            'option1' => 'required|string|max:500',
+            'answer1' => 'required|boolean',
+            'option2' => 'required|string|max:500',
+            'answer2' => 'required|boolean',
+            'option3' => 'required|string|max:500',
+            'answer3' => 'required|boolean',
+            'option4' => 'required|string|max:500',
+            'answer4' => 'required|boolean',
+            'option5' => 'required|string|max:500',
+            'answer5' => 'required|boolean',
+            'explain' => 'required|string|max:50000',
         ];
     }
 
     public function index()
     {
         $courses = courseByModule('mcq');
-        return view('backend.mcq.index', compact('courses'));
+        $mcqs = Mcq::with(['chapter', 'lesson'])->get();
+
+        return view('backend.mcq.index', compact('courses', 'mcqs'));
     }
 
     public function create()
     {
         $courses = courseByModule('mcq');
+
         return view('backend.mcq.create', compact('courses'));
     }
 
@@ -69,7 +74,7 @@ class McqController extends Controller
 
         $data['isPaid'] = $request->boolean('isPaid');
 
-        $data['slug']   = checkSlug('mcqs');
+        $data['slug'] = checkSlug('mcqs');
         $courseIds = $data['course_ids'];
         unset($data['course_ids']);
 
@@ -88,6 +93,7 @@ class McqController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('MCQ Store Failed', ['error' => $e->getMessage()]);
+
             return back()->withInput()->with('error', 'Something went wrong!');
         }
     }
@@ -95,6 +101,7 @@ class McqController extends Controller
     public function edit(Mcq $mcq)
     {
         $courses = courseByModule('mcq');
+
         return view('backend.mcq.edit', compact('mcq', 'courses'));
     }
 
@@ -125,6 +132,7 @@ class McqController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('MCQ Update Failed', ['error' => $e->getMessage()]);
+
             return back()->withInput()->with('error', 'Update failed!');
         }
     }
@@ -132,6 +140,7 @@ class McqController extends Controller
     public function show(Mcq $mcq)
     {
         $mcq->load('questions');
+
         return view('backend.mcq.show', compact('mcq'));
     }
 
@@ -150,6 +159,7 @@ class McqController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('MCQ Delete Failed', ['error' => $e->getMessage()]);
+
             return back()->with('error', 'Delete failed!');
         }
     }
@@ -158,9 +168,11 @@ class McqController extends Controller
     {
         try {
             $mcq->update(['status' => $mcq->status == 1 ? 2 : 1]);
+
             return redirect()->back()->with('success', 'Status Updated Successfully');
         } catch (\Exception $e) {
             Log::error('Error updating MCQ status', ['error' => $e->getMessage()]);
+
             return redirect()->back()->with('error', 'Failed to update status.');
         }
     }
@@ -183,10 +195,10 @@ class McqController extends Controller
             }
         }
 
-        if (!$hasCorrect) {
+        if (! $hasCorrect) {
             return response()->json([
                 'success' => false,
-                'message' => 'At least one answer must be correct!'
+                'message' => 'At least one answer must be correct!',
             ], 422);
         }
 
@@ -198,7 +210,7 @@ class McqController extends Controller
         if ($exists) {
             return response()->json([
                 'success' => false,
-                'message' => 'This question already exists!'
+                'message' => 'This question already exists!',
             ], 422);
         }
 
@@ -211,12 +223,13 @@ class McqController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Question added successfully!',
-                'question' => $question
+                'question' => $question,
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Question Store Failed', ['error' => $e->getMessage()]);
+
             return response()->json(['success' => false, 'message' => 'Failed to add question!'], 500);
         }
     }
@@ -225,7 +238,7 @@ class McqController extends Controller
     {
         return response()->json([
             'success' => true,
-            'question' => $question
+            'question' => $question,
         ]);
     }
 
@@ -242,10 +255,10 @@ class McqController extends Controller
             }
         }
 
-        if (!$hasCorrect) {
+        if (! $hasCorrect) {
             return response()->json([
                 'success' => false,
-                'message' => 'At least one answer must be correct!'
+                'message' => 'At least one answer must be correct!',
             ], 422);
         }
 
@@ -258,7 +271,7 @@ class McqController extends Controller
         if ($exists) {
             return response()->json([
                 'success' => false,
-                'message' => 'This question already exists!'
+                'message' => 'This question already exists!',
             ], 422);
         }
 
@@ -271,12 +284,13 @@ class McqController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Question updated successfully!',
-                'question' => $question
+                'question' => $question,
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Question Update Failed', ['error' => $e->getMessage()]);
+
             return response()->json(['success' => false, 'message' => 'Update failed!'], 500);
         }
     }
@@ -285,12 +299,14 @@ class McqController extends Controller
     {
         try {
             $question->delete();
+
             return response()->json([
                 'success' => true,
-                'message' => 'Question deleted successfully!'
+                'message' => 'Question deleted successfully!',
             ]);
         } catch (\Exception $e) {
             Log::error('Question Delete Failed', ['error' => $e->getMessage()]);
+
             return response()->json(['success' => false, 'message' => 'Delete failed!'], 500);
         }
     }
@@ -311,78 +327,39 @@ class McqController extends Controller
 
         return response()->json([
             'exists' => $exists ? true : false,
-            'question' => $exists
+            'question' => $exists,
         ]);
     }
-
-    // ============ EXISTING METHODS ============
-
-    // public function getNotes(Request $request)
-    // {
-    //     try {
-    //         $validated = $request->validate([
-    //             'course_ids'   => 'required|array|min:1',
-    //             'course_ids.*' => 'exists:courses,id',
-    //             'chapter_id'   => 'nullable|exists:chapters,id',
-    //             'lesson_id'    => 'nullable|exists:lessons,id',
-    //         ]);
-
-    //         $query = Note::select('notes.id', 'notes.title', 'notes.slug', 'notes.chapter_id', 'notes.lesson_id', 'notes.isPaid')
-    //             ->join('course_note', 'notes.id', '=', 'course_note.note_id')
-    //             ->whereIn('course_note.course_id', $validated['course_ids'])
-    //             ->where('notes.status', Status::ACTIVE())
-    //             ->distinct();
-
-    //         if (!empty($validated['chapter_id'])) {
-    //             $query->where('notes.chapter_id', $validated['chapter_id']);
-    //         }
-
-    //         if (!empty($validated['lesson_id'])) {
-    //             $query->where('notes.lesson_id', $validated['lesson_id']);
-    //         }
-
-    //         $notes = $query->orderBy('notes.title')->get();
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'notes'   => $notes,
-    //             'count'   => $notes->count()
-    //         ]);
-    //     } catch (\Exception $e) {
-    //         Log::error('MCQ getNotes error', ['error' => $e->getMessage()]);
-    //         return response()->json(['success' => false, 'message' => 'Failed to load notes'], 500);
-    //     }
-    // }
 
     public function getNotes(Request $request)
     {
         try {
             $validated = $request->validate([
-                'course_ids'   => 'required|array|min:1',
+                'course_ids' => 'required|array|min:1',
                 'course_ids.*' => 'exists:courses,id',
-                'chapter_id'   => 'nullable|exists:chapters,id',
-                'lesson_id'    => 'nullable|exists:lessons,id',
+                'chapter_id' => 'nullable|exists:chapters,id',
+                'lesson_id' => 'nullable|exists:lessons,id',
             ]);
 
             $query = \App\Models\NoteDetail::select(
-                    'note_details.id',
-                    'note_details.title',
-                    'note_details.slug',
-                    'notes.chapter_id',
-                    'notes.lesson_id',
-                    'notes.isPaid'
-                )
+                'note_details.id',
+                'note_details.title',
+                'note_details.slug',
+                'notes.chapter_id',
+                'notes.lesson_id',
+                'notes.isPaid'
+            )
                 ->join('notes', 'note_details.note_id', '=', 'notes.id')
                 ->join('course_note', 'notes.id', '=', 'course_note.note_id')
                 ->whereIn('course_note.course_id', $validated['course_ids'])
                 ->where('notes.status', Status::ACTIVE())
                 ->distinct();
 
-            if (!empty($validated['chapter_id'])) {
+            if (! empty($validated['chapter_id'])) {
                 $query->where('notes.chapter_id', $validated['chapter_id']);
             }
 
-            if (!empty($validated['lesson_id'])) {
+            if (! empty($validated['lesson_id'])) {
                 $query->where('notes.lesson_id', $validated['lesson_id']);
             }
 
@@ -390,11 +367,12 @@ class McqController extends Controller
 
             return response()->json([
                 'success' => true,
-                'notes'   => $notes,
-                'count'   => $notes->count()
+                'notes' => $notes,
+                'count' => $notes->count(),
             ]);
         } catch (\Exception $e) {
             Log::error('MCQ getNotes error', ['error' => $e->getMessage()]);
+
             return response()->json(['success' => false, 'message' => 'Failed to load notes'], 500);
         }
     }
@@ -403,12 +381,12 @@ class McqController extends Controller
     {
         $slug = request('slug');
 
-        if (!$slug) {
+        if (! $slug) {
             return response()->json(['msg' => 'Course not selected!']);
         }
 
         $course = Course::select('id')->where('slug', $slug)->first();
-        if (!$course) {
+        if (! $course) {
             return response()->json(['html' => '']);
         }
 
@@ -421,5 +399,91 @@ class McqController extends Controller
         $html = view('backend.includes.mcq_rows', compact('mcqs'))->render();
 
         return response()->json(['html' => $html]);
+    }
+
+    // ============ EXPORT ============
+    // ============ BULK IMPORT ============
+
+    public function bulkUploadStore(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:5120',
+        ]);
+
+        $import = new McqQuestionsImport();
+        Excel::import($import, $request->file('file'));
+
+        $message = "{$import->inserted} question(s) imported successfully.";
+
+        if ($import->createdSets > 0) {
+            $message .= " {$import->createdSets} new MCQ set(s) were auto-created.";
+        }
+
+        if ($import->skippedCount > 0) {
+            return back()
+                ->with('warning', $message . " {$import->skippedCount} row(s) skipped.")
+                ->with('skipped', $import->skipped);
+        }
+
+        return back()->with('success', $message);
+    }
+
+    public function sampleDownload()
+    {
+        return response()->download(storage_path('app/templates/mcq_sample.xlsx'));
+    }
+
+    // ============ EXPORT (all optional filters) ============
+
+    public function exportGetChapters(Request $request)
+    {
+        $request->validate([
+            'course_id' => 'required|exists:courses,id',
+        ]);
+
+        $course = Course::findOrFail($request->course_id);
+
+        $chapters = $course->chapters()
+            ->select('chapters.id', 'chapters.name')
+            ->orderBy('chapters.name')
+            ->get();
+
+        return response()->json(['success' => true, 'chapters' => $chapters]);
+    }
+
+    public function exportGetLessons(Request $request)
+    {
+        $request->validate([
+            'chapter_id' => 'required|exists:chapters,id',
+        ]);
+
+        $chapter = \App\Models\Chapter::findOrFail($request->chapter_id);
+
+        $lessons = $chapter->lessons()
+            ->select('lessons.id', 'lessons.name')
+            ->orderBy('lessons.name')
+            ->get();
+
+        return response()->json(['success' => true, 'lessons' => $lessons]);
+    }
+
+    public function export(Request $request)
+    {
+        $validated = $request->validate([
+            'course_id' => 'nullable|exists:courses,id',
+            'chapter_id' => 'nullable|exists:chapters,id',
+            'lesson_id' => 'nullable|exists:lessons,id',
+        ]);
+
+        $fileName = 'mcq-questions-'.now()->format('Y-m-d-His').'.xlsx';
+
+        return Excel::download(
+            new McqQuestionsExport(
+                $validated['course_id'] ?? null,
+                $validated['chapter_id'] ?? null,
+                $validated['lesson_id'] ?? null
+            ),
+            $fileName
+        );
     }
 }

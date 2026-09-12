@@ -1,10 +1,18 @@
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans%3A400%2C600%2C700" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro%3A400%2C600%2C700" />
-<link href="{{ asset('frontend/bootstrap-5.3.3/css/bootstrap.min.css') }}" rel="stylesheet">
-<style>
-  @import url(https://unpkg.com/@webpixels/css@1.0/dist/index.css);
-</style>
-<link rel="stylesheet" href="{{ asset('frontend/css/style.css') }}">
-<link rel="stylesheet" href="{{ asset('bootstrap-icons-1.11.3/font/bootstrap-icons.css') }}">
-<link rel="stylesheet" href="{{ asset('frontend/css/slider.css') }}">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>@yield('title', 'MediManiac') | MediManiac</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Bootstrap 5 -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+<link rel="stylesheet" href="{{ asset('frontend/css/theme.css') }}">
+
 <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />

@@ -1,75 +1,46 @@
+<footer class="site-footer">
+    <div class="container">
+        <div class="row gy-4">
+            <div class="col-lg-4">
+                <img src="{{ asset('uploads/logo/logo.png') }}" alt="MediManiac" height="36" class="mb-3">
+                <p class="footer-tagline">From aspirations to achievements — structured prep for medical postgraduate
+                    exams.</p>
+            </div>
 
-<footer class="footer">
-    <div class="menu-bg">
-      <div class="container-xl row pt-4 footer-link">
-        <div class="col-sm-12 col-md-5 logo">
-          <img loading="lazy" class="footer-logo" src="{{ asset('uploads/logo/logo.png') }}" />
-          <p class="mt-2">
-            {{ textLogo() }}
-          </p>
+            <div class="col-6 col-lg-2">
+                <h6 class="footer-heading">Explore</h6>
+                <ul class="footer-links">
+                    <li><a href="{{ url('/') }}">Home</a></li>
+                    <li><a href="{{ route('about') }}">About</a></li>
+                    <li><a href="{{ route('contact') }}">Contact</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-lg-2">
+                <h6 class="footer-heading">Legal</h6>
+                <ul class="footer-links">
+                    <li><a href="{{ route('terms.condition') ?? '#' }}">Terms &amp; Conditions</a></li>
+                    <li><a href="{{ route('privacy.policy') ?? '#' }}">Privacy Policy</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-4">
+                <h6 class="footer-heading">Get in touch</h6>
+                @php $contact = function_exists('contact') ? contact() : []; @endphp
+                <ul class="footer-links">
+                    <li><i class="bi bi-geo-alt me-2"></i>{{ $contact['address'] ?? 'Dhaka, Bangladesh' }}</li>
+                    <li><i class="bi bi-telephone me-2"></i>{{ $contact['phone'] ?? '' }}</li>
+                    <li><i class="bi bi-envelope me-2"></i>{{ $contact['email'] ?? '' }}</li>
+                </ul>
+            </div>
         </div>
-        <div class="col-sm-12 col-md-3 useful-links">
-          <h4 class="text-white mb-4">Useful Links</h4>
-          <ul class="list-unstyled">
-            <li>
-                <a href="{{ route('home') }}" class="{{ Route::is('home') ? 'active' : '' }}">
-                    <i class="bi bi-caret-right pe-3"></i>Home
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('about') }}" class="{{ Route::is('about') ? 'active' : '' }}">
-                    <i class="bi bi-caret-right pe-3"></i>About
-                </a>
-            </li>
-            <li><a href="{{ route('courses.index') }}" class="{{ Route::is('courses.*') ? 'active' : '' }}"><i class="bi bi-caret-right pe-3"></i>Course</a>
-            </li>
-            <li><a href="{{ route('contact')}}" class="{{ Route::is('contact') ? 'active' : '' }}"><i class="bi bi-caret-right pe-3"></i>Contact</a>
-            </li>
-            <li><a href="{{ route('privacy.policy')}}" class="{{ Route::is('privacy.policy') ? 'active' : '' }}"><i class="bi bi-caret-right pe-3"></i>Privacy Policy</a>
-            </li>
-            <li><a href="{{ route('terms.condition')}}" class="{{ Route::is('terms.condition') ? 'active' : '' }}"><i class="bi bi-caret-right pe-3"></i>Terms & Condition</a>
-            </li>
-          </ul>
+
+        <hr class="footer-divider">
+
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+            <span class="footer-copy">&copy; {{ date('Y') }} MediManiac. All rights reserved.</span>
         </div>
-        <div class="col-sm-12 col-md-4 contact-info">
-          <h4 class="text-white mb-4">Contact info</h4>
-          @php
-            $contact = contact();
-          @endphp
-          <ul class="list-unstyled">
-            <li class="mt-2">
-              <div class="d-flex align-items-center">
-                <i class="bi bi-house-fill text-light"></i>
-                <p class="ms-3 text-light">{{ $contact['address'] ?? '' }}</p>
-              </div>
-            </li>
-            <li class="mt-2">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-telephone-inbound-fill text-light"></i>
-                    <p class="ms-3">
-                        <a href="tel:{{ $contact['phone'] ?? '' }}" class="text-light text-decoration-none">
-                            {{ $contact['phone'] ?? '' }}
-                        </a>
-                    </p>
-                </div>
-            </li>
-            <li class="mt-2">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-envelope-arrow-up-fill text-light"></i>
-                    <p class="ms-3">
-                        <a href="mailto:{{ $contact['email'] ?? '' }}" class="text-light text-decoration-none">
-                            {{ $contact['email'] ?? '' }}
-                        </a>
-                    </p>
-                </div>
-            </li>
-          </ul>
-        </div>
-      </div>
     </div>
-    <div class="topbar-bg">
-      <div class="container-xl text-center py-5">
-        <a href="#" class="text-white">© All Rights Reserved By Medi Maniac Powered By Webglister IT</a>
-      </div>
-    </div>
-  </footer>
+</footer>
+
+

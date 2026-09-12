@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class McqQuestion extends Model
 {
+
+    protected $table = 'mcq_questions';
+
     protected $fillable = [
         'note_id',
         'mcq_id',
@@ -37,7 +40,6 @@ class McqQuestion extends Model
     {
         return $this->belongsTo(Mcq::class);
     }
-
     public function note()
     {
         return $this->belongsTo(NoteDetail::class, 'note_id');

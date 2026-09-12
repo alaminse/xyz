@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Backend\SecurePdfController;
 use App\Http\Controllers\Backend\AdminController;
 use App\Http\Controllers\Backend\AssessmentController;
 use App\Http\Controllers\Backend\ChapterController;
@@ -12,10 +11,12 @@ use App\Http\Controllers\Backend\LessonController;
 use App\Http\Controllers\Backend\McqController;
 use App\Http\Controllers\Backend\MockVivaController;
 use App\Http\Controllers\Backend\NoteController;
+use App\Http\Controllers\Backend\NoticeController;
 use App\Http\Controllers\Backend\OspeStationController;
 use App\Http\Controllers\Backend\PermissionController;
 use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SbaController;
+use App\Http\Controllers\Backend\SecurePdfController;
 use App\Http\Controllers\Backend\SettingsController;
 use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\Backend\WrittenAssessmentController;
@@ -34,6 +35,7 @@ Route::get('/admin/login', function () {
             return redirect('/admin/dashboard');
         }
     }
+
     return view('backend.login');
 })->name('admin.login');
 
@@ -103,8 +105,6 @@ Route::middleware('auth')
                 Route::get('/get', 'get')->name('get');
             });
 
-
-
         Route::controller(SbaController::class)
             ->prefix('sbas')
             ->as('sbas.')
@@ -152,6 +152,19 @@ Route::middleware('auth')
                 Route::post('/questions/{question}', 'updateQuestion')->name('questions.update');
                 Route::delete('/questions/{question}', 'destroyQuestion')->name('questions.destroy');
                 Route::post('/{mcq}/check-duplicate', 'checkDuplicate')->name('questions.check');
+
+                Route::post('/bulk-upload', 'bulkUploadStore')->name('bulk-upload.store');
+                Route::get('/sample-download', 'sampleDownload')->name('sample-download');
+                Route::get('/{mcq}/export', 'export')->name('export');
+
+                // MCQ Bulk Import
+                Route::post('/bulk-upload', 'bulkUploadStore')->name('bulk-upload.store');
+                Route::get('/sample-download', 'sampleDownload')->name('sample-download');
+
+                // MCQ Export (cascading course -> chapter -> lesson)
+                Route::get('/export/chapters', 'exportGetChapters')->name('export.chapters');
+                Route::get('/export/lessons', 'exportGetLessons')->name('export.lessons');
+                Route::get('/export', 'export')->name('export');
             });
 
         Route::controller(FlashCardController::class)
@@ -198,7 +211,6 @@ Route::middleware('auth')
         //         Route::get('/get/data', 'getData');
         //     });
 
-
         Route::prefix('notes')->as('notes.')->group(function () {
             Route::get('/', [NoteController::class, 'index'])->name('index');
             Route::get('/create', [NoteController::class, 'create'])->name('create');
@@ -244,7 +256,6 @@ Route::middleware('auth')
 
             });
 
-
         Route::controller(WrittenAssessmentController::class)
             ->prefix('writtenassessments')
             ->as('writtenassessments.')
@@ -260,12 +271,10 @@ Route::middleware('auth')
                 Route::get('/get/lesson', 'get_lesson')->name('get.lesson');
                 Route::get('/get/data', 'getData');
 
-
                 Route::post('/question-group/store/{written}', 'storeQuestionGroup')->name('question.group.store');
                 Route::post('/question-group/update/{questionGroup}', 'updateQuestionGroup')->name('question.group.update');
                 Route::get('/question-group/destroy/{questionGroup}', 'destroyQuestionGroup')->name('question.group.destroy');
             });
-
 
         Route::controller(LectureVideoController::class)
             ->prefix('lecturevideos')
@@ -282,7 +291,6 @@ Route::middleware('auth')
                 Route::get('/get/lesson', 'get_lesson')->name('get.lesson');
                 Route::get('/get/data', 'getData');
                 Route::post('/video-upload', 'videoUpload')->name('video.upload');
-
 
                 Route::post('/upload', 'videoUpload')->name('upload');
                 Route::post('/upload-bunny', 'uploadToBunny')->name('upload.bunny');
@@ -306,7 +314,7 @@ Route::middleware('auth')
                 Route::post('/upload-image', 'uploadImage')->name('uploadImage');
             });
 
-            // OSPE Station Routes
+        // OSPE Station Routes
         Route::controller(OspeStationController::class)
             ->prefix('ospestations')
             ->name('ospestations.')
@@ -326,23 +334,6 @@ Route::middleware('auth')
                 Route::put('/questions/{question}/update', 'updateQuestionGroup')->name('questions.update');
                 Route::delete('/questions/{question}/delete', 'questionDelete')->name('questions.delete');
             });
-
-        // Route::controller(OspeStationController::class)
-        //     ->prefix('ospestations')
-        //     ->as('ospestations.')
-        //     ->group(function () {
-        //         Route::get('/', 'index')->name('index');
-        //         Route::get('/create', 'create')->name('create');
-        //         Route::post('/store', 'store')->name('store');
-        //         Route::get('/status/{ospe}', 'status')->name('status');
-        //         Route::get('/show/{ospe}', 'show')->name('show');
-        //         Route::get('/edit/{ospe}', 'edit')->name('edit');
-        //         Route::put('/update/{ospe}', 'update')->name('update');
-        //         Route::put('/question/update/{question}', 'questionUpdate')->name('question.update');
-        //         Route::get('/question/delete/{question}', 'questionDelete')->name('question.delete');
-        //         Route::get('/destroy/{ospe}', 'destroy')->name('destroy');
-        //         Route::get('/get/data', 'getData')->name('getData');
-        //     });
 
         Route::controller(EnrolleController::class)
             ->prefix('enrolles')
@@ -376,14 +367,17 @@ Route::middleware('auth')
                 Route::post('/snote/update/{setting?}', 'snote_update')->name('snote.update');
             });
 
-            Route::get('secure-pdfs/get/data', [SecurePdfController::class, 'getData'])
-                ->name('secure-pdfs.data');
+        Route::get('secure-pdfs/get/data', [SecurePdfController::class, 'getData'])
+            ->name('secure-pdfs.data');
 
-            Route::post('secure-pdfs/{securePdf}/toggle', [SecurePdfController::class, 'toggleStatus'])
-                ->name('secure-pdfs.toggle');
+        Route::post('secure-pdfs/{securePdf}/toggle', [SecurePdfController::class, 'toggleStatus'])
+            ->name('secure-pdfs.toggle');
 
-            Route::get('secure-pdfs/{securePdf}/logs', [SecurePdfController::class, 'accessLogs'])
-                ->name('secure-pdfs.access-logs');
+        Route::get('secure-pdfs/{securePdf}/logs', [SecurePdfController::class, 'accessLogs'])
+            ->name('secure-pdfs.access-logs');
 
-            Route::resource('secure-pdfs', SecurePdfController::class);
+        Route::resource('secure-pdfs', SecurePdfController::class);
+
+        Route::resource('notices', NoticeController::class)->except(['show']);
+        Route::patch('notices/{notice}/status', [NoticeController::class, 'status'])->name('notices.status');
     });

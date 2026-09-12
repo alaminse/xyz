@@ -1,157 +1,216 @@
 @extends('layouts.frontend')
-@section('title', 'Medi Maniac')
+@section('title', 'MediManiac — From Aspirations to Achievements')
+
 @section('css')
 <style>
-    .rectangle-div .main-div {
-    padding: 20px;
-}
-
-.single-ractangle {
-    background-color: #f7f7f7;
-    border: 1px solid #f7f7f7;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.single-ractangle img {
-    max-width: 100%;
-    height: auto;
-}
-
-.single-ractangle h4 {
-    font-size: 1rem;
-    text-align: center;
-}
-
-/* Responsive styles */
-@media (max-width: 767px) {
-    .rectangle-div .row {
-        flex-direction: column;
-        padding: 10px;
+    /* ===================== HERO ===================== */
+    .hero {
+        padding: 64px 0 40px;
+        overflow: hidden;
     }
 
-    .single-ractangle {
-        padding: 20px;
-        margin-bottom: 15px;
+    .hero-eyebrow {
+        display: inline-block;
+        font-family: var(--font-heading);
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--color-accent-dark);
+        background: rgba(232, 150, 60, 0.12);
+        padding: 6px 16px;
+        border-radius: 999px;
+        margin-bottom: 20px;
     }
-}
+
+    .hero h1 {
+        font-size: clamp(2rem, 4vw, 3rem);
+        line-height: 1.15;
+        margin-bottom: 20px;
+        max-width: 16ch;
+    }
+
+    .hero-sub {
+        font-size: 1.1rem;
+        color: var(--color-body);
+        max-width: 42ch;
+        margin-bottom: 32px;
+    }
+
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 40px; }
+
+    .hero-stats {
+        display: flex;
+        gap: 32px;
+        flex-wrap: wrap;
+        padding-top: 28px;
+        border-top: 1px solid var(--color-border);
+    }
+    .hero-stat-num {
+        font-family: var(--font-heading);
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--color-ink);
+        display: block;
+    }
+    .hero-stat-label { font-size: 0.85rem; color: var(--color-muted); }
+
+    .hero-visual {
+        position: relative;
+    }
+    .hero-visual .frame {
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-soft);
+        border: 1px solid var(--color-border);
+    }
+    .hero-visual img { width: 100%; height: 100%; object-fit: cover; display: block; min-height: 320px; }
+
+    .hero-float-card {
+        position: absolute;
+        bottom: -24px;
+        left: -24px;
+        background: #fff;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-soft);
+        padding: 18px 22px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        max-width: 240px;
+    }
+    .hero-float-card .icon-wrap {
+        width: 44px; height: 44px; border-radius: 12px;
+        background: var(--color-primary);
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-size: 1.2rem; flex-shrink: 0;
+    }
+    .hero-float-card .label { font-size: 0.8rem; color: var(--color-muted); }
+    .hero-float-card .value { font-family: var(--font-heading); font-weight: 700; color: var(--color-ink); }
+
+    @media (max-width: 991px) {
+        .hero-float-card { position: static; margin-top: -40px; margin-left: 16px; }
+    }
+
+    /* ===================== COURSE SECTIONS ===================== */
+    .section-heading-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .section-heading-row h2 { font-size: 1.6rem; margin: 0; }
+    .section-heading-row .section-sub { color: var(--color-muted); font-size: 0.95rem; }
+
+    .topic { padding: 40px 0; }
+    .topic:not(:last-of-type) { border-bottom: 1px solid var(--color-border); }
+
+    .course-card-slot {
+        min-height: 180px;
+    }
 </style>
 @endsection
+
 @section('content')
-    <section id="main-carousel">
-        <div class="row" style="--x-gutter-x: 0rem;">
-            <div class="col px-0">
-                <div class="carousel slide kb-carousel carousel-fade" id="carouselKenBurns" data-bs-ride="carousel">
-                    <div class="carousel-inner">
-                        <div class="carousel-item active">
-                            <img src="{{getImageUrl($sliders->slider1 ?? '')}}"
-                                class="d-block w-100 img-fluid" alt="Slide 1">
-                            <div class="carousel-caption d-none d-md-block">
-                                <h2 class="text-uppercase">{{$sliders->heading1 ?? ''}}</h2>
-                                <p class="text-center">{{ $sliders->short_description1 ?? ''}}</p>
-                                <div class="button">
-                                    <a href="{{ route('contact') }}" class="btn btn-warning">Request Quote</a>
-                                    <a href="{{ route('about') }}" class="btn btn-outline-success">About</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="carousel-item">
-                            <img src="{{getImageUrl($sliders->slider2 ?? '')}}"
-                                class="d-block w-100 img-fluid" alt="Slide 2">
-                            <div class="carousel-caption d-none d-md-block">
-                                <h2 class="text-uppercase">{{$sliders->heading2 ?? ''}}</h2>
-                                <p class="text-center">{{ $sliders->short_description2 ?? ''}}</p>
-                                <div class="button">
-                                    <a href="#" class="btn btn-warning">Request Quote</a>
-                                    <a href="about.html" class="btn btn-outline-success">About</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="carousel-item">
-                            <img src="{{getImageUrl($sliders->slider3 ?? '')}}"
-                                class="d-block w-100 img-fluid" alt="Slide 3">
-                            <div class="carousel-caption d-none d-md-block">
-                                <h2 class="text-uppercase">{{$sliders->heading3 ?? ''}}</h2>
-                                <p class="text-center">{{ $sliders->short_description3 ?? ''}}</p>
-                                <div class="button">
-                                    <a href="#" class="btn btn-warning">Request Quote</a>
-                                    <a href="about.html" class="btn btn-outline-success">About</a>
-                                </div>
-                            </div>
-                        </div>
+
+{{-- ===================== HERO ===================== --}}
+<section class="hero">
+    <div class="container">
+        <div class="row align-items-center gy-5">
+            <div class="col-lg-6">
+                <span class="hero-eyebrow">FCPS &amp; postgraduate medical prep</span>
+                <h1>From aspirations to achievements.</h1>
+                <p class="hero-sub">
+                    {{ $sliders->short_description1 ?? 'Structured courses, question banks, and mock exams built around the way medical students actually revise.' }}
+                </p>
+                <div class="hero-actions">
+                    <a href="#courses" class="btn-primary-cta">
+                        Explore courses <i class="bi bi-arrow-right"></i>
+                    </a>
+                    <a href="{{ route('contact') }}" class="btn-secondary-cta">
+                        Talk to us
+                    </a>
+                </div>
+
+                <div class="hero-stats">
+                    <div>
+                        <span class="hero-stat-num">10,000+</span>
+                        <span class="hero-stat-label">Practice questions</span>
                     </div>
-                    <button class="carousel-control-prev kb-control-prev" type="button" data-bs-target="#carouselKenBurns"
-                            data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button class="carousel-control-next kb-control-next" type="button" data-bs-target="#carouselKenBurns"
-                            data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                    </button>
+                    <div>
+                        <span class="hero-stat-num">{{ $courses->count() ?? '20' }}+</span>
+                        <span class="hero-stat-label">Structured courses</span>
+                    </div>
+                    <div>
+                        <span class="hero-stat-num">24/7</span>
+                        <span class="hero-stat-label">Access on any device</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <div style="margin-top: 50px"></div>
-
-    <section id="thehero">
-        <div class="the-inner">
-            <div class="container">
-                <div class="row">
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                        <h1 class="active">Course</h1>
+            <div class="col-lg-6">
+                <div class="hero-visual">
+                    <div class="frame">
+                        <img src="{{ getImageUrl($sliders->slider1 ?? '') }}" alt="MediManiac">
+                    </div>
+                    <div class="hero-float-card">
+                        <div class="icon-wrap"><i class="bi bi-mortarboard-fill"></i></div>
+                        <div>
+                            <span class="value">{{ $sliders->heading1 ?? 'Rapid Fire' }}</span><br>
+                            <span class="label">This week's focus</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
+{{-- ===================== COURSES ===================== --}}
+<div id="courses">
     @foreach ($courses as $course)
         <section class="topic" id="{{ $course->slug }}">
-            <div class="container-xl">
-                <h2 class="header">{{ $course->name }}</h2>
-                <div class="row d-flex justify-content-center row-cols-1 row-cols-md-4 g-4 load-course"></div>
+            <div class="container">
+                <div class="section-heading-row">
+                    <div>
+                        <h2>{{ $course->name }}</h2>
+                        <span class="section-sub">Pick up where you left off, or start a new topic.</span>
+                    </div>
+                </div>
+                <div class="row d-flex row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 load-course course-card-slot"></div>
             </div>
         </section>
     @endforeach
+</div>
 
-    <div style="margin-top: 50px"></div>
+@endsection
 
-    @push('scripts')
-        <script>
-            $(document).ready(function() {
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            const courseSlug = $(entry.target).attr('id');
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const courseSlug = $(entry.target).attr('id');
 
-                            console.log(courseSlug);
-
-                            $.ajax({
-                                url: `/courses/${courseSlug}`,
-                                type: 'GET',
-                                success: function(data) {
-                                    console.log(data);
-
-                                    const coursesContainer = $(entry.target).find('.load-course');
-
-                                    coursesContainer.html(data.html);
-                                },
-                                error: function(xhr, status, error) {
-                                    console.error('Error fetching courses:', error);
-                                }
-                            });
-                            observer.unobserve(entry.target);
+                    $.ajax({
+                        url: `/courses/${courseSlug}`,
+                        type: 'GET',
+                        success: function(data) {
+                            const coursesContainer = $(entry.target).find('.load-course');
+                            coursesContainer.html(data.html);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error fetching courses:', error);
                         }
                     });
-                });
-                $('.topic').each(function() {
-                    observer.observe(this);
-                });
+                    observer.unobserve(entry.target);
+                }
             });
-        </script>
-    @endpush
-@endsection
+        });
+        $('.topic').each(function() {
+            observer.observe(this);
+        });
+    });
+</script>
+@endpush
