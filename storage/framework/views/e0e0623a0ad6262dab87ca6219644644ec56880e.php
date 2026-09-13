@@ -21,6 +21,10 @@
                 <?php echo method_field('PUT'); ?>
                 <div class="row">
                     <div class="col-sm-12 mb-3">
+                        <label for="start_at" class="form-label">Title</label>
+                        <input type="text" class="form-control" name="title" value="<?php echo old('title', $notice->title); ?>">
+                    </div>
+                    <div class="col-sm-12 mb-3">
                         <label for="message" class="form-label">Message <span class="required text-danger">*</span></label>
                         <textarea class="form-control summernote" name="message" rows="4" required><?php echo old('message', $notice->message); ?></textarea>
                         <?php $__errorArgs = ['message'];

@@ -13,6 +13,7 @@ class NoticeController extends Controller
     private function rules(): array
     {
         return [
+            'title'      => 'required|string|max:255',
             'message'    => 'required|string',
             'type'       => 'required|in:info,warning,urgent',
             'is_active'  => 'nullable',
@@ -33,21 +34,26 @@ class NoticeController extends Controller
         return view('backend.notice.create');
     }
 
+
+    // ২. store() মেথডে slug generate করুন:
     public function store(Request $request)
     {
         $data = $request->validate($this->rules());
         $data['is_active'] = $request->boolean('is_active');
         $data['created_by'] = Auth::id();
+        $data['slug'] = checkSlug('notices');
 
         try {
             Notice::create($data);
-
             return redirect()->route('admin.notices.index')->with('success', 'Notice created successfully.');
         } catch (\Exception $e) {
             Log::error('Notice Store Failed', ['error' => $e->getMessage()]);
             return back()->withInput()->with('error', 'Something went wrong!');
         }
     }
+
+    // update() মেথডে slug বদলানোর দরকার নেই (একবার তৈরি হলে URL স্থির থাকা ভালো),
+    // বাকি সব একই থাকবে।
 
     public function edit(Notice $notice)
     {

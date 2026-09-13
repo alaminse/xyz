@@ -19,6 +19,12 @@
             <form action="<?php echo e(route('admin.notices.store')); ?>" method="POST">
                 <?php echo csrf_field(); ?>
                 <div class="row">
+
+
+                    <div class="col-sm-12 col-md-4 mb-3">
+                        <label for="start_at" class="form-label">Title</label>
+                        <input type="text" class="form-control" name="title" value="<?php echo e(old('title')); ?>">
+                    </div>
                     <div class="col-sm-12 mb-3">
                         <label for="message" class="form-label">Message <span class="required text-danger">*</span></label>
                         <textarea class="form-control summernote" name="message" rows="4" required><?php echo old('message'); ?></textarea>

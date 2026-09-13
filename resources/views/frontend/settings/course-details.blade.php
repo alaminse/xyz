@@ -1,56 +1,135 @@
 @extends('layouts.frontend')
-@section('title', 'Course Details')
-@section('content')
-    <section id="thehero" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ getImageUrl($course->banner) }}');">
-    {{-- <section id="thehero"> --}}
-        <div class="the-inner">
-            <div class="container">
-                <div class="row">
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                        <h1 class="active">Course Details</h1>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section class="about-us">
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-12 col-md-9">
-                    <h2 class="fs-2 mb-5">{{ $course->name }}</h2>
-                    <div class="row d-flex justify-content-center row-cols-1 row-cols-md-3 g-3 load-course mb-4">
-                        @include('frontend.includes.course', ['courses' => $course->courses])
-                    </div>
+@section('title', $course->name)
 
-                    {!! $course->details !!}
-                </div>
-                <div class="col-sm-12 col-md-3">
-                    <div class="course-card p-4">
-                        <h4 class="pe-5">2024 Multi-Specialty Recruitment Assessment (MSRA) subscription options</h4>
-                        <div class="my-3">
-                            <h3 class="text-success">{{ $course->name }}</h3>
-                            @if ($course->is_pricing == 1)
-                            <p class="card-text text-muted">Duration: {{ $course->detail?->duration }} {{ $course->detail?->type }}</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                @if ($course->detail?->sell_price)
-                                    <p class="card-text text-danger fw-bold mb-0">
-                                        Price: <span style="text-decoration: line-through;">{{ $course->detail?->price }} <strong>৳
-                                            </strong></span>
-                                        <span class="card-text text-success fw-bold mb-0 ms-4">{{ $course->detail?->sell_price }}
-                                            <strong>৳ </strong></span>
-                                    </p>
-                                @else
-                                    <p class="card-text text-dark fw-bold mb-0">Price: {{ $course->detail?->price }}</p>
-                                @endif
+@section('content')
+
+{{-- ===================== HERO ===================== --}}
+<section class="course-hero">
+    <div class="container">
+        <div class="course-breadcrumb">
+            <a href="{{ url('/') }}">Home</a> / <span>{{ $course->name }}</span>
+        </div>
+        <h1>{{ $course->name }}</h1>
+
+        @if ($course->is_pricing == 1)
+            <div class="course-meta-row">
+                <span class="course-meta-item"><i class="bi bi-clock"></i> {{ $course->detail?->duration }} {{ $course->detail?->type }}</span>
+                @if ($isEnrolled)
+                    <span class="course-meta-item"><i class="bi bi-check-circle-fill text-success"></i> You're enrolled</span>
+                @endif
+            </div>
+        @endif
+    </div>
+</section>
+
+{{-- ===================== BODY ===================== --}}
+<section class="course-body">
+    <div class="container">
+        <div class="row gy-5">
+
+            {{-- LEFT: content --}}
+            <div class="col-lg-8">
+                @if ($course->banner)
+                    <div class="course-thumb">
+                        <img src="{{ getImageUrl($course->banner) }}" alt="{{ $course->name }}">
+                    </div>
+                @endif
+
+                @if ($course->details)
+                    <h2 class="section-title">About this course</h2>
+                    <div class="course-description">{!! $course->details !!}</div>
+                @endif
+
+                @if ($includedFeatures->isNotEmpty())
+                    <h2 class="section-title">What's included</h2>
+                    <div class="feature-grid">
+                        @foreach ($includedFeatures as $feature)
+                            <div class="feature-chip">
+                                <i class="bi {{ $feature['icon'] }}"></i> {{ $feature['label'] }}
                             </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                @if ($course->chapters->isNotEmpty())
+                    <h2 class="section-title">Curriculum</h2>
+                    <div class="curriculum-list">
+                        @foreach ($course->chapters as $index => $chapter)
+                            <div class="curriculum-item">
+                                <button class="curriculum-header" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#curr-{{ $chapter->id }}">
+                                    <span>{{ $chapter->name }}</span>
+                                    <span class="lesson-count">{{ $chapter->lessons->count() }} lessons</span>
+                                </button>
+                                <div id="curr-{{ $chapter->id }}" class="collapse">
+                                    <div class="curriculum-body">
+                                        @forelse ($chapter->lessons as $lesson)
+                                            <div class="curriculum-lesson">
+                                                <i class="bi bi-play-circle"></i> {{ $lesson->name }}
+                                            </div>
+                                        @empty
+                                            <div class="curriculum-lesson text-muted">No lessons yet.</div>
+                                        @endforelse
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                @if ($course->children->isNotEmpty())
+                    <h2 class="section-title mt-5">Included courses</h2>
+                    @foreach ($course->children as $child)
+                        <a href="{{ route('courses.show', $child->slug) }}" class="subcourse-card">
+                            <img src="{{ getImageUrl($child->banner) }}" alt="{{ $child->name }}">
+                            <div>
+                                <div class="name">{{ $child->name }}</div>
+                                <span class="text-muted" style="font-size:0.85rem;">
+                                    {{ $child->detail?->duration }} {{ $child->detail?->type }}
+                                </span>
+                            </div>
+                        </a>
+                    @endforeach
+                @endif
+            </div>
+
+            {{-- RIGHT: sticky enroll card --}}
+            <div class="col-lg-4">
+                <div class="enroll-card">
+                    @if ($course->is_pricing == 1)
+                        <div class="enroll-price-row">
+                            @if ($course->detail?->sell_price > 0)
+                                <span class="enroll-price">৳{{ $course->detail->sell_price }}</span>
+                                <span class="enroll-price-old">৳{{ $course->detail->price }}</span>
+                            @else
+                                <span class="enroll-price">৳{{ $course->detail?->price }}</span>
                             @endif
                         </div>
-                        <a href="{{ route('courses.checkout', ['course' => $course->slug]) }}" class="btn enroll-btn {{ $course->is_pricing == 1 ? '' : 'disabled' }}">ENROLL</a>
-                        <a href="{{ route('courses.checkout', ['course' => $course->slug, 'isTrial' => 'free-trial']) }}" class="btn enroll-btn mt-2" style="background: #0dcaf0">Free Trial</a>
-                    </div>
+                        <div class="enroll-duration">{{ $course->detail?->duration }} {{ $course->detail?->type }} access</div>
+                    @endif
+
+                    @auth
+                        @if ($isEnrolled)
+                            <a href="{{ url('/dashboard') }}" class="btn-primary-cta">
+                                <i class="bi bi-play-fill"></i> Go to course
+                            </a>
+                        @else
+                            <a href="{{ route('courses.checkout', $course->slug) }}" class="btn-primary-cta">
+                                Enroll now <i class="bi bi-arrow-right"></i>
+                            </a>
+                            <a href="{{ route('courses.checkout', ['course' => $course->slug, 'isTrial' => 'free-trial']) }}" class="btn-secondary-cta">
+                                Start free trial
+                            </a>
+                        @endif
+                    @else
+                        <a href="{{ route('login') }}" class="btn-primary-cta">
+                            Log in to enroll <i class="bi bi-arrow-right"></i>
+                        </a>
+                    @endauth
                 </div>
             </div>
-        </div>
-    </section>
 
+        </div>
+    </div>
+</section>
 @endsection

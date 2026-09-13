@@ -86,4 +86,9 @@ class Course extends Model
         );
     }
 
+    public function children()
+    {
+        return $this->hasMany(Course::class, 'parent_id');
+    }
+
 }

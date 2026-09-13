@@ -21,11 +21,11 @@ class CourseController extends Controller
         return view('frontend.settings.course', compact('courses'));
     }
 
-    public function details($slug)
-    {
-        $course = Course::with('courses')->where('slug', $slug)->first();
-        return view('frontend.settings.course-details', compact('course'));
-    }
+    // public function details($slug)
+    // {
+    //     $course = Course::with('courses')->where('slug', $slug)->first();
+    //     return view('frontend.settings.course-details', compact('course'));
+    // }
 
     public function getCourse($slug)
     {
@@ -179,6 +179,48 @@ class CourseController extends Controller
         $pdf->set_option('isRemoteEnabled', true);
         // // Return the PDF as a download or stream
         return $pdf->stream($invoice->slug.'.pdf');
+    }
+
+
+
+    public function show($slug)
+    {
+        $course = Course::where('slug', $slug)
+            ->where('status', 1)
+            ->with(['detail', 'chapters.lessons', 'children'])
+            ->firstOrFail();
+
+        $isEnrolled = false;
+
+        if (Auth::check()) {
+            $isEnrolled = EnrollUser::where('user_id', Auth::id())
+                ->where('course_id', $course->id)
+                ->exists();
+        }
+
+        // Feature flags to show as "What's included" — pulled straight
+        // from course_details, matching your existing module flag pattern.
+        $features = [
+            'sba'                => ['label' => 'SBA Questions',      'icon' => 'bi-patch-question'],
+            'mcq'                => ['label' => 'MCQ Practice',        'icon' => 'bi-ui-checks'],
+            'flush'              => ['label' => 'Flash Cards',         'icon' => 'bi-collection'],
+            'note'               => ['label' => 'Notes',                'icon' => 'bi-journal-text'],
+            'written'            => ['label' => 'Written Assessment',  'icon' => 'bi-pencil-square'],
+            'videos'             => ['label' => 'Video Lectures',      'icon' => 'bi-play-circle'],
+            'mock_viva'          => ['label' => 'Mock Viva',            'icon' => 'bi-mic'],
+            'ospe'               => ['label' => 'OSPE Stations',       'icon' => 'bi-clipboard2-pulse'],
+            'self_assessment'    => ['label' => 'Self Assessment',     'icon' => 'bi-graph-up-arrow'],
+            'secure_pdf'         => ['label' => 'Secure PDFs',         'icon' => 'bi-file-earmark-pdf'],
+            'review_questions'   => ['label' => 'Review Questions',    'icon' => 'bi-arrow-repeat'],
+            'modeltest'          => ['label' => 'Model Tests',         'icon' => 'bi-clipboard-check'],
+            'question_bank'      => ['label' => 'Question Bank',       'icon' => 'bi-bank'],
+        ];
+
+        $includedFeatures = collect($features)->filter(function ($feature, $key) use ($course) {
+            return (bool) ($course->detail?->$key ?? false);
+        });
+
+        return view('frontend.settings.course-details', compact('course', 'isEnrolled', 'includedFeatures'));
     }
 
 }

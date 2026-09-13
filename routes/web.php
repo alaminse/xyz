@@ -16,6 +16,7 @@ use App\Http\Controllers\Dashboard\SecurePdfController;
 use App\Http\Controllers\Dashboard\VideoStreamController;
 use App\Http\Controllers\Dashboard\WrittenAssessmentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Dashboard\NoticeController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
@@ -173,17 +174,20 @@ Route::get('/terms/condition', [HomeController::class, 'terms'])->name('terms.co
 Route::get('/states/{country}', [DashboardController::class, 'states']);
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact/send', [ContactController::class, 'send'])->name('contact.send');
+Route::get('/notices', [NoticeController::class, 'index'])->name('notices.index');
+Route::get('/notices/{slug}', [NoticeController::class, 'show'])->name('notices.show');
 
 Route::controller(CourseController::class)
     ->prefix('courses')
     ->as('courses.')
     ->group(function () {
         Route::get('/', 'index')->name('index');
-        Route::get('details/{course}', 'details')->name('details');
+        // Route::get('details/{course}', 'details')->name('details');
         Route::get('/{slug}', 'getCourse');
         Route::get('/checkout/{course}/{isTrial?}', 'checkout')->middleware('verified')->name('checkout');
         Route::post('/checkout/store/{course}', 'checkout_store')->middleware('verified')->name('checkout.store');
         Route::get('/invoice/{slug}', 'invoice')->middleware('verified')->name('invoice');
+        Route::get('/{slug}', 'show')->name('show');
     });
 
 // Add these routes to your web.php inside auth middleware group

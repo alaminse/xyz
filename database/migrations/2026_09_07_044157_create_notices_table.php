@@ -10,6 +10,8 @@ return new class extends Migration
     {
         Schema::create('notices', function (Blueprint $table) {
             $table->id();
+            $table->string('slug')->nullable();
+            $table->string('title')->nullable();
             $table->text('message');
             $table->string('type')->default('info'); // info, warning, urgent
             $table->boolean('is_active')->default(true);

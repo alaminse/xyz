@@ -15,6 +15,7 @@ class NoteDetail extends Model
         'slug',
         'description',
     ];
+    
 
     public function note()
     {

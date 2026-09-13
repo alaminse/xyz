@@ -1,21 +1,21 @@
-<?php $__env->startSection('title', 'Written Assessment'); ?>
+<?php $__env->startSection('title', 'User Progress'); ?>
 <?php $__env->startSection('css'); ?>
     <link href="<?php echo e(asset('backend/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css')); ?>" rel="stylesheet">
-    <link href="<?php echo e(asset('backend/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css')); ?>" rel="stylesheet">
+    <link href="<?php echo e(asset('backend/vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css')); ?>"
+        rel="stylesheet">
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('content'); ?>
 
-    <div class="col-md-12 col-sm-12">
+    <div class="col-md-12 col-sm-12 ">
         <div class="x_panel">
             <div class="x_title">
-                <h2>Written Assessment</h2>
+                <h2>User Progress <small></small></h2>
                 <ul class="nav navbar-right panel_toolbox">
-                    <li>
-                        <a class="btn btn-sm btn-success text-light" href="<?php echo e(route('admin.writtenassessments.create')); ?>"><i class="fa fa-plus"></i>
-                            Add New</a>
                     </li>
-                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
-                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                    <li><a class="close-link"><i class="fa fa-close"></i></a>
+                    </li>
                 </ul>
                 <div class="clearfix"></div>
             </div>
@@ -37,17 +37,17 @@
 
                     <div class="col-12">
                         <div class="card-box table-responsive">
-                            <?php echo $__env->make('backend.includes.message', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-                            <table id="datatable-responsive" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                            <table id="datatable-responsive" class="table table-striped table-bordered dt-responsive nowrap"
+                                cellspacing="0" width="100%">
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th>Question</th>
-                                        <th>Course</th>
+                                        <th>Assessment Name</th>
+                                        <th>Courses</th>
                                         <th>Chapter</th>
-                                        <th>IsPaid</th>
-                                        <th>Status</th>
-                                        <th width="25%">Action</th>
+                                        <th>Lesson</th>
+                                        <th>Attendants Count</th>
+                                        <th width="20%">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -60,35 +60,33 @@
         </div>
     </div>
 
-
-    <?php $__env->startPush('scripts'); ?>
+     <?php $__env->startPush('scripts'); ?>
         <script src="<?php echo e(asset('backend/vendors/datatables.net/js/jquery.dataTables.min.js')); ?>"></script>
         <script src="<?php echo e(asset('backend/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js')); ?>"></script>
         <script src="<?php echo e(asset('backend/vendors/datatables.net-responsive/js/dataTables.responsive.min.js')); ?>"></script>
         <script src="<?php echo e(asset('backend/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.js')); ?>"></script>
-
         <script>
-            $(document).ready(function () {
-                // Load the first course's data by default
+            $(document).ready(function() {
                 let activeCourseSlug = $('.nav-link.active').data('target').replace('#', '');
-                getWrittenAssessments(activeCourseSlug);
+                getAssessments(activeCourseSlug)
 
-                // Handle course tab clicks
-                $('.nav-link').on('click', function () {
+                $('.nav-link').on('click', function() {
                     $('.nav-link').removeClass('active');
                     $(this).addClass('active');
 
                     let courseSlug = $(this).data('target').replace('#', '');
-                    getWrittenAssessments(courseSlug);
+                    getAssessments(courseSlug);
                 });
             });
 
-            function getWrittenAssessments(slug) {
+            function getAssessments(slug) {
                 $.ajax({
-                    url: '/admin/writtenassessments/get/data',
+                    url: '/admin/assessments/user/progress/data',
                     data: { slug: slug },
                     method: 'GET',
                     success: function (response) {
+
+                        console.log(response);
 
                         // Destroy if already initialized
                         if ($.fn.DataTable.isDataTable('#datatable-responsive')) {
@@ -111,16 +109,8 @@
                     }
                 });
             }
-
-            function showDeleteConfirmation(event) {
-                event.preventDefault();
-                if (confirm('Are you sure you want to delete this item?')) {
-                    window.location.href = event.currentTarget.href;
-                }
-            }
         </script>
     <?php $__env->stopPush(); ?>
-
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.backend', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/medimaniac/resources/views/backend/written-assessment/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.backend', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/XAMPP/xamppfiles/htdocs/medimaniac/resources/views/backend/assessment/user_progress.blade.php ENDPATH**/ ?>

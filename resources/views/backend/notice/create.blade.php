@@ -20,6 +20,12 @@
             <form action="{{ route('admin.notices.store') }}" method="POST">
                 @csrf
                 <div class="row">
+
+
+                    <div class="col-sm-12 mb-3">
+                        <label for="start_at" class="form-label">Title</label>
+                        <input type="text" class="form-control" name="title" value="{{ old('title') }}">
+                    </div>
                     <div class="col-sm-12 mb-3">
                         <label for="message" class="form-label">Message <span class="required text-danger">*</span></label>
                         <textarea class="form-control summernote" name="message" rows="4" required>{!! old('message') !!}</textarea>

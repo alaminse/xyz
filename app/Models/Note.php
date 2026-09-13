@@ -36,4 +36,5 @@ class Note extends Model
     {
         return $this->belongsTo(Lesson::class, 'lesson_id');
     }
+    
 }

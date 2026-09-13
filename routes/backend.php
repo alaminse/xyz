@@ -129,7 +129,6 @@ Route::middleware('auth')
                 Route::delete('/questions/{question}', 'destroyQuestion')->name('questions.destroy');
                 Route::post('/{sba}/check-duplicate', 'checkDuplicate')->name('questions.check');
 
-
                 Route::post('/bulk-upload', 'bulkUploadStore')->name('bulk-upload.store');
                 Route::get('/sample-download', 'sampleDownload')->name('sample-download');
                 Route::get('/export/chapters', 'exportGetChapters')->name('export.chapters');
@@ -162,13 +161,6 @@ Route::middleware('auth')
 
                 Route::post('/bulk-upload', 'bulkUploadStore')->name('bulk-upload.store');
                 Route::get('/sample-download', 'sampleDownload')->name('sample-download');
-                Route::get('/{mcq}/export', 'export')->name('export');
-
-                // MCQ Bulk Import
-                Route::post('/bulk-upload', 'bulkUploadStore')->name('bulk-upload.store');
-                Route::get('/sample-download', 'sampleDownload')->name('sample-download');
-
-                // MCQ Export (cascading course -> chapter -> lesson)
                 Route::get('/export/chapters', 'exportGetChapters')->name('export.chapters');
                 Route::get('/export/lessons', 'exportGetLessons')->name('export.lessons');
                 Route::get('/export', 'export')->name('export');
@@ -200,8 +192,6 @@ Route::middleware('auth')
                 Route::delete('/questions/{question}', 'destroyQuestion')->name('questions.destroy');
                 Route::post('/{flash}/check-duplicate', 'checkDuplicate')->name('questions.check');
 
-
-
                 Route::post('/bulk-upload', 'bulkUploadStore')->name('bulk-upload.store');
                 Route::get('/sample-download', 'sampleDownload')->name('sample-download');
                 Route::get('/export/chapters', 'exportGetChapters')->name('export.chapters');
@@ -226,24 +216,35 @@ Route::middleware('auth')
         //         Route::get('/get/data', 'getData');
         //     });
 
-        Route::prefix('notes')->as('notes.')->group(function () {
-            Route::get('/', [NoteController::class, 'index'])->name('index');
-            Route::get('/create', [NoteController::class, 'create'])->name('create');
-            Route::post('/', [NoteController::class, 'store'])->name('store');
-            Route::get('/get/data', [NoteController::class, 'getData'])->name('getData');
-            Route::get('/{note}', [NoteController::class, 'show'])->name('show');
-            Route::get('/{note}/edit', [NoteController::class, 'edit'])->name('edit');
-            Route::put('/{note}', [NoteController::class, 'update'])->name('update');
-            Route::delete('/{note}', [NoteController::class, 'destroy'])->name('destroy');
-            Route::patch('/{note}/status', [NoteController::class, 'status'])->name('status');
+        Route::controller(NoteController::class)
+            ->prefix('notes')
+            ->as('notes.')
+            ->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/create', 'create')->name('create');
+                Route::post('/', 'store')->name('store');
+                Route::get('/get/data', 'getData')->name('getData');
 
-            // ----- Section (NoteDetail) management, mirrors SbaController's question routes -----
-            Route::post('/{note}/details', [NoteController::class, 'storeDetail'])->name('details.store');
-            Route::post('/{note}/details/check-duplicate', [NoteController::class, 'checkDuplicate'])->name('details.checkDuplicate');
-            Route::get('/details/{detail}', [NoteController::class, 'getDetail'])->name('details.get');
-            Route::put('/details/{detail}', [NoteController::class, 'updateDetail'])->name('details.update');
-            Route::delete('/details/{detail}', [NoteController::class, 'destroyDetail'])->name('details.destroy');
-        });
+                // ----- Literal/specific routes MUST come before {note} wildcard -----
+                Route::get('/sample-download', 'sampleDownload')->name('sample-download');
+                Route::post('/bulk-upload', 'bulkUploadStore')->name('bulk-upload.store');
+                Route::get('/export/chapters', 'exportGetChapters')->name('export.chapters');
+                Route::get('/export/lessons', 'exportGetLessons')->name('export.lessons');
+                Route::get('/export', 'export')->name('export');
+
+                Route::get('/details/{detail}', 'getDetail')->name('details.get');
+                Route::put('/details/{detail}', 'updateDetail')->name('details.update');
+                Route::delete('/details/{detail}', 'destroyDetail')->name('details.destroy');
+
+                // ----- {note} wildcard routes LAST -----
+                Route::get('/{note}', 'show')->name('show');
+                Route::get('/{note}/edit', 'edit')->name('edit');
+                Route::put('/{note}', 'update')->name('update');
+                Route::delete('/{note}', 'destroy')->name('destroy');
+                Route::patch('/{note}/status', 'status')->name('status');
+                Route::post('/{note}/details', 'storeDetail')->name('details.store');
+                Route::post('/{note}/details/check-duplicate', 'checkDuplicate')->name('details.checkDuplicate');
+            });
 
         Route::controller(AssessmentController::class)
             ->prefix('assessments')
