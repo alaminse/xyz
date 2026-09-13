@@ -3,36 +3,40 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
-use App\Enums\Status;
-use Illuminate\Support\Facades\Log;
-use App\Models\FlashCardQuestion;
-use Illuminate\Support\Str;
-use App\Models\Note;
 use App\Models\Course;
 use App\Models\FlashCard;
+use App\Models\FlashCardQuestion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
+
+use App\Exports\FlashCardQuestionsExport;
+use App\Imports\FlashCardQuestionsImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class FlashCardController extends Controller
 {
     public function index()
     {
         $courses = courseByModule('flush');
+
         return view('backend.flash.index', compact('courses'));
     }
 
     public function create()
     {
         $courses = courseByModule('flush');
+
         return view('backend.flash.create', compact('courses'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'course_ids'    => 'required|array',
-            'course_ids.*'  => 'exists:courses,id',
-            'chapter_id'    => 'required|exists:chapters,id',
-            'lesson_id'     => 'required|exists:lessons,id'
+            'course_ids' => 'required|array',
+            'course_ids.*' => 'exists:courses,id',
+            'chapter_id' => 'required|exists:chapters,id',
+            'lesson_id' => 'required|exists:lessons,id',
         ]);
 
         if (contentExists(\App\Models\FlashCard::class, $request->chapter_id, $request->lesson_id, $request->course_ids)) {
@@ -42,10 +46,10 @@ class FlashCardController extends Controller
         }
 
         $flashCard = FlashCard::create([
-            'chapter_id'    => $request->chapter_id,
-            'lesson_id'     => $request->lesson_id,
-            'isPaid'        => $request->has('isPaid') ? 1 : 0,
-            'status'        => 1,
+            'chapter_id' => $request->chapter_id,
+            'lesson_id' => $request->lesson_id,
+            'isPaid' => $request->has('isPaid') ? 1 : 0,
+            'status' => 1,
         ]);
 
         $flashCard->courses()->sync($request->course_ids);
@@ -57,6 +61,7 @@ class FlashCardController extends Controller
     public function show(FlashCard $flash)
     {
         $flash->load(['courses', 'chapter', 'lesson', 'questions']);
+
         return view('backend.flash.show', compact('flash'));
     }
 
@@ -65,16 +70,17 @@ class FlashCardController extends Controller
         $flash->load(['courses', 'chapter', 'lesson']);
 
         $courses = courseByModule('flush');
+
         return view('backend.flash.edit', compact('flash', 'courses'));
     }
 
     public function update(Request $request, FlashCard $flash)
     {
         $request->validate([
-            'course_ids'    => 'required|array',
-            'course_ids.*'  => 'exists:courses,id',
-            'chapter_id'    => 'required|exists:chapters,id',
-            'lesson_id'     => 'required|exists:lessons,id'
+            'course_ids' => 'required|array',
+            'course_ids.*' => 'exists:courses,id',
+            'chapter_id' => 'required|exists:chapters,id',
+            'lesson_id' => 'required|exists:lessons,id',
         ]);
 
         if (contentExists(\App\Models\FlashCard::class, $request->chapter_id, $request->lesson_id, $request->course_ids, $flash->id)) {
@@ -84,9 +90,9 @@ class FlashCardController extends Controller
         }
 
         $flash->update([
-            'chapter_id'    => $request->chapter_id,
-            'lesson_id'     => $request->lesson_id,
-            'isPaid'        => $request->has('isPaid') ? 1 : 0,
+            'chapter_id' => $request->chapter_id,
+            'lesson_id' => $request->lesson_id,
+            'isPaid' => $request->has('isPaid') ? 1 : 0,
         ]);
 
         $flash->courses()->sync($request->course_ids);
@@ -98,13 +104,15 @@ class FlashCardController extends Controller
     public function destroy(FlashCard $flash)
     {
         $flash->delete();
+
         return redirect()->route('admin.flashs.index')
             ->with('success', 'Flash Card deleted successfully.');
     }
 
     public function status(FlashCard $flash)
     {
-        $flash->update(['status' => !$flash->status]);
+        $flash->update(['status' => ! $flash->status]);
+
         return response()->json(['success' => true, 'status' => $flash->status]);
     }
 
@@ -112,47 +120,47 @@ class FlashCardController extends Controller
     public function storeQuestion(Request $request, FlashCard $flash)
     {
         $request->validate([
-            'question'  => 'required|string|max:1000',
-            'answer'    => 'required|string',
+            'question' => 'required|string|max:1000',
+            'answer' => 'required|string',
         ]);
 
         $question = $flash->questions()->create([
-            'question'  => $request->question,
-            'answer'    => $request->answer,
-            'slug'      => Str::slug($request->question) . '-' . Str::random(6),
+            'question' => $request->question,
+            'answer' => $request->answer,
+            'slug' => Str::slug($request->question).'-'.Str::random(6),
         ]);
 
         return response()->json([
-            'success'   => true,
-            'message'   => 'Question added successfully.',
-            'question'  => $question
+            'success' => true,
+            'message' => 'Question added successfully.',
+            'question' => $question,
         ]);
     }
 
     public function getQuestion(FlashCardQuestion $question)
     {
         return response()->json([
-            'success'   => true,
-            'question'  => $question
+            'success' => true,
+            'question' => $question,
         ]);
     }
 
     public function updateQuestion(Request $request, FlashCardQuestion $question)
     {
         $request->validate([
-            'question'  => 'required|string|max:1000',
-            'answer'    => 'required|string',
+            'question' => 'required|string|max:1000',
+            'answer' => 'required|string',
         ]);
 
         $question->update([
-            'question'  => $request->question,
-            'answer'    => $request->answer,
+            'question' => $request->question,
+            'answer' => $request->answer,
         ]);
 
         return response()->json([
-            'success'   => true,
-            'message'   => 'Question updated successfully.',
-            'question'  => $question
+            'success' => true,
+            'message' => 'Question updated successfully.',
+            'question' => $question,
         ]);
     }
 
@@ -162,7 +170,7 @@ class FlashCardController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Question deleted successfully.'
+            'message' => 'Question deleted successfully.',
         ]);
     }
 
@@ -180,7 +188,7 @@ class FlashCardController extends Controller
 
         return response()->json([
             'exists' => $exists ? true : false,
-            'question' => $exists
+            'question' => $exists,
         ]);
     }
 
@@ -203,10 +211,10 @@ class FlashCardController extends Controller
 
         try {
             $flashs = $course->flashCards()
-                            ->withCount('questions')
-                            ->with(['chapter:id,name', 'lesson:id,name'])
-                            ->latest()
-                            ->get();
+                ->withCount('questions')
+                ->with(['chapter:id,name', 'lesson:id,name'])
+                ->latest()
+                ->get();
 
             $html = view('backend.includes.flash_rows', compact('flashs'))->render();
 
@@ -215,5 +223,74 @@ class FlashCardController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-}
 
+    // =========================== Import Export ==============================
+
+    public function bulkUploadStore(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:5120',
+        ]);
+
+        $import = new FlashCardQuestionsImport;
+        Excel::import($import, $request->file('file'));
+
+        $message = "{$import->inserted} question(s) imported successfully.";
+
+        if ($import->createdSets > 0) {
+            $message .= " {$import->createdSets} new Flash Card set(s) were auto-created.";
+        }
+
+        if ($import->skippedCount > 0) {
+            return back()->with('warning', $message." {$import->skippedCount} row(s) skipped.")
+                ->with('skipped', $import->skipped);
+        }
+
+        return back()->with('success', $message);
+    }
+
+    public function sampleDownload()
+    {
+        return response()->download(storage_path('app/templates/flashcard_sample.xlsx'));
+    }
+
+    public function exportGetChapters(Request $request)
+    {
+        $request->validate(['course_id' => 'required|exists:courses,id']);
+        $course = Course::findOrFail($request->course_id);
+
+        $chapters = $course->chapters()->select('chapters.id', 'chapters.name')->orderBy('chapters.name')->get();
+
+        return response()->json(['success' => true, 'chapters' => $chapters]);
+    }
+
+    public function exportGetLessons(Request $request)
+    {
+        $request->validate(['chapter_id' => 'required|exists:chapters,id']);
+        $chapter = \App\Models\Chapter::findOrFail($request->chapter_id);
+
+        $lessons = $chapter->lessons()->select('lessons.id', 'lessons.name')->orderBy('lessons.name')->get();
+
+        return response()->json(['success' => true, 'lessons' => $lessons]);
+    }
+
+    public function export(Request $request)
+    {
+        $validated = $request->validate([
+            'course_id' => 'nullable|exists:courses,id',
+            'chapter_id' => 'nullable|exists:chapters,id',
+            'lesson_id' => 'nullable|exists:lessons,id',
+        ]);
+
+        $fileName = 'flashcard-questions-'.now()->format('Y-m-d-His').'.xlsx';
+
+        return Excel::download(
+            new FlashCardQuestionsExport(
+                $validated['course_id'] ?? null,
+                $validated['chapter_id'] ?? null,
+                $validated['lesson_id'] ?? null
+            ),
+            $fileName
+        );
+    }
+}

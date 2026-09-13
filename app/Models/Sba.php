@@ -60,4 +60,6 @@ class Sba extends Model
     {
         return $this->note ? $this->note->title : 'N/A';
     }
+
+    
 }

@@ -33,4 +33,5 @@ class FlashCardQuestion extends Model
     {
         return $this->belongsTo(FlashCard::class);
     }
+
 }

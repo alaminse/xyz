@@ -129,6 +129,13 @@ Route::middleware('auth')
                 Route::delete('/questions/{question}', 'destroyQuestion')->name('questions.destroy');
                 Route::post('/{sba}/check-duplicate', 'checkDuplicate')->name('questions.check');
 
+
+                Route::post('/bulk-upload', 'bulkUploadStore')->name('bulk-upload.store');
+                Route::get('/sample-download', 'sampleDownload')->name('sample-download');
+                Route::get('/export/chapters', 'exportGetChapters')->name('export.chapters');
+                Route::get('/export/lessons', 'exportGetLessons')->name('export.lessons');
+                Route::get('/export', 'export')->name('export');
+
             });
 
         Route::controller(McqController::class)
@@ -192,6 +199,14 @@ Route::middleware('auth')
 
                 Route::delete('/questions/{question}', 'destroyQuestion')->name('questions.destroy');
                 Route::post('/{flash}/check-duplicate', 'checkDuplicate')->name('questions.check');
+
+
+
+                Route::post('/bulk-upload', 'bulkUploadStore')->name('bulk-upload.store');
+                Route::get('/sample-download', 'sampleDownload')->name('sample-download');
+                Route::get('/export/chapters', 'exportGetChapters')->name('export.chapters');
+                Route::get('/export/lessons', 'exportGetLessons')->name('export.lessons');
+                Route::get('/export', 'export')->name('export');
             });
         // Unchecked
 

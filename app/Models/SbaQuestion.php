@@ -20,4 +20,5 @@ class SbaQuestion extends Model
     {
         return $this->belongsTo(NoteDetail::class, 'note_id');
     }
+
 }

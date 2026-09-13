@@ -53,4 +53,5 @@ class FlashCard extends Model
     {
         return $this->hasMany(FlashCardQuestion::class);
     }
+    
 }

@@ -12,8 +12,24 @@
                 <h2>Flash Card List</h2>
                 <ul class="nav navbar-right panel_toolbox">
                     <li>
-                        <a class="btn btn-sm btn-success text-light" href="<?php echo e(route('admin.flashs.create')); ?>"><i class="fa fa-plus"></i>
+                        <a class="btn btn-sm btn-success text-light" href="<?php echo e(route('admin.flashs.create')); ?>"><i
+                                class="fa fa-plus"></i>
                             Add New</a>
+                    </li>
+                    <li>
+                        <a class="btn btn-sm btn-info text-light" data-toggle="modal" data-target="#importModal">
+                            <i class="fa fa-upload"></i> Import
+                        </a>
+                    </li>
+                    <li>
+                        <a class="btn btn-sm btn-warning text-light" data-toggle="modal" data-target="#exportModal">
+                            <i class="fa fa-download"></i> Export
+                        </a>
+                    </li>
+                    <li>
+                        <a class="btn btn-sm btn-secondary text-light" href="<?php echo e(route('admin.flashs.sample-download')); ?>">
+                            <i class="fa fa-file-excel-o"></i> Sample
+                        </a>
                     </li>
                     <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
                     <li><a class="close-link"><i class="fa fa-close"></i></a></li>
@@ -62,12 +78,152 @@
         </div>
     </div>
 
+
+
+    <!-- Import Modal -->
+    <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form action="<?php echo e(route('admin.flashs.bulk-upload.store')); ?>" method="POST" enctype="multipart/form-data">
+                    <?php echo csrf_field(); ?>
+                    <div class="modal-header">
+                        <h5 class="modal-title">Bulk Import Questions</h5>
+                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Excel / CSV File <span class="text-danger">*</span></label>
+                            <input type="file" name="file" class="form-control" required accept=".xlsx,.xls,.csv">
+                            <small class="text-muted">
+                                File must have <b>chapter_name</b>, <b>lesson_name</b> columns.
+                                If the MCQ set doesn't exist yet, also fill <b>course_name</b> — it will be created
+                                automatically.
+                                <a href="<?php echo e(route('admin.flashs.sample-download')); ?>">Download sample</a>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal fade" id="exportModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Export Questions</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Leave everything empty to export all questions, or narrow it down.</p>
+
+                    <div class="form-group">
+                        <label>Course <span class="text-muted">(optional)</span></label>
+                        <select id="exportCourse" class="form-control">
+                            <option value="">-- All Courses --</option>
+                            <?php $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($course->id); ?>"><?php echo e($course->name); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Chapter <span class="text-muted">(optional)</span></label>
+                        <select id="exportChapter" class="form-control" disabled>
+                            <option value="">-- All Chapters --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Lesson <span class="text-muted">(optional)</span></label>
+                        <select id="exportLesson" class="form-control" disabled>
+                            <option value="">-- All Lessons --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning" id="exportSubmitBtn">
+                        <i class="fa fa-download"></i> Download
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?php $__env->startPush('scripts'); ?>
         <script src="<?php echo e(asset('backend/vendors/datatables.net/js/jquery.dataTables.min.js')); ?>"></script>
         <script src="<?php echo e(asset('backend/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js')); ?>"></script>
         <script src="<?php echo e(asset('backend/vendors/datatables.net-responsive/js/dataTables.responsive.min.js')); ?>"></script>
         <script src="<?php echo e(asset('backend/vendors/datatables.net-responsive-bs/js/responsive.bootstrap.js')); ?>"></script>
         <script>
+            // ================================================================
+            // ================================================================
+            // Course change -> load chapters
+            $('#exportCourse').on('change', function() {
+                let courseId = $(this).val();
+                $('#exportChapter').html('<option value="">-- All Chapters --</option>').prop('disabled', true);
+                $('#exportLesson').html('<option value="">-- All Lessons --</option>').prop('disabled', true);
+
+                if (!courseId) return;
+
+                $.ajax({
+                    url: "<?php echo e(route('admin.flashs.export.chapters')); ?>",
+                    method: 'GET',
+                    data: {
+                        course_id: courseId
+                    },
+                    success: function(res) {
+                        let options = '<option value="">-- All Chapters --</option>';
+                        res.chapters.forEach(function(chapter) {
+                            options += `<option value="${chapter.id}">${chapter.name}</option>`;
+                        });
+                        $('#exportChapter').html(options).prop('disabled', false);
+                    }
+                });
+            });
+
+            $('#exportChapter').on('change', function() {
+                let chapterId = $(this).val();
+                $('#exportLesson').html('<option value="">-- All Lessons --</option>').prop('disabled', true);
+
+                if (!chapterId) return;
+
+                $.ajax({
+                    url: "<?php echo e(route('admin.flashs.export.lessons')); ?>",
+                    method: 'GET',
+                    data: {
+                        chapter_id: chapterId
+                    },
+                    success: function(res) {
+                        let options = '<option value="">-- All Lessons --</option>';
+                        res.lessons.forEach(function(lesson) {
+                            options += `<option value="${lesson.id}">${lesson.name}</option>`;
+                        });
+                        $('#exportLesson').html(options).prop('disabled', false);
+                    }
+                });
+            });
+
+            $('#exportSubmitBtn').on('click', function() {
+                let courseId = $('#exportCourse').val();
+                let chapterId = $('#exportChapter').val();
+                let lessonId = $('#exportLesson').val();
+
+                let url = "<?php echo e(route('admin.flashs.export')); ?>" + "?";
+                if (courseId) url += "course_id=" + courseId + "&";
+                if (chapterId) url += "chapter_id=" + chapterId + "&";
+                if (lessonId) url += "lesson_id=" + lessonId + "&";
+
+                window.location.href = url;
+            });
+            // ================================================================
+            // ================================================================
 
             $(document).ready(function() {
                 let activeCourseSlug = $('.nav-link.active').data('target').replace('#', '');
@@ -86,9 +242,11 @@
             function getMcq(slug) {
                 $.ajax({
                     url: '/admin/flashs/get/data',
-                    data: { slug: slug },
+                    data: {
+                        slug: slug
+                    },
                     method: 'GET',
-                    success: function (response) {
+                    success: function(response) {
 
                         console.log(response);
 
@@ -108,7 +266,7 @@
                             ordering: true
                         });
                     },
-                    error: function (xhr) {
+                    error: function(xhr) {
                         console.error('Error fetching data:', xhr);
                     }
                 });

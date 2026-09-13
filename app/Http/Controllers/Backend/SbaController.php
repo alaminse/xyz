@@ -11,6 +11,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+
+use App\Exports\SbaQuestionsExport;
+use App\Imports\SbaQuestionsImport;
+use Maatwebsite\Excel\Facades\Excel;
+
 class SbaController extends Controller
 {
     private function rules(bool $update = false): array
@@ -360,5 +365,81 @@ class SbaController extends Controller
         $html = view('backend.includes.sba_rows', compact('sbas'))->render();
 
         return response()->json(['html' => $html]);
+    }
+
+    // Export Import functionality --------------------
+    public function bulkUploadStore(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:5120',
+        ]);
+
+        $import = new SbaQuestionsImport;
+        Excel::import($import, $request->file('file'));
+
+        $message = "{$import->inserted} question(s) imported successfully.";
+
+        if ($import->createdSets > 0) {
+            $message .= " {$import->createdSets} new SBA set(s) were auto-created.";
+        }
+
+        if ($import->skippedCount > 0) {
+            return back()
+                ->with('warning', $message." {$import->skippedCount} row(s) skipped.")
+                ->with('skipped', $import->skipped);
+        }
+
+        return back()->with('success', $message);
+    }
+
+    public function sampleDownload()
+    {
+        return response()->download(storage_path('app/templates/sba_sample.xlsx'));
+    }
+
+    public function exportGetChapters(Request $request)
+    {
+        $request->validate(['course_id' => 'required|exists:courses,id']);
+        $course = Course::findOrFail($request->course_id);
+
+        $chapters = $course->chapters()
+            ->select('chapters.id', 'chapters.name')
+            ->orderBy('chapters.name')
+            ->get();
+
+        return response()->json(['success' => true, 'chapters' => $chapters]);
+    }
+
+    public function exportGetLessons(Request $request)
+    {
+        $request->validate(['chapter_id' => 'required|exists:chapters,id']);
+        $chapter = \App\Models\Chapter::findOrFail($request->chapter_id);
+
+        $lessons = $chapter->lessons()
+            ->select('lessons.id', 'lessons.name')
+            ->orderBy('lessons.name')
+            ->get();
+
+        return response()->json(['success' => true, 'lessons' => $lessons]);
+    }
+
+    public function export(Request $request)
+    {
+        $validated = $request->validate([
+            'course_id' => 'nullable|exists:courses,id',
+            'chapter_id' => 'nullable|exists:chapters,id',
+            'lesson_id' => 'nullable|exists:lessons,id',
+        ]);
+
+        $fileName = 'sba-questions-'.now()->format('Y-m-d-His').'.xlsx';
+
+        return Excel::download(
+            new SbaQuestionsExport(
+                $validated['course_id'] ?? null,
+                $validated['chapter_id'] ?? null,
+                $validated['lesson_id'] ?? null
+            ),
+            $fileName
+        );
     }
 }
